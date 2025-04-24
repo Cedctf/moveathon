@@ -60,6 +60,70 @@ export default function Home() {
           </FadeIn>
         </div>
       </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-white">
+        <div className="container px-4">
+          <FadeIn>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Tokenize Any Real-World Asset</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                From real estate to luxury items, Asseta enables the tokenization and synthetic trading of any
+                real-world asset on IOTA's secure Tangle.
+              </p>
+            </div>
+          </FadeIn>
+
+          <StaggerContainer className="grid md:grid-cols-3 gap-8">
+            <StaggerItem>
+              <div className="bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
+                  <Building2 className="h-6 w-6 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Tokenize Real Estate</h3>
+                <p className="text-gray-600 mb-4">
+                  Convert property ownership into digital tokens for fractional investment and trading.
+                </p>
+                <Link href="/dashboard" className="text-emerald-600 font-medium inline-flex items-center">
+                  Explore Properties <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
+                  <Coins className="h-6 w-6 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Synthetic Trading</h3>
+                <p className="text-gray-600 mb-4">
+                  Trade synthetic versions of real-world assets without owning the underlying asset.
+                </p>
+                <Link href="/trade" className="text-emerald-600 font-medium inline-flex items-center">
+                  Start Trading <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
+                  <Globe className="h-6 w-6 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Global Liquidity</h3>
+                <p className="text-gray-600 mb-4">
+                  Access global liquidity pools and earn rewards by providing liquidity to asset pairs.
+                </p>
+                <Link href="/pools" className="text-emerald-600 font-medium inline-flex items-center">
+                  View Pools <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+              </div>
+            </StaggerItem>
+          </StaggerContainer>
+        </div>
+      </section>
+
+      
     </div>
   )
 }
