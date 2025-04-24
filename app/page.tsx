@@ -63,7 +63,7 @@ export default function Home() {
 
       {/* Features Section */}
       <section className="py-20 bg-white">
-        <div className="container px-4">
+        <div className="container px-4 mx-auto">
           <FadeIn>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Tokenize Any Real-World Asset</h2>
@@ -74,7 +74,7 @@ export default function Home() {
             </div>
           </FadeIn>
 
-          <StaggerContainer className="grid md:grid-cols-3 gap-8">
+          <StaggerContainer className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <StaggerItem>
               <div className="bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                 <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
@@ -125,7 +125,7 @@ export default function Home() {
 
       {/* How It Works Section */}
       <section className="py-20 bg-gray-50">
-        <div className="container px-4">
+        <div className="container px-4 mx-auto">
           <FadeIn>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">How Asseta Works</h2>
@@ -135,7 +135,7 @@ export default function Home() {
             </div>
           </FadeIn>
 
-          <StaggerContainer className="grid md:grid-cols-4 gap-8">
+          <StaggerContainer className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
             <StaggerItem>
               <div className="text-center">
                 <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 transform transition-transform duration-500 hover:scale-110">
