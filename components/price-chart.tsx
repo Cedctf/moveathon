@@ -85,7 +85,7 @@ export default function PriceChart() {
   const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
     if (active && payload && payload.length) {
       return (
-        <Card className="p-3 border shadow-sm bg-background">
+        <Card className="p-3 border shadow-sm bg-white">
           <p className="font-medium">{label}</p>
           <p className="text-emerald-600">Price: ${payload[0].value.toLocaleString()}</p>
           <p className="text-gray-500 text-sm">Volume: ${(payload[1].value / 1000).toFixed(0)}K</p>
