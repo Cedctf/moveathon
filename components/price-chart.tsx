@@ -111,8 +111,58 @@ export default function PriceChart() {
   }
 
   return (
-    <div>
-        
-    </div>
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart
+        data={visibleData}
+        margin={{
+          top: 5,
+          right: 30,
+          left: 20,
+          bottom: 5,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+        <XAxis dataKey="date" tick={{ fontSize: 12 }} tickMargin={10} />
+        <YAxis
+          yAxisId="left"
+          tickFormatter={formatYAxis}
+          tick={{ fontSize: 12 }}
+          tickMargin={10}
+          domain={["auto", "auto"]}
+        />
+        <YAxis
+          yAxisId="right"
+          orientation="right"
+          tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
+          tick={{ fontSize: 12 }}
+          tickMargin={10}
+          domain={[0, "dataMax + 100000"]}
+        />
+        <Tooltip content={<CustomTooltip />} />
+        <Legend />
+        <Line
+          yAxisId="left"
+          type="monotone"
+          dataKey="price"
+          stroke="#10b981"
+          activeDot={{ r: 8 }}
+          name="Price (USD)"
+          strokeWidth={2}
+          dot={false}
+          isAnimationActive={false} // We're handling our own animation
+        />
+        <Line
+          yAxisId="right"
+          type="monotone"
+          dataKey="volume"
+          stroke="#6b7280"
+          name="Volume (USD)"
+          strokeWidth={1.5}
+          strokeDasharray="5 5"
+          dot={false}
+          isAnimationActive={false} // We're handling our own animation
+        />
+      </LineChart>
+    </ResponsiveContainer>
   )
 }
