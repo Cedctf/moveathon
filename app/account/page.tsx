@@ -291,7 +291,219 @@ export default function AccountPage() {
               </TabsList>
 
               <TabsContent value="assets" className="mt-6">
-                {/* Assets content will go here */}
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold text-lg">Your Tokenized Assets</h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                    >
+                      <PlusCircle className="h-4 w-4 mr-2" /> List New Asset
+                    </Button>
+                  </div>
+
+                  {loading ? (
+                    Array.from({ length: 2 }).map((_, index) => (
+                      <Card key={index} className="transition-all duration-300 hover:shadow-md">
+                        <CardContent className="p-6">
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-start gap-4">
+                              <Skeleton className="h-12 w-12 rounded-full" />
+                              <div>
+                                <Skeleton className="h-5 w-40 mb-2" />
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Skeleton className="h-5 w-16" />
+                                  <Skeleton className="h-5 w-20" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Skeleton className="h-6 w-24 mb-1" />
+                              <Skeleton className="h-4 w-16" />
+                            </div>
+                          </div>
+
+                          <div className="mt-6">
+                            <div className="flex justify-between items-center mb-2">
+                              <Skeleton className="h-4 w-24" />
+                              <Skeleton className="h-4 w-12" />
+                            </div>
+                            <Skeleton className="h-2 w-full mb-2" />
+                            <div className="flex justify-between">
+                              <Skeleton className="h-5 w-32" />
+                              <Skeleton className="h-5 w-24" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <StaggerContainer>
+                      {assets.map((asset) => (
+                        <StaggerItem key={asset.id}>
+                          <Card className="transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+                            <CardContent className="p-6">
+                              <div className="flex justify-between items-start">
+                                <div className="flex items-start gap-4">
+                                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                                    {asset.type === "Real Estate" ? (
+                                      <Building2 className="h-6 w-6 text-gray-500" />
+                                    ) : (
+                                      <Coins className="h-6 w-6 text-gray-500" />
+                                    )}
+                                  </div>
+                                  <div>
+                                    <h4 className="font-medium">{asset.name}</h4>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <span 
+                                        className="text-xs border rounded px-2 py-0.5 transition-all duration-300 hover:border-emerald-600"
+                                      >
+                                        {asset.symbol}
+                                      </span>
+                                      <span
+                                        className="text-xs border rounded px-2 py-0.5 transition-all duration-300 hover:border-emerald-600"
+                                      >
+                                        {asset.type}
+                                      </span>
+                                      {asset.status === "pending" && (
+                                        <span
+                                          className="text-xs border rounded px-2 py-0.5 bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-yellow-200"
+                                        >
+                                          Pending
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="font-bold text-lg">
+                                    $<CountUp end={asset.value} />
+                                  </div>
+                                  <div className="text-sm text-gray-500">Total Value</div>
+                                </div>
+                              </div>
+
+                              <div className="mt-6">
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="text-sm text-gray-500">Your Ownership</span>
+                                  <span className="font-medium">{(asset.ownership * 100).toFixed(2)}%</span>
+                                </div>
+                                <Progress
+                                  value={asset.ownership * 100}
+                                  className="h-2 mb-2 transition-all duration-1000"
+                                />
+                                <div className="flex justify-between text-sm">
+                                  <span>
+                                    Your Value:{" "}
+                                    <span className="font-medium">
+                                      $<CountUp end={asset.value * asset.ownership} />
+                                    </span>
+                                  </span>
+                                  <Link
+                                    href="#"
+                                    className="text-emerald-600 flex items-center transition-all duration-300 hover:text-emerald-700"
+                                  >
+                                    View Details <ChevronRight className="h-4 w-4 ml-1" />
+                                  </Link>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </StaggerItem>
+                      ))}
+                    </StaggerContainer>
+                  )}
+
+                  <FadeIn delay={600}>
+                    <Card className="transition-all duration-300 hover:shadow-md">
+                      <CardHeader>
+                        <CardTitle>Portfolio Summary</CardTitle>
+                        <CardDescription>Overview of your tokenized assets</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="text-sm text-gray-500 mb-1">Total Value</div>
+                            {loading ? (
+                              <Skeleton className="h-8 w-24" />
+                            ) : (
+                              <div className="font-bold text-2xl">
+                                $<CountUp end={150000} />
+                              </div>
+                            )}
+                          </div>
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="text-sm text-gray-500 mb-1">Assets</div>
+                            {loading ? (
+                              <Skeleton className="h-8 w-16" />
+                            ) : (
+                              <div className="font-bold text-2xl">
+                                <CountUp end={2} />
+                              </div>
+                            )}
+                          </div>
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="text-sm text-gray-500 mb-1">Earnings (YTD)</div>
+                            {loading ? (
+                              <Skeleton className="h-8 w-24" />
+                            ) : (
+                              <div className="font-bold text-2xl text-emerald-600">
+                                $<CountUp end={12500} />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="mt-6">
+                          <h4 className="font-medium mb-3">Asset Allocation</h4>
+                          {loading ? (
+                            <>
+                              <Skeleton className="h-8 w-full mb-3" />
+                              <div className="flex gap-4">
+                                <Skeleton className="h-5 w-32" />
+                                <Skeleton className="h-5 w-32" />
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="h-8 w-full rounded-full overflow-hidden bg-gray-100 flex">
+                                <div
+                                  className="h-full bg-emerald-600 transition-all duration-1000"
+                                  style={{ width: "0%" }}
+                                  id="real-estate-bar"
+                                ></div>
+                                <div
+                                  className="h-full bg-blue-500 transition-all duration-1000"
+                                  style={{ width: "0%" }}
+                                  id="luxury-bar"
+                                ></div>
+                              </div>
+                              <div className="flex gap-4 mt-3">
+                                <div className="flex items-center">
+                                  <div className="w-3 h-3 bg-emerald-600 rounded-full mr-2"></div>
+                                  <span className="text-sm">Real Estate (83.3%)</span>
+                                </div>
+                                <div className="flex items-center">
+                                  <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                                  <span className="text-sm">Luxury Items (16.7%)</span>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </CardContent>
+                      <CardFooter>
+                        <Button
+                          variant="outline"
+                          className="w-full transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                        >
+                          <Download className="h-4 w-4 mr-2" /> Export Portfolio Report
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </FadeIn>
+                </div>
               </TabsContent>
 
               <TabsContent value="transactions" className="mt-6">
