@@ -123,7 +123,61 @@ export default function Home() {
         </div>
       </section>
 
-      
+      {/* How It Works Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container px-4">
+          <FadeIn>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">How Asseta Works</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                A simple process to tokenize, trade, and invest in real-world assets on IOTA's Tangle.
+              </p>
+            </div>
+          </FadeIn>
+
+          <StaggerContainer className="grid md:grid-cols-4 gap-8">
+            <StaggerItem>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 transform transition-transform duration-500 hover:scale-110">
+                  <span className="text-2xl font-bold text-emerald-600">1</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">KYC Verification</h3>
+                <p className="text-gray-600">Complete our zero-knowledge KYC process to verify your identity.</p>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 transform transition-transform duration-500 hover:scale-110">
+                  <span className="text-2xl font-bold text-emerald-600">2</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">List Your Asset</h3>
+                <p className="text-gray-600">Submit your asset details and documentation for verification.</p>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 transform transition-transform duration-500 hover:scale-110">
+                  <span className="text-2xl font-bold text-emerald-600">3</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Mint Tokens</h3>
+                <p className="text-gray-600">Once approved, mint ERC3643 tokens representing your asset.</p>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 transform transition-transform duration-500 hover:scale-110">
+                  <span className="text-2xl font-bold text-emerald-600">4</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Trade or Invest</h3>
+                <p className="text-gray-600">Trade synthetic versions or invest in tokenized assets.</p>
+              </div>
+            </StaggerItem>
+          </StaggerContainer>
+        </div>
+      </section>
     </div>
   )
 }
