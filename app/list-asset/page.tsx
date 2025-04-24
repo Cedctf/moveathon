@@ -19,9 +19,15 @@ export default function ListAssetPage() {
   const [selectedIdType, setSelectedIdType] = useState("passport")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [selectedImages, setSelectedImages] = useState<File | null>(null)
+  const [selectedTitleDeed, setSelectedTitleDeed] = useState<File | null>(null)
+  const [selectedAppraisal, setSelectedAppraisal] = useState<File | null>(null)
+  const [selectedAdditionalDocs, setSelectedAdditionalDocs] = useState<File | null>(null)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imagesInputRef = useRef<HTMLInputElement>(null)
+  const titleDeedInputRef = useRef<HTMLInputElement>(null)
+  const appraisalInputRef = useRef<HTMLInputElement>(null)
+  const additionalDocsInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = (ref: React.RefObject<HTMLInputElement>) => {
     ref.current?.click()
@@ -62,6 +68,7 @@ export default function ListAssetPage() {
     // Simulate asset details submission
     setTimeout(() => {
       setAssetDetailsCompleted(true)
+      setActiveTab("documents")
     }, 1500)
   }
 
@@ -91,6 +98,15 @@ export default function ListAssetPage() {
             {assetDetailsCompleted ? <Check className="h-5 w-5" /> : "2"}
           </div>
           <span className={assetDetailsCompleted ? "text-emerald-600 font-medium" : ""}>Asset Details</span>
+          <div className="w-8 h-0.5 bg-gray-200"></div>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center ${
+              activeTab === "documents" ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-500"
+            }`}
+          >
+            3
+          </div>
+          <span>Legal Documents</span>
         </div>
       </div>
 
@@ -99,6 +115,7 @@ export default function ListAssetPage() {
           <TabsList className="hidden">
             <TabsTrigger value="kyc">KYC Verification</TabsTrigger>
             <TabsTrigger value="asset-details">Asset Details</TabsTrigger>
+            <TabsTrigger value="documents">Legal Documents</TabsTrigger>
           </TabsList>
 
           <TabsContent value="kyc">
@@ -351,6 +368,222 @@ export default function ListAssetPage() {
                     </Button>
                   </div>
                 </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="documents">
+            <Card>
+              <CardHeader>
+                <CardTitle>Legal Documents</CardTitle>
+                <CardDescription>
+                  Upload legal documents to verify ownership and complete the tokenization process
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-6">
+                  <div className="grid gap-3">
+                    <Label>Title Deed / Proof of Ownership</Label>
+                    <div className="border border-dashed rounded-lg p-6 flex flex-col items-center justify-center gap-2">
+                      <FileText className="h-8 w-8 text-gray-400" />
+                      <p className="text-sm text-gray-500">Upload title deed or proof of ownership</p>
+                      <p className="text-xs text-gray-400">PDF, DOCX (max. 10MB)</p>
+                      <input
+                        type="file"
+                        ref={titleDeedInputRef}
+                        onChange={(e) => handleFileChange(e, setSelectedTitleDeed)}
+                        className="hidden"
+                        accept=".pdf,.doc,.docx"
+                      />
+                      <Button variant="outline" size="sm" type="button" onClick={() => handleFileSelect(titleDeedInputRef)} className="hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors">
+                        Select File
+                      </Button>
+                      {selectedTitleDeed && (
+                        <p className="text-sm text-gray-600 mt-1">
+                          Selected: {selectedTitleDeed.name}
+                        </p>
+                      )}
+                      {uploadProgress > 0 && (
+                        <div className="w-full mt-2">
+                          <Progress value={uploadProgress} className="w-full" />
+                          {uploadProgress < 100 && (
+                            <p className="text-sm text-gray-500 mt-1">Uploading... {uploadProgress}%</p>
+                          )}
+                        </div>
+                      )}
+                      {uploadProgress === 100 && (
+                        <p className="text-sm text-emerald-600 flex items-center gap-1">
+                          <Check className="h-4 w-4" /> File uploaded successfully
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3">
+                    <Label>Appraisal Document</Label>
+                    <div className="border border-dashed rounded-lg p-6 flex flex-col items-center justify-center gap-2">
+                      <FileText className="h-8 w-8 text-gray-400" />
+                      <p className="text-sm text-gray-500">Upload asset appraisal document</p>
+                      <p className="text-xs text-gray-400">PDF, DOCX (max. 10MB)</p>
+                      <input
+                        type="file"
+                        ref={appraisalInputRef}
+                        onChange={(e) => handleFileChange(e, setSelectedAppraisal)}
+                        className="hidden"
+                        accept=".pdf,.doc,.docx"
+                      />
+                      <Button variant="outline" size="sm" type="button" onClick={() => handleFileSelect(appraisalInputRef)} className="hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors">
+                        Select File
+                      </Button>
+                      {selectedAppraisal && (
+                        <p className="text-sm text-gray-600 mt-1">
+                          Selected: {selectedAppraisal.name}
+                        </p>
+                      )}
+                      {uploadProgress > 0 && (
+                        <div className="w-full mt-2">
+                          <Progress value={uploadProgress} className="w-full" />
+                          {uploadProgress < 100 && (
+                            <p className="text-sm text-gray-500 mt-1">Uploading... {uploadProgress}%</p>
+                          )}
+                        </div>
+                      )}
+                      {uploadProgress === 100 && (
+                        <p className="text-sm text-emerald-600 flex items-center gap-1">
+                          <Check className="h-4 w-4" /> File uploaded successfully
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3">
+                    <Label>Additional Documents</Label>
+                    <div className="border border-dashed rounded-lg p-6 flex flex-col items-center justify-center gap-2">
+                      <FileText className="h-8 w-8 text-gray-400" />
+                      <p className="text-sm text-gray-500">Upload any additional supporting documents</p>
+                      <p className="text-xs text-gray-400">PDF, DOCX (max. 10MB)</p>
+                      <input
+                        type="file"
+                        ref={additionalDocsInputRef}
+                        onChange={(e) => handleFileChange(e, setSelectedAdditionalDocs)}
+                        className="hidden"
+                        accept=".pdf,.doc,.docx"
+                      />
+                      <Button variant="outline" size="sm" type="button" onClick={() => handleFileSelect(additionalDocsInputRef)} className="hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors">
+                        Select Files
+                      </Button>
+                      {selectedAdditionalDocs && (
+                        <p className="text-sm text-gray-600 mt-1">
+                          Selected: {selectedAdditionalDocs.name}
+                        </p>
+                      )}
+                      {uploadProgress > 0 && (
+                        <div className="w-full mt-2">
+                          <Progress value={uploadProgress} className="w-full" />
+                          {uploadProgress < 100 && (
+                            <p className="text-sm text-gray-500 mt-1">Uploading... {uploadProgress}%</p>
+                          )}
+                        </div>
+                      )}
+                      {uploadProgress === 100 && (
+                        <p className="text-sm text-emerald-600 flex items-center gap-1">
+                          <Check className="h-4 w-4" /> Files uploaded successfully
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="border rounded-lg p-6 mt-4">
+                    <h3 className="font-semibold mb-4">Tokenization Options</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-start space-x-3">
+                        <input
+                          type="checkbox"
+                          id="erc3643"
+                          defaultChecked
+                          className="h-4 w-4 text-emerald-600 rounded border-gray-300 mt-1"
+                        />
+                        <div>
+                          <label htmlFor="erc3643" className="font-medium text-sm">
+                            Mint token via ERC3643 standard
+                          </label>
+                          <p className="text-sm text-gray-500">
+                            The ERC3643 standard is designed for security tokens and complies with regulatory
+                            requirements.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-3">
+                        <input
+                          type="checkbox"
+                          id="synthetic"
+                          className="h-4 w-4 text-emerald-600 rounded border-gray-300 mt-1"
+                        />
+                        <div>
+                          <label htmlFor="synthetic" className="font-medium text-sm">
+                            Enable synthetic trading (sRWA)
+                          </label>
+                          <p className="text-sm text-gray-500">
+                            Allow traders to create synthetic versions of your asset for trading without owning the
+                            underlying asset.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-3">
+                        <input
+                          type="checkbox"
+                          id="liquidity"
+                          className="h-4 w-4 text-emerald-600 rounded border-gray-300 mt-1"
+                        />
+                        <div>
+                          <label htmlFor="liquidity" className="font-medium text-sm">
+                            Create liquidity pool
+                          </label>
+                          <p className="text-sm text-gray-500">
+                            Create a liquidity pool for your asset to enable trading and earn rewards from trading fees.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-emerald-50 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="h-4 w-4 text-emerald-600 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-emerald-800">Verification Process</h4>
+                        <p className="text-sm text-emerald-700">
+                          After submission, our team will verify your documents and asset details. This process typically
+                          takes 2-3 business days.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="terms-documents"
+                      required
+                      className="h-4 w-4 text-emerald-600 rounded border-gray-300"
+                    />
+                    <label
+                      htmlFor="terms-documents"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      I confirm that all information and documents provided are accurate and legally valid
+                    </label>
+                  </div>
+                </div>
+
+                <div className="flex justify-between mt-6">
+                  <Button type="button" variant="outline" onClick={() => setActiveTab("asset-details")}>
+                    Back
+                  </Button>
+                  <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">Submit Application</Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
