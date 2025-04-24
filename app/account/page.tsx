@@ -221,6 +221,60 @@ export default function AccountPage() {
                     <div className="text-sm font-medium">Member Since</div>
                     {loading ? <Skeleton className="h-5 w-24" /> : <div className="text-sm">{userData.joinDate}</div>}
                   </div>
+
+                  <hr className="border-t border-gray-200 my-4" />
+
+                  <div className="pt-2">
+                    <div className="text-sm font-medium mb-3">Security Level</div>
+                    <Progress value={loading ? 0 : securityProgress} className="h-2 mb-2" />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>Basic</span>
+                      <span>Advanced</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    {loading ? (
+                      Array.from({ length: 3 }).map((_, index) => (
+                        <div key={index} className="flex justify-between items-center">
+                          <Skeleton className="h-5 w-40" />
+                          <Skeleton className="h-5 w-16" />
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center">
+                            <Shield className="h-4 w-4 mr-2 text-emerald-600" />
+                            <span className="text-sm">Two-Factor Authentication</span>
+                          </div>
+                          <span className="text-xs bg-emerald-600 text-white px-2 py-1 rounded-full transition-all duration-300 hover:bg-emerald-700">
+                            Enabled
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center">
+                            <User className="h-4 w-4 mr-2 text-emerald-600" />
+                            <span className="text-sm">KYC Verification</span>
+                          </div>
+                          <span className="text-xs bg-emerald-600 text-white px-2 py-1 rounded-full transition-all duration-300 hover:bg-emerald-700">
+                            Completed
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center">
+                            <CreditCard className="h-4 w-4 mr-2 text-gray-400" />
+                            <span className="text-sm">Payment Method</span>
+                          </div>
+                          <span className="text-xs border border-gray-300 px-2 py-1 rounded-full transition-all duration-300 hover:border-emerald-600">
+                            Not Added
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
