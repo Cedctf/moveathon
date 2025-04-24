@@ -30,7 +30,92 @@ import { StaggerContainer, StaggerItem } from "@/components/animations/stagger-c
 import { CountUp } from "@/components/animations/count-up"
 import { Skeleton } from "@/components/ui/skeleton"
 
+// Mock user data
+const userData = {
+  name: "Alex Johnson",
+  email: "alex.johnson@example.com",
+  walletAddress: "0x1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t",
+  kycStatus: "verified",
+  joinDate: "Jan 15, 2023",
+  avatar: "/placeholder.svg?height=100&width=100",
+}
+
+// Mock assets data
+const assets = [
+  {
+    id: 1,
+    name: "Manhattan Apartment",
+    symbol: "MANH-APT",
+    type: "Real Estate",
+    value: 2500000,
+    ownership: 0.05,
+    status: "active",
+  },
+  {
+    id: 2,
+    name: "Vintage Rolex Daytona",
+    symbol: "VRD-LUX",
+    type: "Luxury Item",
+    value: 125000,
+    ownership: 0.2,
+    status: "pending",
+  },
+]
+
+// Mock transactions data
+const transactions = [
+  {
+    id: 1,
+    type: "buy",
+    asset: "MANH-APT",
+    amount: "0.05",
+    value: 125000,
+    date: "Mar 15, 2023",
+    status: "completed",
+  },
+  {
+    id: 2,
+    type: "add_liquidity",
+    asset: "USDC/MANH-APT",
+    amount: "50000",
+    value: 50000,
+    date: "Mar 10, 2023",
+    status: "completed",
+  },
+  {
+    id: 3,
+    type: "buy",
+    asset: "VRD-LUX",
+    amount: "0.2",
+    value: 25000,
+    date: "Feb 28, 2023",
+    status: "completed",
+  },
+  {
+    id: 4,
+    type: "withdraw_rewards",
+    asset: "USDC/MANH-APT",
+    amount: "2500",
+    value: 2500,
+    date: "Feb 15, 2023",
+    status: "completed",
+  },
+  {
+    id: 5,
+    type: "list_asset",
+    asset: "Vintage Rolex Daytona",
+    amount: "1",
+    value: 125000,
+    date: "Feb 10, 2023",
+    status: "completed",
+  },
+]
+
 export default function AccountPage() {
+  const [isWalletConnected, setIsWalletConnected] = useState(true)
+  const [loading, setLoading] = useState(true)
+  const [securityProgress, setSecurityProgress] = useState(0)
+
   return (
     <div className="container py-8 px-4">
       <FadeIn>
