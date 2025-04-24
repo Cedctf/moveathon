@@ -9,7 +9,6 @@ import { Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
-  { name: "List Asset", href: "/list-asset" },
   { name: "Dashboard", href: "/dashboard" },
   { name: "Trade", href: "/trade" },
   { name: "Pools", href: "/pools" },
