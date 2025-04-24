@@ -74,12 +74,12 @@ export default function ListAssetPage() {
 
   return (
     <div className="container py-8 px-4 mx-auto">
-      <div className="mb-8 text-center">
+      <div className="mb-8 text-left">
         <h1 className="text-3xl font-bold mb-2">List Your Asset</h1>
         <p className="text-gray-500">Tokenize your real-world asset on IOTA's Tangle</p>
       </div>
 
-      <div className="flex justify-center items-center mb-8">
+      <div className="flex justify-start items-center mb-8">
         <div className="flex items-center gap-2">
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center ${
