@@ -164,7 +164,67 @@ export default function AccountPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mx-auto">
         <div className="lg:mx-auto w-full">
-          {/* Profile section will go here */}
+          <FadeIn delay={200}>
+            <Card className="transition-all duration-300 hover:shadow-md">
+              <CardHeader className="pb-2">
+                <CardTitle>Profile</CardTitle>
+                <CardDescription>Your personal information</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex flex-col items-center text-center mb-6">
+                    <Skeleton className="h-24 w-24 rounded-full mb-4" />
+                    <Skeleton className="h-6 w-32 mb-2" />
+                    <Skeleton className="h-4 w-48 mb-2" />
+                    <Skeleton className="h-6 w-24 mt-2" />
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center text-center mb-6">
+                    <div className="h-24 w-24 mb-4 animate-fadeIn rounded-full bg-gray-100 flex items-center justify-center relative overflow-hidden">
+                      {userData.avatar ? (
+                        <img src={userData.avatar} alt={userData.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <span className="text-2xl font-semibold">{userData.name.charAt(0)}</span>
+                      )}
+                    </div>
+                    <h3 className="font-bold text-xl">{userData.name}</h3>
+                    <p className="text-gray-500">{userData.email}</p>
+                    <div className="flex items-center mt-2">
+                      <span className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 flex items-center gap-1 text-sm px-2 py-1 rounded-full">
+                        <Check className="h-3 w-3" /> KYC Verified
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-sm font-medium mb-1">Wallet Address</div>
+                    {loading ? (
+                      <Skeleton className="h-10 w-full" />
+                    ) : (
+                      <div className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
+                        <code className="text-xs truncate max-w-[180px]">{userData.walletAddress}</code>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 transition-all duration-300 hover:bg-emerald-100 hover:text-emerald-600"
+                          onClick={() => copyToClipboard(userData.walletAddress)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm font-medium">Member Since</div>
+                    {loading ? <Skeleton className="h-5 w-24" /> : <div className="text-sm">{userData.joinDate}</div>}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </FadeIn>
         </div>
 
         <div className="lg:col-span-2 w-full mx-auto">
