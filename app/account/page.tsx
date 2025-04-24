@@ -294,13 +294,15 @@ export default function AccountPage() {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center">
                     <h3 className="font-semibold text-lg">Your Tokenized Assets</h3>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
-                    >
-                      <PlusCircle className="h-4 w-4 mr-2" /> List New Asset
-                    </Button>
+                    <Link href="/account/list-asset">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                      >
+                        <PlusCircle className="h-4 w-4 mr-2" /> List New Asset
+                      </Button>
+                    </Link>
                   </div>
 
                   {loading ? (
