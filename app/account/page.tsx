@@ -607,9 +607,144 @@ export default function AccountPage() {
   </Card>
 </TabsContent>
 
-              <TabsContent value="documents" className="mt-6">
-                {/* Documents content will go here */}
-              </TabsContent>
+<TabsContent value="documents" className="mt-6">
+  <Card className="transition-all duration-300 hover:shadow-md">
+    <CardHeader>
+      <CardTitle>Legal Documents</CardTitle>
+      <CardDescription>Documents related to your assets and transactions</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-4">
+        {loading ? (
+          Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="border rounded-lg p-4 flex justify-between items-center">
+              <div className="flex items-center">
+                <Skeleton className="h-10 w-10 rounded-full mr-4" />
+                <div>
+                  <Skeleton className="h-5 w-48 mb-1" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              </div>
+              <Skeleton className="h-9 w-24" />
+            </div>
+          ))
+        ) : (
+          <StaggerContainer>
+            <StaggerItem>
+              <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
+                    <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Manhattan Apartment - Title Deed</h4>
+                    <div className="text-sm text-gray-500">Uploaded on Mar 10, 2023</div>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                >
+                  <Download className="h-4 w-4 mr-2" /> Download
+                </Button>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
+                    <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Manhattan Apartment - Appraisal</h4>
+                    <div className="text-sm text-gray-500">Uploaded on Mar 8, 2023</div>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                >
+                  <Download className="h-4 w-4 mr-2" /> Download
+                </Button>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
+                    <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Vintage Rolex Daytona - Authentication</h4>
+                    <div className="text-sm text-gray-500">Uploaded on Feb 10, 2023</div>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                >
+                  <Download className="h-4 w-4 mr-2" /> Download
+                </Button>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
+                    <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">KYC Verification Documents</h4>
+                    <div className="text-sm text-gray-500">Uploaded on Jan 15, 2023</div>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                >
+                  <Download className="h-4 w-4 mr-2" /> Download
+                </Button>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
+                    <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Platform Terms of Service</h4>
+                    <div className="text-sm text-gray-500">Signed on Jan 15, 2023</div>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" /> View
+                </Button>
+              </div>
+            </StaggerItem>
+          </StaggerContainer>
+        )}
+      </div>
+    </CardContent>
+    <CardFooter>
+      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 transition-all duration-300 hover:shadow-md">
+        Upload New Document
+      </Button>
+    </CardFooter>
+  </Card>
+</TabsContent>
             </Tabs>
           </FadeIn>
         </div>
