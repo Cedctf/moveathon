@@ -282,7 +282,27 @@ export default function AccountPage() {
         </div>
 
         <div className="lg:col-span-2 w-full mx-auto">
-          {/* Tabs section will go here */}
+          <FadeIn delay={300}>
+            <Tabs defaultValue="assets" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1">
+                <TabsTrigger value="assets" className="data-[state=active]:bg-white">My Assets</TabsTrigger>
+                <TabsTrigger value="transactions" className="data-[state=active]:bg-white">Transactions</TabsTrigger>
+                <TabsTrigger value="documents" className="data-[state=active]:bg-white">Documents</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="assets" className="mt-6">
+                {/* Assets content will go here */}
+              </TabsContent>
+
+              <TabsContent value="transactions" className="mt-6">
+                {/* Transactions content will go here */}
+              </TabsContent>
+
+              <TabsContent value="documents" className="mt-6">
+                {/* Documents content will go here */}
+              </TabsContent>
+            </Tabs>
+          </FadeIn>
         </div>
       </div>
     </div>
