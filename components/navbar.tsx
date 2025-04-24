@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils"
 
 const navLinks = [
   { name: "Home", href: "/" },
-  { name: "Dashboard", href: "/dashboard" },
   { name: "List Asset", href: "/list-asset" },
+  { name: "Dashboard", href: "/dashboard" },
   { name: "Trade", href: "/trade" },
   { name: "Pools", href: "/pools" },
   { name: "Account", href: "/account" },
@@ -22,8 +22,8 @@ export default function Navbar() {
   const pathname = usePathname()
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-sm">
+      <div className="container flex h-16 items-center justify-between max-w-6xl mx-auto">
         <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
             <span className="inline-block h-6 w-6 bg-emerald-600 rounded-full"></span>
