@@ -14,11 +14,14 @@ import { Progress } from "@/components/ui/progress"
 export default function ListAssetPage() {
   const [activeTab, setActiveTab] = useState("kyc")
   const [kycCompleted, setKycCompleted] = useState(false)
+  const [assetDetailsCompleted, setAssetDetailsCompleted] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [selectedIdType, setSelectedIdType] = useState("passport")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedImages, setSelectedImages] = useState<File | null>(null)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const imagesInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = (ref: React.RefObject<HTMLInputElement>) => {
     ref.current?.click()
@@ -50,6 +53,15 @@ export default function ListAssetPage() {
     // Simulate KYC verification
     setTimeout(() => {
       setKycCompleted(true)
+      setActiveTab("asset-details")
+    }, 1500)
+  }
+
+  const handleAssetDetailsSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Simulate asset details submission
+    setTimeout(() => {
+      setAssetDetailsCompleted(true)
     }, 1500)
   }
 
@@ -70,6 +82,15 @@ export default function ListAssetPage() {
             {kycCompleted ? <Check className="h-5 w-5" /> : "1"}
           </div>
           <span className={kycCompleted ? "text-emerald-600 font-medium" : ""}>KYC Verification</span>
+          <div className="w-8 h-0.5 bg-gray-200"></div>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center ${
+              activeTab === "asset-details" || assetDetailsCompleted ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-500"
+            }`}
+          >
+            {assetDetailsCompleted ? <Check className="h-5 w-5" /> : "2"}
+          </div>
+          <span className={assetDetailsCompleted ? "text-emerald-600 font-medium" : ""}>Asset Details</span>
         </div>
       </div>
 
@@ -77,6 +98,7 @@ export default function ListAssetPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="hidden">
             <TabsTrigger value="kyc">KYC Verification</TabsTrigger>
+            <TabsTrigger value="asset-details">Asset Details</TabsTrigger>
           </TabsList>
 
           <TabsContent value="kyc">
@@ -220,6 +242,112 @@ export default function ListAssetPage() {
                   <div className="flex justify-end mt-6">
                     <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white">
                       Submit KYC
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="asset-details">
+            <Card>
+              <CardHeader>
+                <CardTitle>Asset Details</CardTitle>
+                <CardDescription>Provide information about the asset you want to tokenize</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleAssetDetailsSubmit}>
+                  <div className="grid gap-6">
+                    <div className="grid gap-3">
+                      <Label htmlFor="asset-name">Asset Name</Label>
+                      <Input id="asset-name" placeholder="Enter asset name" required />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid gap-3">
+                        <Label htmlFor="asset-type">Asset Type</Label>
+                        <Select required>
+                          <SelectTrigger className="bg-white">
+                            <SelectValue placeholder="Select asset type" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white">
+                            <SelectItem value="real-estate-residential" className="hover:bg-emerald-50 cursor-pointer">
+                              Real Estate - Residential
+                            </SelectItem>
+                            <SelectItem value="real-estate-commercial" className="hover:bg-emerald-50 cursor-pointer">
+                              Real Estate - Commercial
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-3">
+                        <Label htmlFor="location">Location</Label>
+                        <Input id="location" placeholder="Enter asset location" required />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid gap-3">
+                        <Label htmlFor="valuation">Valuation (USD)</Label>
+                        <Input id="valuation" type="number" placeholder="Enter asset valuation" required />
+                      </div>
+
+                      <div className="grid gap-3">
+                        <Label htmlFor="token-symbol">Token Symbol</Label>
+                        <Input id="token-symbol" placeholder="e.g., NYC-APT" required />
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3">
+                      <Label htmlFor="description">Asset Description</Label>
+                      <Textarea id="description" placeholder="Describe your asset in detail" rows={4} required />
+                    </div>
+
+                    <div className="grid gap-3">
+                      <Label>Asset Images</Label>
+                      <div className="border border-dashed rounded-lg p-6 flex flex-col items-center justify-center gap-2">
+                        <ImageIcon className="h-8 w-8 text-gray-400" />
+                        <p className="text-sm text-gray-500">Upload images of your asset</p>
+                        <p className="text-xs text-gray-400">PNG, JPG or WEBP (max. 10MB)</p>
+                        <input
+                          type="file"
+                          ref={imagesInputRef}
+                          onChange={(e) => handleFileChange(e, setSelectedImages)}
+                          className="hidden"
+                          accept=".jpg,.jpeg,.png,.webp"
+                        />
+                        <Button variant="outline" size="sm" type="button" onClick={() => handleFileSelect(imagesInputRef)} className="hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors">
+                          Select Files
+                        </Button>
+                        {selectedImages && (
+                          <p className="text-sm text-gray-600 mt-1">
+                            Selected: {selectedImages.name}
+                          </p>
+                        )}
+                        {uploadProgress > 0 && (
+                          <div className="w-full mt-2">
+                            <Progress value={uploadProgress} className="w-full" />
+                            {uploadProgress < 100 && (
+                              <p className="text-sm text-gray-500 mt-1">Uploading... {uploadProgress}%</p>
+                            )}
+                          </div>
+                        )}
+                        {uploadProgress === 100 && (
+                          <p className="text-sm text-emerald-600 flex items-center gap-1">
+                            <Check className="h-4 w-4" /> Files uploaded successfully
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between mt-6">
+                    <Button type="button" variant="outline" onClick={() => setActiveTab("kyc")}>
+                      Back
+                    </Button>
+                    <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                      Continue
                     </Button>
                   </div>
                 </form>
