@@ -116,6 +116,40 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true)
   const [securityProgress, setSecurityProgress] = useState(0)
 
+  useEffect(() => {
+    // Simulate loading data
+    const timer = setTimeout(() => {
+      setLoading(false)
+    }, 1500)
+
+    // Animate security progress
+    const progressTimer = setTimeout(() => {
+      const animateProgress = () => {
+        setSecurityProgress((prev) => {
+          if (prev >= 80) return 80
+          return prev + 1
+        })
+      }
+
+      const interval = setInterval(animateProgress, 20)
+      return () => clearInterval(interval)
+    }, 2000)
+
+    return () => {
+      clearTimeout(timer)
+      clearTimeout(progressTimer)
+    }
+  }, [])
+
+  const toggleWalletConnection = () => {
+    setIsWalletConnected(!isWalletConnected)
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    alert("Copied to clipboard!")
+  }
+
   return (
     <div className="container py-8 px-4">
       <FadeIn>
