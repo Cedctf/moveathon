@@ -507,8 +507,105 @@ export default function AccountPage() {
               </TabsContent>
 
               <TabsContent value="transactions" className="mt-6">
-                {/* Transactions content will go here */}
-              </TabsContent>
+  <Card className="transition-all duration-300 hover:shadow-md">
+    <CardHeader>
+      <CardTitle>Transaction History</CardTitle>
+      <CardDescription>Your recent transactions on the platform</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-6">
+        {loading ? (
+          Array.from({ length: 5 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex justify-between items-center border-b pb-4 last:border-0 last:pb-0"
+            >
+              <div className="flex items-start gap-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div>
+                  <Skeleton className="h-5 w-32 mb-1" />
+                  <div className="flex items-center gap-2 mt-1">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <Skeleton className="h-5 w-24 mb-1" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            </div>
+          ))
+        ) : (
+          <StaggerContainer>
+            {transactions.map((tx) => (
+              <StaggerItem key={tx.id}>
+                <div className="flex justify-between items-center border-b pb-4 last:border-0 last:pb-0 group hover:bg-gray-50 p-2 rounded-md transition-all duration-300">
+                  <div className="flex items-start gap-4">
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${
+                        tx.type === "buy"
+                          ? "bg-emerald-100"
+                          : tx.type === "add_liquidity"
+                            ? "bg-blue-100"
+                            : tx.type === "withdraw_rewards"
+                              ? "bg-purple-100"
+                              : "bg-gray-100"
+                      }`}
+                    >
+                      {tx.type === "buy" && <ArrowUpRight className="h-5 w-5 text-emerald-600" />}
+                      {tx.type === "add_liquidity" && <Landmark className="h-5 w-5 text-blue-600" />}
+                      {tx.type === "withdraw_rewards" && <Coins className="h-5 w-5 text-purple-600" />}
+                      {tx.type === "list_asset" && <FileText className="h-5 w-5 text-gray-600" />}
+                    </div>
+                    <div>
+                      <h4 className="font-medium">
+                        {tx.type === "buy" && "Purchased Asset"}
+                        {tx.type === "add_liquidity" && "Added Liquidity"}
+                        {tx.type === "withdraw_rewards" && "Withdrew Rewards"}
+                        {tx.type === "list_asset" && "Listed Asset"}
+                      </h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm text-gray-500">{tx.asset}</span>
+                        <span className="text-xs text-gray-400">•</span>
+                        <span className="text-sm text-gray-500">
+                          {tx.amount} {tx.type === "buy" ? "tokens" : "USDC"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium">${tx.value.toLocaleString()}</div>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <Clock className="h-3.5 w-3.5 mr-1" />
+                      {tx.date}
+                    </div>
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        )}
+      </div>
+    </CardContent>
+    <CardFooter className="flex justify-between">
+      <Button
+        variant="outline"
+        size="sm"
+        className="transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+      >
+        <History className="h-4 w-4 mr-2" /> View All
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        className="transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+      >
+        <Download className="h-4 w-4 mr-2" /> Export
+      </Button>
+    </CardFooter>
+  </Card>
+</TabsContent>
 
               <TabsContent value="documents" className="mt-6">
                 {/* Documents content will go here */}
