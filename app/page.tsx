@@ -8,9 +8,17 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-emerald-900 to-emerald-700">
+      <section className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+          <video 
+            className="object-cover w-full h-full"
+            src="/hero.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+          <div className="absolute inset-0 bg-black/30"></div>
         </div>
 
         <div className="container relative z-10 px-4 flex flex-col items-center text-center">
