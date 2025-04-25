@@ -379,7 +379,156 @@ export default function MarketplacePage() {
         </TabsContent>
 
         <TabsContent value="pools" className="mt-0 mx-auto">
-          {/* Pools content will go here */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mx-auto">
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Available Pools</CardTitle>
+                  <CardDescription>Provide liquidity to earn rewards from trading fees</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {loading
+                      ? Array.from({ length: 4 }).map((_, index) => (
+                          <div key={index} className="border rounded-lg p-4">
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center">
+                                <div className="relative mr-3">
+                                  <Skeleton className="h-10 w-10 rounded-full" />
+                                  <Skeleton className="h-6 w-6 rounded-full absolute -bottom-1 -right-1" />
+                                </div>
+                                <div>
+                                  <Skeleton className="h-5 w-32 mb-1" />
+                                  <Skeleton className="h-4 w-24" />
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <Skeleton className="h-5 w-24 mb-1" />
+                                <Skeleton className="h-4 w-32" />
+                              </div>
+                              <Skeleton className="h-5 w-5" />
+                            </div>
+                          </div>
+                        ))
+                      : pools.map((pool) => (
+                          <div
+                            key={pool.id}
+                            className="border rounded-lg p-4 hover:border-emerald-600 transition-colors cursor-pointer"
+                          >
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center">
+                                <div className="relative mr-3">
+                                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                    {pool.token1}
+                                  </div>
+                                  <div className="w-6 h-6 rounded-full bg-gray-100 absolute -bottom-1 -right-1 flex items-center justify-center text-xs">
+                                    {pool.token2}
+                                  </div>
+                                </div>
+                                <div>
+                                  <h3 className="font-medium">{pool.name}</h3>
+                                  <div className="flex items-center text-sm text-gray-500">
+                                    <span>APR: </span>
+                                    <span className="text-emerald-600 font-medium ml-1">{pool.apr}%</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-medium">${pool.totalLiquidity.toLocaleString()}</div>
+                                <div className="text-sm text-gray-500">Total Liquidity</div>
+                              </div>
+                              <ChevronRight className="h-5 w-5 text-gray-400" />
+                            </div>
+
+                            {pool.userLiquidity > 0 && (
+                              <div className="mt-4 pt-4 border-t">
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="text-sm text-gray-500">Your Share</span>
+                                  <span className="text-sm font-medium">{(pool.userShare * 100).toFixed(2)}%</span>
+                                </div>
+                                <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
+                                  <div 
+                                    className="bg-emerald-500 h-2 rounded-full" 
+                                    style={{ width: `${pool.userShare * 100}%` }}
+                                  ></div>
+                                </div>
+                                <div className="flex justify-between mt-2">
+                                  <div className="text-sm">
+                                    <span className="text-gray-500">Your Liquidity:</span>
+                                    <span className="font-medium ml-1">${pool.userLiquidity.toLocaleString()}</span>
+                                  </div>
+                                  <div className="text-sm">
+                                    <span className="text-gray-500">Rewards:</span>
+                                    <span className="font-medium ml-1 text-emerald-600">
+                                      ${pool.rewards.toLocaleString()}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Your Liquidity</CardTitle>
+                  <CardDescription>Manage your liquidity positions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="border rounded-lg p-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-medium">Total Value</h3>
+                        <span className="font-bold text-xl">$584,000</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-500">Active Pools</div>
+                          <div className="font-bold text-lg">4</div>
+                        </div>
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-500">Total Rewards</div>
+                          <div className="font-bold text-lg text-emerald-600">$77,187</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border rounded-lg p-4">
+                      <h3 className="font-medium mb-3">Top Positions</h3>
+                      <div className="space-y-3">
+                        {pools
+                          .filter((pool) => pool.userLiquidity > 0)
+                          .sort((a, b) => b.userLiquidity - a.userLiquidity)
+                          .slice(0, 3)
+                          .map((pool) => (
+                            <div key={pool.id} className="flex justify-between items-center">
+                              <div className="flex items-center">
+                                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs mr-2">
+                                  {pool.token1}/{pool.token2}
+                                </div>
+                                <span className="text-sm">{pool.name}</span>
+                              </div>
+                              <span className="font-medium">${pool.userLiquidity.toLocaleString()}</span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+
+                    <button
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-md flex items-center justify-center"
+                    >
+                      <PlusCircle className="mr-2 h-4 w-4" /> Add New Liquidity
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
