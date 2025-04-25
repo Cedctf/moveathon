@@ -143,15 +143,23 @@ const assets = [
 
 export default function MarketplacePage() {
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filteredAssets, setFilteredAssets] = useState<any[]>([])
+  const [marketplaceTab, setMarketplaceTab] = useState("assets")
 
   useEffect(() => {
     // Simulate loading data
     const timer = setTimeout(() => {
       setLoading(false)
+      setFilteredAssets(assets)
     }, 1500)
 
     return () => clearTimeout(timer)
   }, [])
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value)
+  }
 
   return (
     <div className="container py-8 px-4 mx-auto max-w-7xl">
@@ -163,6 +171,41 @@ export default function MarketplacePage() {
           </div>
         </div>
       </FadeIn>
+
+      <Tabs defaultValue="assets" value={marketplaceTab} onValueChange={setMarketplaceTab} className="mb-8 mx-auto">
+        <FadeIn delay={200}>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <TabsList className="bg-gray-100 p-1">
+              <TabsTrigger value="assets" className="data-[state=active]:bg-white">Assets</TabsTrigger>
+              <TabsTrigger value="pools" className="data-[state=active]:bg-white">Liquidity Pools</TabsTrigger>
+            </TabsList>
+
+            <div className="flex gap-2">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                <Input
+                  type="search"
+                  placeholder={marketplaceTab === "assets" ? "Search assets..." : "Search pools..."}
+                  className="pl-8 w-full md:w-[250px] bg-white"
+                  value={searchTerm}
+                  onChange={handleSearch}
+                />
+              </div>
+              <Button variant="outline" size="icon" className="bg-white hover:bg-gray-50">
+                <Filter className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </FadeIn>
+
+        <TabsContent value="assets" className="mt-0 mx-auto">
+          {/* Asset content will go here */}
+        </TabsContent>
+
+        <TabsContent value="pools" className="mt-0 mx-auto">
+          {/* Pools content will go here */}
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
