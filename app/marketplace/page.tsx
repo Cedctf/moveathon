@@ -141,8 +141,30 @@ const assets = [
     },
   ]
 
-export default function Marketplace() {
-    return <div>Marketplace</div>;
+export default function MarketplacePage() {
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate loading data
+    const timer = setTimeout(() => {
+      setLoading(false)
+    }, 1500)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  return (
+    <div className="container py-8 px-4 mx-auto max-w-7xl">
+      <FadeIn>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Marketplace</h1>
+            <p className="text-gray-500">Discover, invest, and provide liquidity for tokenized assets</p>
+          </div>
+        </div>
+      </FadeIn>
+    </div>
+  )
 }
 
 
