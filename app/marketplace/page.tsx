@@ -294,62 +294,88 @@ export default function MarketplacePage() {
             </div>
           </FadeIn>
 
-          <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAssets.map((asset) => (
-              <StaggerItem key={asset.id}>
-                <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Card key={index} className="overflow-hidden">
                   <div className="relative h-48">
-                    <Image src={asset.image || "/placeholder.svg"} alt={asset.name} fill className="object-cover" />
-                    {asset.verified && (
-                      <span className="absolute top-2 right-2 bg-emerald-600 text-white text-xs font-semibold px-2 py-1 rounded-full transition-all duration-300 hover:bg-emerald-700">
-                        Verified
-                      </span>
-                    )}
+                    <Skeleton className="h-full w-full" />
                   </div>
                   <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">{asset.name}</CardTitle>
-                        <CardDescription className="flex items-center mt-1">
-                          <MapPin className="h-3.5 w-3.5 mr-1" /> {asset.location}
-                        </CardDescription>
-                      </div>
-                      <span className="ml-2 text-xs border border-gray-200 rounded-full px-2 py-1">
-                        {asset.type}
-                      </span>
-                    </div>
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-1/2" />
                   </CardHeader>
                   <CardContent className="pb-2">
                     <div className="flex justify-between items-center">
-                      <div>
-                        <p className="text-sm text-gray-500">Token Symbol</p>
-                        <p className="font-medium">{asset.tokenSymbol}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">Price</p>
-                        <p className="font-bold">${asset.price.toLocaleString()}</p>
-                      </div>
+                      <Skeleton className="h-5 w-1/3" />
+                      <Skeleton className="h-5 w-1/4" />
                     </div>
                   </CardContent>
                   <CardFooter className="flex justify-between">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
-                    >
-                      Details
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="bg-emerald-600 hover:bg-emerald-700 transition-all duration-300 hover:shadow text-white"
-                    >
-                      Trade sRWA
-                    </Button>
+                    <Skeleton className="h-9 w-20" />
+                    <Skeleton className="h-9 w-24" />
                   </CardFooter>
                 </Card>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+              ))}
+            </div>
+          ) : (
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredAssets.map((asset) => (
+                <StaggerItem key={asset.id}>
+                  <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <div className="relative h-48">
+                      <Image src={asset.image || "/placeholder.svg"} alt={asset.name} fill className="object-cover" />
+                      {asset.verified && (
+                        <span className="absolute top-2 right-2 bg-emerald-600 text-white text-xs font-semibold px-2 py-1 rounded-full transition-all duration-300 hover:bg-emerald-700">
+                          Verified
+                        </span>
+                      )}
+                    </div>
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">{asset.name}</CardTitle>
+                          <CardDescription className="flex items-center mt-1">
+                            <MapPin className="h-3.5 w-3.5 mr-1" /> {asset.location}
+                          </CardDescription>
+                        </div>
+                        <span className="ml-2 text-xs border border-gray-200 rounded-full px-2 py-1">
+                          {asset.type}
+                        </span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="text-sm text-gray-500">Token Symbol</p>
+                          <p className="font-medium">{asset.tokenSymbol}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500">Price</p>
+                          <p className="font-bold">${asset.price.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                      >
+                        Details
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-emerald-600 hover:bg-emerald-700 transition-all duration-300 hover:shadow text-white"
+                      >
+                        Trade sRWA
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          )}
         </TabsContent>
 
         <TabsContent value="pools" className="mt-0 mx-auto">
