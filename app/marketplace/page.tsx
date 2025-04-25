@@ -223,6 +223,13 @@ export default function MarketplacePage() {
     }
   }
 
+  const handleWithdrawLiquidity = () => {
+    // Mock withdrawing liquidity
+    alert(`Withdrawn ${amount1} from the pool`)
+    setSelectedPool(null)
+    setAmount1("")
+  }
+
   return (
     <div className="container py-8 px-4 mx-auto max-w-7xl">
       <FadeIn>
@@ -691,6 +698,36 @@ export default function MarketplacePage() {
                           <span className="font-medium text-emerald-600">{selectedPool.apr}%</span>
                         </div>
                       </div>
+
+                      <div className="grid gap-2">
+                        <label htmlFor="withdraw-amount">Withdraw Amount</label>
+                        <Input
+                          id="withdraw-amount"
+                          type="number"
+                          placeholder="Enter amount to withdraw"
+                          value={amount1}
+                          onChange={(e) => setAmount1(e.target.value)}
+                        />
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-500">
+                            Available: ${selectedPool.userLiquidity.toLocaleString()}
+                          </span>
+                          <button
+                            className="text-sm text-emerald-600 font-medium"
+                            onClick={() => setAmount1(selectedPool.userLiquidity.toString())}
+                          >
+                            Max
+                          </button>
+                        </div>
+                      </div>
+
+                      <Button
+                        className="w-full bg-emerald-600 hover:bg-emerald-700"
+                        onClick={handleWithdrawLiquidity}
+                        disabled={!amount1}
+                      >
+                        Withdraw Liquidity
+                      </Button>
                     </>
                   ) : (
                     <div className="text-center py-8">
