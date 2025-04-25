@@ -151,6 +151,8 @@ export default function MarketplacePage() {
   const [selectedLocation, setSelectedLocation] = useState("all")
   const [selectedPool, setSelectedPool] = useState<any>(null)
   const [activeTab, setActiveTab] = useState("add")
+  const [amount1, setAmount1] = useState("")
+  const [amount2, setAmount2] = useState("")
   const [marketplaceTab, setMarketplaceTab] = useState("assets")
 
   useEffect(() => {
@@ -209,6 +211,16 @@ export default function MarketplacePage() {
 
   const toggleWalletConnection = () => {
     setIsWalletConnected(!isWalletConnected)
+  }
+
+  const handleAddLiquidity = () => {
+    // Mock adding liquidity
+    if (selectedPool) {
+      alert(`Added ${amount1} ${selectedPool.token1} and ${amount2} ${selectedPool.token2} to the pool`)
+      setSelectedPool(null)
+      setAmount1("")
+      setAmount2("")
+    }
   }
 
   return (
@@ -599,6 +611,57 @@ export default function MarketplacePage() {
                       <DollarSign className="h-3.5 w-3.5" />${selectedPool.totalLiquidity.toLocaleString()}
                     </span>
                   </div>
+
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <label htmlFor="add-amount1">{selectedPool.token1} Amount</label>
+                      <Input
+                        id="add-amount1"
+                        type="number"
+                        placeholder={`Enter ${selectedPool.token1} amount`}
+                        value={amount1}
+                        onChange={(e) => setAmount1(e.target.value)}
+                      />
+                      <div className="text-right text-sm text-gray-500">Balance: 10,000 {selectedPool.token1}</div>
+                    </div>
+
+                    <div className="flex justify-center">
+                      <div className="bg-gray-100 p-1 rounded-full">
+                        <ChevronsUpDown className="h-5 w-5 text-gray-500" />
+                      </div>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <label htmlFor="add-amount2">{selectedPool.token2} Amount</label>
+                      <Input
+                        id="add-amount2"
+                        type="number"
+                        placeholder={`Enter ${selectedPool.token2} amount`}
+                        value={amount2}
+                        onChange={(e) => setAmount2(e.target.value)}
+                      />
+                      <div className="text-right text-sm text-gray-500">Balance: 5 {selectedPool.token2}</div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-500">Estimated Share</span>
+                      <span className="font-medium">0.02%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Estimated APR</span>
+                      <span className="font-medium text-emerald-600">{selectedPool.apr}%</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    className="w-full bg-emerald-600 hover:bg-emerald-700"
+                    onClick={handleAddLiquidity}
+                    disabled={!amount1 || !amount2}
+                  >
+                    Add Liquidity
+                  </Button>
                 </TabsContent>
 
                 <TabsContent value="withdraw" className="space-y-4 pt-4">
