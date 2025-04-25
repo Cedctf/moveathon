@@ -142,12 +142,15 @@ const assets = [
   ]
 
 export default function MarketplacePage() {
+  const [isWalletConnected, setIsWalletConnected] = useState(true)
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [filteredAssets, setFilteredAssets] = useState<any[]>([])
   const [selectedType, setSelectedType] = useState("all")
   const [selectedPrice, setSelectedPrice] = useState("all")
   const [selectedLocation, setSelectedLocation] = useState("all")
+  const [selectedPool, setSelectedPool] = useState<any>(null)
+  const [activeTab, setActiveTab] = useState("add")
   const [marketplaceTab, setMarketplaceTab] = useState("assets")
 
   useEffect(() => {
@@ -198,6 +201,14 @@ export default function MarketplacePage() {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value)
+  }
+
+  const handlePoolSelect = (pool: any) => {
+    setSelectedPool(pool)
+  }
+
+  const toggleWalletConnection = () => {
+    setIsWalletConnected(!isWalletConnected)
   }
 
   return (
@@ -414,6 +425,7 @@ export default function MarketplacePage() {
                           <div
                             key={pool.id}
                             className="border rounded-lg p-4 hover:border-emerald-600 transition-colors cursor-pointer"
+                            onClick={() => handlePoolSelect(pool)}
                           >
                             <div className="flex justify-between items-center">
                               <div className="flex items-center">
@@ -480,57 +492,168 @@ export default function MarketplacePage() {
                   <CardDescription>Manage your liquidity positions</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="border rounded-lg p-4">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-medium">Total Value</h3>
-                        <span className="font-bold text-xl">$584,000</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-gray-50 p-3 rounded-lg">
-                          <div className="text-sm text-gray-500">Active Pools</div>
-                          <div className="font-bold text-lg">4</div>
+                  {isWalletConnected ? (
+                    <div className="space-y-4">
+                      <div className="border rounded-lg p-4">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="font-medium">Total Value</h3>
+                          <span className="font-bold text-xl">$584,000</span>
                         </div>
-                        <div className="bg-gray-50 p-3 rounded-lg">
-                          <div className="text-sm text-gray-500">Total Rewards</div>
-                          <div className="font-bold text-lg text-emerald-600">$77,187</div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <div className="text-sm text-gray-500">Active Pools</div>
+                            <div className="font-bold text-lg">4</div>
+                          </div>
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <div className="text-sm text-gray-500">Total Rewards</div>
+                            <div className="font-bold text-lg text-emerald-600">$77,187</div>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="border rounded-lg p-4">
-                      <h3 className="font-medium mb-3">Top Positions</h3>
-                      <div className="space-y-3">
-                        {pools
-                          .filter((pool) => pool.userLiquidity > 0)
-                          .sort((a, b) => b.userLiquidity - a.userLiquidity)
-                          .slice(0, 3)
-                          .map((pool) => (
-                            <div key={pool.id} className="flex justify-between items-center">
-                              <div className="flex items-center">
-                                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs mr-2">
-                                  {pool.token1}/{pool.token2}
+                      <div className="border rounded-lg p-4">
+                        <h3 className="font-medium mb-3">Top Positions</h3>
+                        <div className="space-y-3">
+                          {pools
+                            .filter((pool) => pool.userLiquidity > 0)
+                            .sort((a, b) => b.userLiquidity - a.userLiquidity)
+                            .slice(0, 3)
+                            .map((pool) => (
+                              <div key={pool.id} className="flex justify-between items-center">
+                                <div className="flex items-center">
+                                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs mr-2">
+                                    {pool.token1}/{pool.token2}
+                                  </div>
+                                  <span className="text-sm">{pool.name}</span>
                                 </div>
-                                <span className="text-sm">{pool.name}</span>
+                                <span className="font-medium">${pool.userLiquidity.toLocaleString()}</span>
                               </div>
-                              <span className="font-medium">${pool.userLiquidity.toLocaleString()}</span>
-                            </div>
-                          ))}
+                            ))}
+                        </div>
                       </div>
-                    </div>
 
-                    <button
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-md flex items-center justify-center"
-                    >
-                      <PlusCircle className="mr-2 h-4 w-4" /> Add New Liquidity
-                    </button>
-                  </div>
+                      <button
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-md flex items-center justify-center"
+                        onClick={() => {
+                          handlePoolSelect(pools[0]);
+                          setActiveTab("add");
+                        }}
+                      >
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add New Liquidity
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Wallet className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="font-medium text-lg mb-2">Connect Your Wallet</h3>
+                      <p className="text-gray-500 mb-4">
+                        Connect your wallet to view and manage your liquidity positions
+                      </p>
+                      <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={toggleWalletConnection}>
+                        Connect Wallet
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
           </div>
         </TabsContent>
       </Tabs>
+
+      {selectedPool && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedPool(null)}>
+          <div className="bg-white rounded-lg max-w-[500px] w-full p-6 m-4" onClick={e => e.stopPropagation()}>
+            <div className="flex flex-col">
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold">Manage Liquidity</h2>
+                <p className="text-sm text-gray-500">{selectedPool.name} Pool</p>
+              </div>
+
+              <Tabs defaultValue="add" value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1">
+                  <TabsTrigger value="add" className="data-[state=active]:bg-white">Add Liquidity</TabsTrigger>
+                  <TabsTrigger value="withdraw" className="data-[state=active]:bg-white">Withdraw</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="add" className="space-y-4 pt-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <div className="relative mr-3">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                          {selectedPool.token1}
+                        </div>
+                        <div className="w-6 h-6 rounded-full bg-gray-100 absolute -bottom-1 -right-1 flex items-center justify-center text-xs">
+                          {selectedPool.token2}
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{selectedPool.name}</h3>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <span>APR: </span>
+                          <span className="text-emerald-600 font-medium ml-1">{selectedPool.apr}%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center gap-1 border border-gray-200 rounded-full text-xs px-2 py-1">
+                      <DollarSign className="h-3.5 w-3.5" />${selectedPool.totalLiquidity.toLocaleString()}
+                    </span>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="withdraw" className="space-y-4 pt-4">
+                  {selectedPool.userLiquidity > 0 ? (
+                    <>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium">Your Position</h3>
+                          <div className="text-sm text-gray-500">{selectedPool.name} Pool</div>
+                        </div>
+                        <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full">
+                          {(selectedPool.userShare * 100).toFixed(2)}% Share
+                        </span>
+                      </div>
+
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="flex justify-between items-center mb-3">
+                          <span className="text-sm text-gray-500">Your Liquidity</span>
+                          <span className="font-medium">${selectedPool.userLiquidity.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between items-center mb-3">
+                          <span className="text-sm text-gray-500">Earned Rewards</span>
+                          <span className="font-medium text-emerald-600">${selectedPool.rewards.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-500">Current APR</span>
+                          <span className="font-medium text-emerald-600">{selectedPool.apr}%</span>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Percent className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <h3 className="font-medium text-lg mb-2">No Position Found</h3>
+                      <p className="text-gray-500 mb-4">You don't have any liquidity in this pool yet.</p>
+                      <Button variant="outline" onClick={() => setActiveTab("add")} className="mx-auto">
+                        Add Liquidity <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+
+              <button 
+                className="absolute top-3 right-3 text-gray-500 hover:text-gray-700" 
+                onClick={() => setSelectedPool(null)}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
