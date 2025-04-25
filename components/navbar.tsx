@@ -9,7 +9,7 @@ import { Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
-  { name: "Dashboard", href: "/dashboard" },
+  { name: "Marketplace", href: "/marketplace" },
   { name: "Trade", href: "/trade" },
   { name: "Pools", href: "/pools" },
   { name: "Account", href: "/account" },
