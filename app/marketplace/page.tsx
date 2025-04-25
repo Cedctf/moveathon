@@ -145,6 +145,9 @@ export default function MarketplacePage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [filteredAssets, setFilteredAssets] = useState<any[]>([])
+  const [selectedType, setSelectedType] = useState("all")
+  const [selectedPrice, setSelectedPrice] = useState("all")
+  const [selectedLocation, setSelectedLocation] = useState("all")
   const [marketplaceTab, setMarketplaceTab] = useState("assets")
 
   useEffect(() => {
@@ -156,6 +159,42 @@ export default function MarketplacePage() {
 
     return () => clearTimeout(timer)
   }, [])
+
+  useEffect(() => {
+    let result = [...assets]
+
+    // Filter by search term
+    if (searchTerm) {
+      result = result.filter(
+        (asset) =>
+          asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          asset.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          asset.tokenSymbol.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    }
+
+    // Filter by type
+    if (selectedType !== "all") {
+      result = result.filter((asset) => asset.subtype.toLowerCase() === selectedType.toLowerCase())
+    }
+
+    // Filter by price range
+    if (selectedPrice !== "all") {
+      const [min, max] = selectedPrice.split("-").map(Number)
+      if (max) {
+        result = result.filter((asset) => asset.price >= min && asset.price <= max)
+      } else {
+        result = result.filter((asset) => asset.price >= min)
+      }
+    }
+
+    // Filter by location
+    if (selectedLocation !== "all") {
+      result = result.filter((asset) => asset.location.toLowerCase().includes(selectedLocation.toLowerCase()))
+    }
+
+    setFilteredAssets(result)
+  }, [searchTerm, selectedType, selectedPrice, selectedLocation])
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value)
@@ -199,6 +238,62 @@ export default function MarketplacePage() {
         </FadeIn>
 
         <TabsContent value="assets" className="mt-0 mx-auto">
+          <FadeIn delay={300}>
+            <div className="flex flex-wrap gap-4 mb-4">
+              <Select value={selectedType} onValueChange={setSelectedType}>
+                <SelectTrigger className="w-[180px] bg-white">
+                  <SelectValue placeholder="Asset Type" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="all" className="hover:bg-emerald-50 cursor-pointer">All Types</SelectItem>
+                  <SelectItem value="residential" className="hover:bg-emerald-50 cursor-pointer">Residential</SelectItem>
+                  <SelectItem value="commercial" className="hover:bg-emerald-50 cursor-pointer">Commercial</SelectItem>
+                  <SelectItem value="agricultural" className="hover:bg-emerald-50 cursor-pointer">Agricultural</SelectItem>
+                  <SelectItem value="watch" className="hover:bg-emerald-50 cursor-pointer">Watches</SelectItem>
+                  <SelectItem value="art" className="hover:bg-emerald-50 cursor-pointer">Art</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedPrice} onValueChange={setSelectedPrice}>
+                <SelectTrigger className="w-[180px] bg-white">
+                  <SelectValue placeholder="Price Range" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="all" className="hover:bg-emerald-50 cursor-pointer">All Prices</SelectItem>
+                  <SelectItem value="0-100000" className="hover:bg-emerald-50 cursor-pointer">
+                    <span className="inline-block w-full">$0 - $100,000</span>
+                  </SelectItem>
+                  <SelectItem value="100000-500000" className="hover:bg-emerald-50 cursor-pointer">
+                    <span className="inline-block w-full">$100,000 - $500,000</span>
+                  </SelectItem>
+                  <SelectItem value="500000-1000000" className="hover:bg-emerald-50 cursor-pointer">
+                    <span className="inline-block w-full">$500,000 - $1,000,000</span>
+                  </SelectItem>
+                  <SelectItem value="1000000-5000000" className="hover:bg-emerald-50 cursor-pointer">
+                    <span className="inline-block w-full">$1,000,000 - $5,000,000</span>
+                  </SelectItem>
+                  <SelectItem value="5000000" className="hover:bg-emerald-50 cursor-pointer">
+                    <span className="inline-block w-full">$5,000,000+</span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                <SelectTrigger className="w-[180px] bg-white">
+                  <SelectValue placeholder="Location" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="all" className="hover:bg-emerald-50 cursor-pointer">All Locations</SelectItem>
+                  <SelectItem value="new york" className="hover:bg-emerald-50 cursor-pointer">North America</SelectItem>
+                  <SelectItem value="europe" className="hover:bg-emerald-50 cursor-pointer">Europe</SelectItem>
+                  <SelectItem value="tokyo" className="hover:bg-emerald-50 cursor-pointer">Asia</SelectItem>
+                  <SelectItem value="bali" className="hover:bg-emerald-50 cursor-pointer">Oceania</SelectItem>
+                  <SelectItem value="africa" className="hover:bg-emerald-50 cursor-pointer">Africa</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </FadeIn>
+
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAssets.map((asset) => (
               <StaggerItem key={asset.id}>
