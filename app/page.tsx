@@ -93,7 +93,7 @@ export default function Home() {
                 <p className="text-gray-600 mb-4">
                   Convert property ownership into digital tokens for fractional investment and trading.
                 </p>
-                <Link href="/dashboard" className="text-emerald-600 font-medium inline-flex items-center">
+                <Link href="/account" className="text-emerald-600 font-medium inline-flex items-center">
                   Explore Properties <ChevronRight className="h-4 w-4 ml-1" />
                 </Link>
               </div>
@@ -123,7 +123,7 @@ export default function Home() {
                 <p className="text-gray-600 mb-4">
                   Access global liquidity pools and earn rewards by providing liquidity to asset pairs.
                 </p>
-                <Link href="/pools" className="text-emerald-600 font-medium inline-flex items-center">
+                <Link href="/marketplace" className="text-emerald-600 font-medium inline-flex items-center">
                   View Pools <ChevronRight className="h-4 w-4 ml-1" />
                 </Link>
               </div>
