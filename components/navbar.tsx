@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ConnectButton } from "@iota/dapp-kit"
 
 const navLinks = [
   { name: "Marketplace", href: "/marketplace" },
@@ -42,9 +43,9 @@ export default function Navbar() {
           </nav>
         </div>
         <div className="flex items-center gap-4">
-          <Button variant="outline" className="hidden md:flex">
-            Connect Wallet
-          </Button>
+          <div className="hidden md:flex">
+            <ConnectButton />
+          </div>
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" aria-label="Menu">
@@ -67,7 +68,7 @@ export default function Navbar() {
                   </Link>
                 ))}
                 <div className="flex flex-col gap-2 mt-4">
-                  <Button variant="outline">Connect Wallet</Button>
+                  <ConnectButton />
                 </div>
               </div>
             </SheetContent>
