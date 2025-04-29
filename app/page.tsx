@@ -1,113 +1,192 @@
-import Image from "next/image";
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { ArrowRight, Building2, ChevronRight, Coins, Globe } from "lucide-react"
+import { FadeIn } from "@/components/animations/fade-in"
+import { StaggerContainer, StaggerItem } from "@/components/animations/stagger-container"
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Section */}
+      <section className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <video 
+            className="object-cover w-full h-full"
+            src="/hero.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+          <div className="absolute inset-0 bg-black/30"></div>
         </div>
-      </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+        <div className="container relative z-10 px-4 flex flex-col items-center text-center">
+          <FadeIn delay={300} duration={800}>
+            <div className="inline-flex items-center rounded-full border border-gray-200 bg-white/50 backdrop-blur-sm px-3 py-1 text-sm font-medium mb-6">
+              <span className="text-emerald-500 mr-1">•</span> Powered by IOTA's Tangle
+            </div>
+          </FadeIn>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+          <FadeIn delay={500} duration={800}>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-4 text-white drop-shadow-md">
+              Bringing Real-World Assets to IOTA's Tangle
+            </h1>
+          </FadeIn>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+          <FadeIn delay={700} duration={800}>
+            <p className="max-w-[700px] text-lg md:text-xl text-white/90 mb-8 drop-shadow">
+              Tokenize, trade, and invest in real-world assets on the most secure and scalable distributed ledger.
+            </p>
+          </FadeIn>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
+          <FadeIn delay={900} duration={800}>
+            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+              <Link href="/dashboard">
+                <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto">
+                  Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/list-asset">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-white/20 backdrop-blur-sm border-white/40 text-white hover:bg-white/30 w-full sm:w-auto"
+                >
+                  List Asset
+                </Button>
+              </Link>
+              <Link href="/trade">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-white/20 backdrop-blur-sm border-white/40 text-white hover:bg-white/30 w-full sm:w-auto"
+                >
+                  Trade sRWA
+                </Button>
+              </Link>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+      {/* Features Section */}
+      <section className="py-20 bg-white">
+        <div className="container px-4 mx-auto">
+          <FadeIn>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Tokenize Any Real-World Asset</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                From real estate to luxury items, Asseta enables the tokenization and synthetic trading of any
+                real-world asset on IOTA's secure Tangle.
+              </p>
+            </div>
+          </FadeIn>
+
+          <StaggerContainer className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <StaggerItem>
+              <div className="bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
+                  <Building2 className="h-6 w-6 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Tokenize Real Estate</h3>
+                <p className="text-gray-600 mb-4">
+                  Convert property ownership into digital tokens for fractional investment and trading.
+                </p>
+                <Link href="/account" className="text-emerald-600 font-medium inline-flex items-center">
+                  Explore Properties <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
+                  <Coins className="h-6 w-6 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Synthetic Trading</h3>
+                <p className="text-gray-600 mb-4">
+                  Trade synthetic versions of real-world assets without owning the underlying asset.
+                </p>
+                <Link href="/trade" className="text-emerald-600 font-medium inline-flex items-center">
+                  Start Trading <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
+                  <Globe className="h-6 w-6 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Global Liquidity</h3>
+                <p className="text-gray-600 mb-4">
+                  Access global liquidity pools and earn rewards by providing liquidity to asset pairs.
+                </p>
+                <Link href="/marketplace" className="text-emerald-600 font-medium inline-flex items-center">
+                  View Pools <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+              </div>
+            </StaggerItem>
+          </StaggerContainer>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container px-4 mx-auto">
+          <FadeIn>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">How Asseta Works</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                A simple process to tokenize, trade, and invest in real-world assets on IOTA's Tangle.
+              </p>
+            </div>
+          </FadeIn>
+
+          <StaggerContainer className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            <StaggerItem>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 transform transition-transform duration-500 hover:scale-110">
+                  <span className="text-2xl font-bold text-emerald-600">1</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">KYC Verification</h3>
+                <p className="text-gray-600">Complete our zero-knowledge KYC process to verify your identity.</p>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 transform transition-transform duration-500 hover:scale-110">
+                  <span className="text-2xl font-bold text-emerald-600">2</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">List Your Asset</h3>
+                <p className="text-gray-600">Submit your asset details and documentation for verification.</p>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 transform transition-transform duration-500 hover:scale-110">
+                  <span className="text-2xl font-bold text-emerald-600">3</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Mint Tokens</h3>
+                <p className="text-gray-600">Once approved, mint ERC3643 tokens representing your asset.</p>
+              </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 transform transition-transform duration-500 hover:scale-110">
+                  <span className="text-2xl font-bold text-emerald-600">4</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Trade or Invest</h3>
+                <p className="text-gray-600">Trade synthetic versions or invest in tokenized assets.</p>
+              </div>
+            </StaggerItem>
+          </StaggerContainer>
+        </div>
+      </section>
+    </div>
+  )
 }
