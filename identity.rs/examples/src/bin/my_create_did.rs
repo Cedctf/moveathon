@@ -21,8 +21,8 @@ async fn main() -> anyhow::Result<()> {
   // Set the package ID environment variable if not already set
   if env::var("IOTA_IDENTITY_PKG_ID").is_err() {
     // Use a default package ID with 0x prefix - replace with your actual package ID
-    env::set_var("IOTA_IDENTITY_PKG_ID", "0x1234567890abcdef");
-    println!("Using default package ID: 0x1234567890abcdef");
+    env::set_var("IOTA_IDENTITY_PKG_ID", "0xa7cc2c7008993a775e8766f9e0420b21b3f60a7c641f16f66df9466bf6389114");
+    println!("Using default package ID: 0xa7cc2c7008993a775e8766f9e0420b21b3f60a7c641f16f66df9466bf6389114");
     println!("For production use, set the IOTA_IDENTITY_PKG_ID environment variable");
   }
 
