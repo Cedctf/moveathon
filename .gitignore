@@ -37,3 +37,9 @@ next-env.d.ts
 
 identity.rs/node_modules
 identity.rs/package-lock.json
+
+move.lock
+move.toml
+first_package/tests/first_package_tests.move
+first_package.move
+first_package_tests.move

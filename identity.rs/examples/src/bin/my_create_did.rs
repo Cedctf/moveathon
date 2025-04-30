@@ -20,17 +20,36 @@ use std::env;
 async fn main() -> anyhow::Result<()> {
   // Set the package ID environment variable if not already set
   if env::var("IOTA_IDENTITY_PKG_ID").is_err() {
-    // Use a default package ID with 0x prefix - replace with your actual package ID
+    // Make sure this package ID is correctly deployed on your network
+    // You may need to deploy the identity package first
     env::set_var("IOTA_IDENTITY_PKG_ID", "0xa7cc2c7008993a775e8766f9e0420b21b3f60a7c641f16f66df9466bf6389114");
     println!("Using default package ID: 0xa7cc2c7008993a775e8766f9e0420b21b3f60a7c641f16f66df9466bf6389114");
     println!("For production use, set the IOTA_IDENTITY_PKG_ID environment variable");
   }
 
+  // Make sure your local network is running and accessible
+  println!("\nAttempting to connect to the network...");
+  
   // === USER SETUP ===
   // Create new client to interact with chain and get funded account with keys for the USER
   println!("\n=== USER SETUP ===");
   let user_storage = get_memstorage()?;
-  let user_client = get_funded_client(&user_storage).await?;
+  
+  // Add error handling for better debugging
+  let user_client = match get_funded_client(&user_storage).await {
+    Ok(client) => client,
+    Err(e) => {
+      println!("\nError: Failed to create client. This usually means:");
+      println!("1. The identity package is not deployed on the network");
+      println!("2. Your local network isn't running or accessible");
+      println!("3. The package ID is incorrect");
+      println!("\nTo fix:");
+      println!("- Deploy the identity package to your network first");
+      println!("- Ensure your private network is running (if using a local setup)");
+      println!("- Update the package ID to match your deployment");
+      return Err(e);
+    }
+  };
 
   // Create new DID document and publish it (for the user)
   let (user_document, _user_method_fragment) = create_did_document(&user_client, &user_storage).await?;
