@@ -36,3 +36,4 @@ yarn-error.log*
 next-env.d.ts
 
 identity.rs/node_modules
+identity.rs/package-lock.json
