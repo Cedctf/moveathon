@@ -1,0 +1,12 @@
+[package]
+name = "PythPriceExample"
+version = "0.0.1"
+
+[addresses]
+pyth_price_example = "0x0"
+
+[dependencies]
+MoveStdlib = { git = "https://github.com/move-language/move.git", subdir = "language/move-stdlib", rev = "main" }
+Pyth = { git = "https://github.com/pyth-network/pyth-crosschain.git", subdir = "target_chains/sui/contracts", rev = "iota-contract-testnet" }
+Wormhole = { git = "https://github.com/pyth-network/pyth-crosschain.git", subdir = "target_chains/sui/contracts/vendor/wormhole_iota_testnet/wormhole", rev = "iota-contract-testnet" }
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "751c23caf24efd071463b9ffd07eabcb15f44f31" } 
