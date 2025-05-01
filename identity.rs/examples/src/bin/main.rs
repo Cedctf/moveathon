@@ -4,29 +4,40 @@
 use examples::create_did_document;
 use examples::get_funded_client;
 use examples::get_memstorage;
-// Remove if not needed: use examples::pretty_print_json;
+use examples::TEST_GAS_BUDGET;
 use serde_json::json;
 use std::env;
 use std::collections::HashMap;
 
-// Correct imports for the identity framework
 use identity_iota::core::{FromJson, Url, Object, Duration, Timestamp};
 use identity_iota::credential::{
     Subject, Credential, CredentialBuilder, Jwt, JwtCredentialValidationOptions, 
     JwtCredentialValidator, DecodedJwtCredential, FailFast, Presentation, PresentationBuilder,
     JwtPresentationOptions, JwtPresentationValidationOptions, JwtPresentationValidator,
     DecodedJwtPresentation, JwtPresentationValidatorUtils, JwtCredentialValidatorUtils,
-    SubjectHolderRelationship
+    SubjectHolderRelationship, 
+    // ZKP related imports
+    Jpt, JptCredentialValidationOptions, JptCredentialValidator, 
+    JptCredentialValidatorUtils, JptPresentationValidationOptions,
+    JptPresentationValidator, JptPresentationValidatorUtils,
+    JwpCredentialOptions, JwpPresentationOptions, SelectiveDisclosurePresentation
 };
-use identity_iota::did::{DID, CoreDID}; // Correct import for CoreDID
-use identity_iota::storage::{JwkDocumentExt, JwsSignatureOptions};
+use identity_iota::did::{DID, CoreDID}; 
+use identity_iota::storage::{JwkDocumentExt, JwsSignatureOptions, JwpDocumentExt, KeyType, JwkMemStore};
 use identity_eddsa_verifier::EdDSAJwsVerifier;
 use identity_iota::document::verifiable::JwsVerificationOptions;
 use identity_iota::resolver::Resolver;
-use identity_iota::iota::IotaDocument; // Correct import for IotaDocument
+use identity_iota::iota::IotaDocument;
+use identity_iota::iota::rebased::transaction::TransactionOutput;
+use identity_iota::iota::rebased::client::{IdentityClient, IotaKeySignature};
+use identity_iota::iota_interaction::OptionalSync;
+use identity_storage::Storage;
+use jsonprooftoken::jpa::algs::ProofAlgorithm;
+use secret_storage::Signer;
+use identity_iota::verification::MethodScope;
 
 /// Demonstrates how to create a DID Document and publish it on chain,
-/// then perform a simulated KYC process.
+/// then perform a simulated KYC process with Zero-Knowledge Selective Disclosure.
 ///
 /// In this example we connect to a locally running private network, but it can be adapted
 /// to run on any IOTA node by setting the network and faucet endpoints.
@@ -76,21 +87,21 @@ async fn main() -> anyhow::Result<()> {
   let resolved_user = user_client.resolve_did(user_document.id()).await?;
   println!("Resolved USER DID document: {resolved_user:#}");
 
-  // === KYC PROVIDER SETUP ===
-  // Create a KYC provider DID (simulating a KYC authority)
-  println!("\n=== KYC PROVIDER SETUP ===");
+  // === KYC PROVIDER SETUP WITH BBS+ SUPPORT ===
+  println!("\n=== KYC PROVIDER SETUP WITH ZERO-KNOWLEDGE SUPPORT ===");
   let kyc_storage = get_memstorage()?; 
   let kyc_client = get_funded_client(&kyc_storage).await?;
-  let (kyc_document, kyc_method_fragment) = create_did_document(&kyc_client, &kyc_storage).await?;
-  println!("Published KYC PROVIDER DID document: {kyc_document:#}");
+  
+  // Create a KYC provider DID with ZKP capabilities using BBS+
+  let (kyc_document, kyc_method_fragment) = create_zkp_did(&kyc_client, &kyc_storage).await?;
+  println!("Published KYC PROVIDER DID document with ZKP support: {kyc_document:#}");
 
-  // === KYC VERIFICATION PROCESS ===
-  println!("\n=== KYC VERIFICATION PROCESS ===");
+  // === ZKP-ENABLED KYC CREDENTIAL ISSUANCE ===
+  println!("\n=== ZKP-ENABLED KYC CREDENTIAL ISSUANCE ===");
 
   // Create a credential subject with KYC information
-  // Fix: Use directly constructing a Subject instead of from_json_value
-  let subject_json = json!({
-    "id": user_document.id().to_string(), // Use to_string() instead of as_str()
+  let subject: Subject = Subject::from_json_value(json!({
+    "id": user_document.id().as_str(),
     "name": "John Doe",
     "dateOfBirth": "1993-04-15",
     "nationality": "US", 
@@ -109,151 +120,146 @@ async fn main() -> anyhow::Result<()> {
       "postalCode": "94107",
       "country": "US"
     }
-  });
-  
-  let subject = Subject::from_json_value(subject_json)?;
+  }))?;
 
   // Build the KYC credential
   let kyc_credential: Credential = CredentialBuilder::default()
     .id(Url::parse("https://example.org/credentials/kyc/1234")?)
-    .issuer(Url::parse(&kyc_document.id().to_string())?) // Use to_string() instead of as_str()
+    .issuer(Url::parse(kyc_document.id().as_str())?)
     .type_("KycCredential")
     .subject(subject)
     .build()?;
 
-  // Create a JWT credential signed by the KYC provider
-  let kyc_credential_jwt: Jwt = kyc_document
-    .create_credential_jwt(
+  // Create a JPT credential signed by the KYC provider using BBS+
+  let kyc_credential_jpt: Jpt = kyc_document
+    .create_credential_jpt(
       &kyc_credential,
       &kyc_storage,
       &kyc_method_fragment,
-      &JwsSignatureOptions::default(),
+      &JwpCredentialOptions::default(),
       None,
     )
     .await?;
 
-  println!("KYC Verifiable Credential created successfully");
+  println!("ZKP-enabled KYC Verifiable Credential created successfully");
 
-  // === VERIFY THE KYC CREDENTIAL ===
-  println!("\n=== VERIFY THE KYC CREDENTIAL ===");
+  // === VERIFY THE KYC CREDENTIAL (FULL DISCLOSURE) ===
+  println!("\n=== VERIFY THE FULL KYC CREDENTIAL ===");
 
-  // Validate the credential
-  let decoded_credential: DecodedJwtCredential<Object> =
-    JwtCredentialValidator::with_signature_verifier(EdDSAJwsVerifier::default())
-      .validate::<_, Object>(
-        &kyc_credential_jwt,
-        &kyc_document,
-        &JwtCredentialValidationOptions::default(),
-        FailFast::FirstError,
-      )?;
+  // Validate the credential using JPT validator
+  let decoded_credential = JptCredentialValidator::validate::<_, Object>(
+    &kyc_credential_jpt,
+    &kyc_document,
+    &JptCredentialValidationOptions::default(),
+    FailFast::FirstError,
+  )?;
 
-  println!("KYC credential successfully validated!");
-  println!("KYC Credential Details:");
+  println!("Full KYC credential successfully validated!");
+  println!("KYC Credential Details (all fields):");
   println!("{:#}", decoded_credential.credential);
 
-  // === VERIFIABLE PRESENTATION CREATION ===
-  println!("\n=== VERIFIABLE PRESENTATION CREATION ===");
-  println!("Creating a Verifiable Presentation to share KYC credential with a service provider");
+  // === SELECTIVE DISCLOSURE PRESENTATION CREATION ===
+  println!("\n=== SELECTIVE DISCLOSURE PRESENTATION CREATION ===");
+  println!("User wants to prove they're verified but hide sensitive details");
 
-  // Generate a unique challenge (in a real scenario, this would come from the service provider)
-  let challenge = "abc123-service-provider-challenge-456xyz";
+  // Determine which KYC method ID was used for signing
+  let method_id = decoded_credential
+    .decoded_jwp
+    .get_issuer_protected_header()
+    .kid()
+    .unwrap();
 
-  // Set an expiry time for the presentation (10 minutes from now)
-  let expires = Timestamp::now_utc().checked_add(Duration::minutes(10)).unwrap();
+  // Create a selective disclosure presentation that hides specific fields
+  let mut selective_disclosure = SelectiveDisclosurePresentation::new(&decoded_credential.decoded_jwp);
+  
+  // Conceal sensitive fields the user doesn't want to share
+  selective_disclosure.conceal_in_subject("document.number")?;  // Hide passport number
+  selective_disclosure.conceal_in_subject("address.street")?;   // Hide street address
+  selective_disclosure.conceal_in_subject("address.postalCode")?; // Hide postal code
+  
+  // Generate a challenge for presentation verification
+  let challenge = "service-provider-challenge-123456";
 
-  // Build a Verifiable Presentation containing the KYC credential
-  let kyc_presentation: Presentation<Jwt> = PresentationBuilder::new(
-      user_document.id().to_url().into(),
-      Default::default()
-    )
-    .credential(kyc_credential_jwt.clone())
-    .build()?;
-
-  println!("Verifiable Presentation built successfully");
-
-  // User signs the presentation with their verification method
-  let kyc_presentation_jwt: Jwt = user_document
-    .create_presentation_jwt(
-      &kyc_presentation,
-      &user_storage,
-      &_user_method_fragment, // Use the actual fragment name you stored earlier
-      &JwsSignatureOptions::default().nonce(challenge.to_owned()),
-      &JwtPresentationOptions::default().expiration_date(expires),
+  // Create the ZKP presentation that proves credential validity while hiding concealed fields
+  let zkp_presentation: Jpt = kyc_document
+    .create_presentation_jpt(
+      &mut selective_disclosure,
+      method_id,
+      &JwpPresentationOptions::default().nonce(challenge),
     )
     .await?;
 
-  println!("Verifiable Presentation signed successfully");
+  println!("Selective disclosure presentation created successfully");
+  println!("User can now prove their KYC status without revealing all personal details");
 
-  // === SERVICE PROVIDER PRESENTATION VERIFICATION ===
-  println!("\n=== SERVICE PROVIDER PRESENTATION VERIFICATION ===");
-  println!("Service provider receives and verifies the Verifiable Presentation");
+  // === SERVICE PROVIDER VERIFIES SELECTIVE DISCLOSURE ===
+  println!("\n=== SERVICE PROVIDER VERIFIES SELECTIVE DISCLOSURE ===");
 
-  // Set up verification options including the challenge
-  let presentation_verifier_options: JwsVerificationOptions =
-    JwsVerificationOptions::default().nonce(challenge.to_owned());
-
+  // Service provider extracts the issuer from the presentation
+  let issuer: CoreDID = JptPresentationValidatorUtils::extract_issuer_from_presented_jpt(&zkp_presentation)?;
+  
   // Create a resolver for DID resolution
   let mut resolver: Resolver<IotaDocument> = Resolver::new();
   resolver.attach_iota_handler((*user_client).clone());
-
-  // Verify the presentation signature first
-  let holder_did: CoreDID = JwtPresentationValidatorUtils::extract_holder(&kyc_presentation_jwt)?;
-  let holder: IotaDocument = resolver.resolve(&holder_did).await?;
-
-  let presentation_validation_options =
-    JwtPresentationValidationOptions::default().presentation_verifier_options(presentation_verifier_options);
-
-  let verified_presentation: DecodedJwtPresentation<Jwt> = JwtPresentationValidator::with_signature_verifier(
-    EdDSAJwsVerifier::default(),
-  )
-  .validate(&kyc_presentation_jwt, &holder, &presentation_validation_options)?;
-
-  println!("Presentation signature verification successful");
-
-  // Now verify the credential inside the presentation
-  let jwt_credentials: &Vec<Jwt> = &verified_presentation.presentation.verifiable_credential;
-  let issuers: Vec<CoreDID> = jwt_credentials
-    .iter()
-    .map(JwtCredentialValidatorUtils::extract_issuer_from_jwt)
-    .collect::<Result<Vec<CoreDID>, _>>()?;
-
+  
   // Resolve the issuer's document
-  let issuers_documents = resolver.resolve_multiple(&issuers).await?;
+  let issuer_document: IotaDocument = resolver.resolve(&issuer).await?;
+  
+  // Validate the ZKP presentation with the challenge
+  let presentation_validation_options = JptPresentationValidationOptions::default().nonce(challenge);
+  
+  // Verify the selective disclosure presentation
+  let verified_sd_credential = JptPresentationValidator::validate::<_, Object>(
+    &zkp_presentation,
+    &issuer_document,
+    &presentation_validation_options,
+    FailFast::FirstError,
+  )?;
+  
+  println!("Selective disclosure successfully validated!");
+  println!("Service provider can see:");
+  println!("{:#}", verified_sd_credential.credential);
+  println!("Notice that some fields are hidden while the credential remains valid");
 
-  // Validate the credentials in the presentation
-  let credential_validator = JwtCredentialValidator::with_signature_verifier(EdDSAJwsVerifier::default());
-  let validation_options = JwtCredentialValidationOptions::default()
-    .subject_holder_relationship(holder_did.to_url().into(), SubjectHolderRelationship::AlwaysSubject);
-
-  // Verify each credential in the presentation (in this case, just one KYC credential)
-  for (index, jwt_vc) in jwt_credentials.iter().enumerate() {
-    let issuer_document = &issuers_documents[&issuers[index]];
-    
-    let decoded_credential: DecodedJwtCredential<Object> = credential_validator
-      .validate::<_, Object>(jwt_vc, issuer_document, &validation_options, FailFast::FirstError)?;
-      
-    println!("KYC credential in presentation verified: {}", decoded_credential.credential.id.as_ref().unwrap()); // Fix for Option<Url>
-  }
-
-  println!("\n=== COMPLETE KYC VERIFICATION FLOW SUCCESSFUL ===");
-  println!("The service provider has successfully verified:");
-  println!("1. The presentation was signed by the holder (user)");
-  println!("2. The presentation contains a valid KYC credential");
-  println!("3. The KYC credential was issued by a trusted KYC provider");
-  println!("4. The presentation holder is the subject of the KYC credential");
-  println!("5. The presentation hasn't expired and includes the correct challenge");
-
-  println!("\nThe service provider can now grant the user access to their service");
-  println!("based on the verified KYC information");
-
-  // === ADDITIONAL KYC APPLICATIONS ===
-  println!("\n=== ADDITIONAL KYC APPLICATIONS ===");
-  println!("This KYC credential can be used for:");
-  println!("- Opening bank accounts");
-  println!("- Accessing financial services");
-  println!("- Participating in regulated investments");
-  println!("- Cross-border transactions");
-  println!("- Meeting regulatory compliance requirements");
+  println!("\n=== BENEFITS OF ZERO-KNOWLEDGE KYC ===");
+  println!("1. Privacy: Users share only necessary information");
+  println!("2. Security: Cryptographic verification ensures authenticity");
+  println!("3. Compliance: KYC requirements met without exposing excess data");
+  println!("4. User Control: Individuals decide what to reveal per service");
 
   Ok(())
+}
+
+// Helper function to create a DID with ZKP capabilities using BBS+
+async fn create_zkp_did<K, I, S>(
+  identity_client: &IdentityClient<S>,
+  storage: &Storage<K, I>,
+) -> anyhow::Result<(IotaDocument, String)>
+where
+  K: identity_storage::JwkStorage + identity_storage::JwkStorageBbsPlusExt,
+  I: identity_storage::KeyIdStorage,
+  S: Signer<IotaKeySignature> + OptionalSync,
+{
+  // Create a new DID document with a placeholder DID
+  let mut unpublished: IotaDocument = IotaDocument::new(identity_client.network());
+
+  // Generate a method with BBS+ capabilities
+  let verification_method_fragment = unpublished
+    .generate_method_jwp(
+      storage, 
+      JwkMemStore::BLS12381G2_KEY_TYPE, 
+      ProofAlgorithm::BLS12381_SHA256, 
+      None, 
+      MethodScope::VerificationMethod
+    )
+    .await?;
+
+  // Publish the DID document
+  let TransactionOutput::<IotaDocument> { output: document, .. } = identity_client
+    .publish_did_document(unpublished)
+    .with_gas_budget(TEST_GAS_BUDGET)
+    .build_and_execute(identity_client)
+    .await?;
+
+  Ok((document, verification_method_fragment))
 }
