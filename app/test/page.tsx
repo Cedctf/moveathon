@@ -44,6 +44,10 @@ export default function TestPage() {
   const [tokenAType, setTokenAType] = useState('')
   const [tokenBType, setTokenBType] = useState('')
   const [pools, setPools] = useState<Pool[]>([])
+  const [selectedPool, setSelectedPool] = useState<Pool | null>(null)
+  const [activeTab, setActiveTab] = useState('add')
+  const [amount1, setAmount1] = useState('')
+  const [amount2, setAmount2] = useState('')
 
   // Initialize IOTA client
   useEffect(() => {
@@ -260,6 +264,13 @@ export default function TestPage() {
     }
   }
 
+  const handlePoolSelect = (pool: Pool) => {
+    setSelectedPool(pool);
+    setActiveTab('add');
+    setAmount1('');
+    setAmount2('');
+  }
+
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">IOTA Liquidity Pools</h1>
@@ -330,6 +341,7 @@ export default function TestPage() {
                         <div
                           key={pool.id}
                           className="border rounded-lg p-4 hover:border-emerald-600 transition-colors cursor-pointer"
+                          onClick={() => handlePoolSelect(pool)}
                         >
                           <div className="flex justify-between items-center">
                             <div className="flex items-center">
@@ -433,6 +445,167 @@ export default function TestPage() {
       {error && (
         <div className="bg-red-50 text-red-600 p-4 rounded-md mb-8">
           {error}
+        </div>
+      )}
+
+      {/* Pool management modal */}
+      {selectedPool && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedPool(null)}>
+          <div className="bg-white rounded-lg max-w-[500px] w-full p-6 m-4" onClick={e => e.stopPropagation()}>
+            <div className="flex flex-col">
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold">Manage Liquidity</h2>
+                <p className="text-sm text-gray-500">
+                  {selectedPool.tokenA.split('::').pop()} / {selectedPool.tokenB.split('::').pop()} Pool
+                </p>
+              </div>
+
+              <Tabs defaultValue="add" value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1">
+                  <TabsTrigger value="add" className="data-[state=active]:bg-white">Add Liquidity</TabsTrigger>
+                  <TabsTrigger value="withdraw" className="data-[state=active]:bg-white">Withdraw</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="add" className="space-y-4 pt-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <div className="relative mr-3">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-xs">
+                          {selectedPool.tokenA.split('::').pop()}
+                        </div>
+                        <div className="w-6 h-6 rounded-full bg-gray-100 absolute -bottom-1 -right-1 flex items-center justify-center text-xs">
+                          {selectedPool.tokenB.split('::').pop()}
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{selectedPool.tokenA.split('::').pop()} / {selectedPool.tokenB.split('::').pop()}</h3>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <span>Pool ID: </span>
+                          <span className="ml-1 truncate max-w-[150px]">{selectedPool.id}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <label htmlFor="add-amount1">{selectedPool.tokenA.split('::').pop()} Amount</label>
+                      <Input
+                        id="add-amount1"
+                        type="text"
+                        placeholder={`Enter ${selectedPool.tokenA.split('::').pop()} amount`}
+                        value={amount1}
+                        onChange={(e) => setAmount1(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="flex justify-center">
+                      <div className="bg-gray-100 p-1 rounded-full">
+                        <RefreshCw className="h-5 w-5 text-gray-500" />
+                      </div>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <label htmlFor="add-amount2">{selectedPool.tokenB.split('::').pop()} Amount</label>
+                      <Input
+                        id="add-amount2"
+                        type="text"
+                        placeholder={`Enter ${selectedPool.tokenB.split('::').pop()} amount`}
+                        value={amount2}
+                        onChange={(e) => setAmount2(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-500">Pool Reserves ({selectedPool.tokenA.split('::').pop()})</span>
+                      <span className="font-medium">{selectedPool.reserveA || '0'}</span>
+                    </div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-500">Pool Reserves ({selectedPool.tokenB.split('::').pop()})</span>
+                      <span className="font-medium">{selectedPool.reserveB || '0'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">LP Tokens</span>
+                      <span className="font-medium">{selectedPool.lpTotal || '0'}</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                    disabled={!amount1 || !amount2 || connectionStatus !== 'connected'}
+                    onClick={() => {
+                      alert(`Added ${amount1} ${selectedPool.tokenA.split('::').pop()} and ${amount2} ${selectedPool.tokenB.split('::').pop()} to the pool`);
+                      setAmount1('');
+                      setAmount2('');
+                      setSelectedPool(null);
+                    }}
+                  >
+                    Add Liquidity
+                  </Button>
+                </TabsContent>
+
+                <TabsContent value="withdraw" className="space-y-4 pt-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-sm text-gray-500">LP Tokens</span>
+                      <span className="font-medium">{selectedPool.lpTotal || '0'}</span>
+                    </div>
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-sm text-gray-500">{selectedPool.tokenA.split('::').pop()} Reserves</span>
+                      <span className="font-medium">{selectedPool.reserveA || '0'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">{selectedPool.tokenB.split('::').pop()} Reserves</span>
+                      <span className="font-medium">{selectedPool.reserveB || '0'}</span>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <label htmlFor="withdraw-amount">LP Tokens to Withdraw</label>
+                    <Input
+                      id="withdraw-amount"
+                      type="text"
+                      placeholder="Enter amount of LP tokens"
+                      value={amount1}
+                      onChange={(e) => setAmount1(e.target.value)}
+                    />
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">
+                        Available: {selectedPool.lpTotal || '0'}
+                      </span>
+                      <button
+                        className="text-sm text-emerald-600 font-medium"
+                        onClick={() => setAmount1(selectedPool.lpTotal || '0')}
+                      >
+                        Max
+                      </button>
+                    </div>
+                  </div>
+
+                  <Button
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                    disabled={!amount1 || connectionStatus !== 'connected'}
+                    onClick={() => {
+                      alert(`Withdrawn ${amount1} LP tokens from the pool`);
+                      setAmount1('');
+                      setSelectedPool(null);
+                    }}
+                  >
+                    Withdraw Liquidity
+                  </Button>
+                </TabsContent>
+              </Tabs>
+
+              <button 
+                className="absolute top-3 right-3 text-gray-500 hover:text-gray-700" 
+                onClick={() => setSelectedPool(null)}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
