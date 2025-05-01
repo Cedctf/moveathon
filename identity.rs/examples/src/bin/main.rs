@@ -92,44 +92,81 @@ async fn main() -> anyhow::Result<()> {
   let (kyc_document, kyc_method_fragment) = create_zkp_did(&kyc_client, &kyc_storage).await?;
   println!("Published KYC PROVIDER DID document with ZKP support: {kyc_document:#}");
 
-  // === ZKP-ENABLED KYC CREDENTIAL ISSUANCE ===
-  println!("\n=== ZKP-ENABLED KYC CREDENTIAL ISSUANCE ===");
+  // === ZKP-ENABLED PROPERTY VERIFICATION CREDENTIAL ISSUANCE ===
+  println!("\n=== ZKP-ENABLED PROPERTY VERIFICATION CREDENTIAL ISSUANCE ===");
 
-  // Create a credential subject with KYC information
+  // Create a credential subject with property information
   let subject: Subject = Subject::from_json_value(json!({
     "id": user_document.id().as_str(),
-    "name": "John Doe",
-    "dateOfBirth": "1993-04-15",
-    "nationality": "US", 
-    "kycLevel": "Enhanced",
-    "verificationDate": "2023-06-29",
-    "document": {
-      "type": "Passport",
-      "number": "AB123456789",
-      "issuingCountry": "US",
-      "expiryDate": "2030-01-01"
+    "propertyDetails": {
+      "address": {
+        "street": "123 Blockchain Avenue",
+        "city": "San Francisco",
+        "state": "CA",
+        "postalCode": "94107",
+        "country": "US",
+        "coordinates": {
+          "latitude": "37.7749",
+          "longitude": "-122.4194"
+        }
+      },
+      "propertyType": "Single Family Residence",
+      "yearBuilt": "2008",
+      "squareFootage": 2850,
+      "value": {
+        "amount": 1250000,
+        "currency": "USD",
+        "assessmentDate": "2023-09-15"
+      },
+      "features": {
+        "bedrooms": 4,
+        "bathrooms": 3.5,
+        "garage": "2-car attached",
+        "lot": {
+          "size": 0.25,
+          "unit": "acres"
+        }
+      }
     },
-    "address": {
-      "street": "123 Blockchain St",
-      "city": "San Francisco",
-      "state": "CA",
-      "postalCode": "94107",
-      "country": "US"
+    "ownershipDetails": {
+      "ownershipType": "Fee Simple",
+      "purchaseDate": "2020-03-12",
+      "titleVerified": true,
+      "titleInsurance": true,
+      "encumbrances": {
+        "mortgages": [
+          {
+            "lender": "First National Bank",
+            "originalAmount": 950000,
+            "currentBalance": 875000,
+            "interestRate": 3.25,
+            "term": 30,
+            "type": "Fixed"
+          }
+        ],
+        "liens": false,
+        "easements": true
+      }
+    },
+    "verificationDetails": {
+      "verificationDate": "2023-10-01",
+      "verificationLevel": "Comprehensive",
+      "verifiedBy": "PropTech Verification Services"
     }
   }))?;
 
-  // Build the KYC credential
-  let kyc_credential: Credential = CredentialBuilder::default()
-    .id(Url::parse("https://example.org/credentials/kyc/1234")?)
+  // Build the property verification credential
+  let property_credential: Credential = CredentialBuilder::default()
+    .id(Url::parse("https://example.org/credentials/property/1234")?)
     .issuer(Url::parse(kyc_document.id().as_str())?)
-    .type_("KycCredential")
+    .type_("PropertyVerificationCredential")
     .subject(subject)
     .build()?;
 
-  // Create a JPT credential signed by the KYC provider using BBS+
-  let kyc_credential_jpt: Jpt = kyc_document
+  // Create a JPT credential signed by the verification provider using BBS+
+  let property_credential_jpt: Jpt = kyc_document
     .create_credential_jpt(
-      &kyc_credential,
+      &property_credential,
       &kyc_storage,
       &kyc_method_fragment,
       &JwpCredentialOptions::default(),
@@ -137,26 +174,26 @@ async fn main() -> anyhow::Result<()> {
     )
     .await?;
 
-  println!("ZKP-enabled KYC Verifiable Credential created successfully");
+  println!("ZKP-enabled Property Verification Credential created successfully");
 
-  // === VERIFY THE KYC CREDENTIAL (FULL DISCLOSURE) ===
-  println!("\n=== VERIFY THE FULL KYC CREDENTIAL ===");
+  // === VERIFY THE PROPERTY CREDENTIAL (FULL DISCLOSURE) ===
+  println!("\n=== VERIFY THE FULL PROPERTY CREDENTIAL ===");
 
   // Validate the credential using JPT validator
   let decoded_credential = JptCredentialValidator::validate::<_, Object>(
-    &kyc_credential_jpt,
+    &property_credential_jpt,
     &kyc_document,
     &JptCredentialValidationOptions::default(),
     FailFast::FirstError,
   )?;
 
-  println!("Full KYC credential successfully validated!");
-  println!("KYC Credential Details (all fields):");
+  println!("Full Property Credential successfully validated!");
+  println!("Property Credential Details (all fields):");
   println!("{:#}", decoded_credential.credential);
 
   // === SELECTIVE DISCLOSURE PRESENTATION CREATION ===
   println!("\n=== SELECTIVE DISCLOSURE PRESENTATION CREATION ===");
-  println!("User wants to prove they're verified but hide sensitive details");
+  println!("Owner wants to prove property ownership but hide sensitive details");
 
   // Determine which KYC method ID was used for signing
   let method_id = decoded_credential
@@ -168,10 +205,11 @@ async fn main() -> anyhow::Result<()> {
   // Create a selective disclosure presentation that hides specific fields
   let mut selective_disclosure = SelectiveDisclosurePresentation::new(&decoded_credential.decoded_jwp);
   
-  // Conceal sensitive fields the user doesn't want to share
-  selective_disclosure.conceal_in_subject("document.number")?;  // Hide passport number
-  selective_disclosure.conceal_in_subject("address.street")?;   // Hide street address
-  selective_disclosure.conceal_in_subject("address.postalCode")?; // Hide postal code
+  // Conceal sensitive fields the property owner doesn't want to share
+  selective_disclosure.conceal_in_subject("propertyDetails.value.amount")?;  // Hide property value
+  selective_disclosure.conceal_in_subject("ownershipDetails.mortgages")?;    // Hide mortgage information
+  selective_disclosure.conceal_in_subject("propertyDetails.address.street")?; // Hide exact street address
+  selective_disclosure.conceal_in_subject("propertyDetails.address.postalCode")?; // Hide postal code
   
   // Generate a challenge for presentation verification
   let challenge = "service-provider-challenge-123456";
@@ -186,7 +224,7 @@ async fn main() -> anyhow::Result<()> {
     .await?;
 
   println!("Selective disclosure presentation created successfully");
-  println!("User can now prove their KYC status without revealing all personal details");
+  println!("Owner can now prove their property ownership without revealing all details");
 
   // === SERVICE PROVIDER VERIFIES SELECTIVE DISCLOSURE ===
   println!("\n=== SERVICE PROVIDER VERIFIES SELECTIVE DISCLOSURE ===");
