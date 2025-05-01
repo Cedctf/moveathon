@@ -92,81 +92,110 @@ async fn main() -> anyhow::Result<()> {
   let (kyc_document, kyc_method_fragment) = create_zkp_did(&kyc_client, &kyc_storage).await?;
   println!("Published KYC PROVIDER DID document with ZKP support: {kyc_document:#}");
 
-  // === ZKP-ENABLED PROPERTY VERIFICATION CREDENTIAL ISSUANCE ===
-  println!("\n=== ZKP-ENABLED PROPERTY VERIFICATION CREDENTIAL ISSUANCE ===");
+  // === ZKP-ENABLED COMPREHENSIVE KYC CREDENTIAL ISSUANCE ===
+  println!("\n=== ZKP-ENABLED COMPREHENSIVE KYC CREDENTIAL ISSUANCE ===");
 
-  // Create a credential subject with property information
+  // Create a credential subject with detailed user and property information
   let subject: Subject = Subject::from_json_value(json!({
     "id": user_document.id().as_str(),
-    "propertyDetails": {
-      "address": {
-        "street": "123 Blockchain Avenue",
-        "city": "San Francisco",
-        "state": "CA",
-        "postalCode": "94107",
-        "country": "US",
-        "coordinates": {
-          "latitude": "37.7749",
-          "longitude": "-122.4194"
+    "userPersonalDetails": {
+      "fullName": "John Alexander Smith",
+      "email": "john.smith@example.com",
+      "phoneNumber": "+1-555-123-4567",
+      "address": "1234 Market Street, Apt 567, San Francisco, CA 94103, United States",
+      "idVerificationMethod": "passport", // Only allows: "passport", "driversLicense", or "nationalId"
+      "idVerificationNumber": "P12345678",
+      "idExpiryDate": "2028-05-15"
+    },
+    "assetDetails": {
+      "assetName": "Skyline Towers - Unit 1701",
+      "assetType": "Residential Real Estate",
+      "location": {
+        "address": {
+          "street": "123 Financial District Avenue",
+          "city": "San Francisco",
+          "state": "CA",
+          "postalCode": "94104",
+          "country": "US",
+          "coordinates": {
+            "latitude": "37.7897",
+            "longitude": "-122.4001"
+          }
+        },
+        "propertyDetails": {
+          "propertyType": "Luxury Condominium",
+          "yearBuilt": "2012",
+          "squareFootage": 1850,
+          "floors": 1,
+          "features": {
+            "bedrooms": 3,
+            "bathrooms": 2.5,
+            "amenities": ["Rooftop Pool", "Fitness Center", "Concierge"]
+          }
         }
       },
-      "propertyType": "Single Family Residence",
-      "yearBuilt": "2008",
-      "squareFootage": 2850,
-      "value": {
-        "amount": 1250000,
+      "valuation": {
+        "amount": 2750000,
         "currency": "USD",
-        "assessmentDate": "2023-09-15"
+        "assessmentDate": "2023-11-10",
+        "assessor": "Global Property Valuation Services"
       },
-      "features": {
-        "bedrooms": 4,
-        "bathrooms": 3.5,
-        "garage": "2-car attached",
-        "lot": {
-          "size": 0.25,
-          "unit": "acres"
-        }
+      "tokenSymbol": "SKTWR1701",
+      "assetDescription": "Premium corner unit on the 17th floor of Skyline Towers with panoramic bay views, recently renovated with high-end finishes, smart home technology, and premium appliances. Building includes 24/7 security and valet parking."
+    },
+    "tokenizationOptions": {
+      "mintTokenViaErc3642": true,
+      "enableSyntheticTradingSrwa": false,
+      "createLiquidityPool": true,
+      "tokenizationDetails": {
+        "totalTokens": 100000,
+        "initialPrice": 27.50, // USD per token
+        "minimumInvestment": 5000, // USD
+        "tradingRestrictions": "6-month lockup period for initial investors"
       }
     },
     "ownershipDetails": {
-      "ownershipType": "Fee Simple",
-      "purchaseDate": "2020-03-12",
+      "ownershipType": "Full Ownership",
+      "purchaseDate": "2021-08-15",
       "titleVerified": true,
       "titleInsurance": true,
       "encumbrances": {
         "mortgages": [
           {
-            "lender": "First National Bank",
-            "originalAmount": 950000,
-            "currentBalance": 875000,
-            "interestRate": 3.25,
+            "lender": "Pacific Coast Bank",
+            "originalAmount": 1500000,
+            "currentBalance": 1350000,
+            "interestRate": 2.75,
             "term": 30,
             "type": "Fixed"
           }
         ],
         "liens": false,
-        "easements": true
+        "easements": false
       }
     },
     "verificationDetails": {
-      "verificationDate": "2023-10-01",
-      "verificationLevel": "Comprehensive",
-      "verifiedBy": "PropTech Verification Services"
+      "verificationDate": "2023-12-05",
+      "verificationLevel": "Enhanced Due Diligence",
+      "verifiedBy": "BlockchainKYC Solutions Inc.",
+      "verificationStatus": "Approved",
+      "expiryDate": "2024-12-05",
+      "complianceNotes": "All source of funds documentation verified. AML checks passed."
     }
   }))?;
 
-  // Build the property verification credential
-  let property_credential: Credential = CredentialBuilder::default()
-    .id(Url::parse("https://example.org/credentials/property/1234")?)
+  // Build the comprehensive KYC credential
+  let kyc_credential: Credential = CredentialBuilder::default()
+    .id(Url::parse("https://example.org/credentials/asset-kyc/1234")?)
     .issuer(Url::parse(kyc_document.id().as_str())?)
-    .type_("PropertyVerificationCredential")
+    .type_("AssetKycVerificationCredential")
     .subject(subject)
     .build()?;
 
   // Create a JPT credential signed by the verification provider using BBS+
-  let property_credential_jpt: Jpt = kyc_document
+  let kyc_credential_jpt: Jpt = kyc_document
     .create_credential_jpt(
-      &property_credential,
+      &kyc_credential,
       &kyc_storage,
       &kyc_method_fragment,
       &JwpCredentialOptions::default(),
@@ -174,26 +203,26 @@ async fn main() -> anyhow::Result<()> {
     )
     .await?;
 
-  println!("ZKP-enabled Property Verification Credential created successfully");
+  println!("ZKP-enabled Comprehensive KYC Credential created successfully");
 
-  // === VERIFY THE PROPERTY CREDENTIAL (FULL DISCLOSURE) ===
-  println!("\n=== VERIFY THE FULL PROPERTY CREDENTIAL ===");
+  // === VERIFY THE FULL KYC CREDENTIAL ===
+  println!("\n=== VERIFY THE FULL KYC CREDENTIAL ===");
 
   // Validate the credential using JPT validator
   let decoded_credential = JptCredentialValidator::validate::<_, Object>(
-    &property_credential_jpt,
+    &kyc_credential_jpt,
     &kyc_document,
     &JptCredentialValidationOptions::default(),
     FailFast::FirstError,
   )?;
 
-  println!("Full Property Credential successfully validated!");
-  println!("Property Credential Details (all fields):");
+  println!("Full KYC Credential successfully validated!");
+  println!("KYC Credential Details (all fields):");
   println!("{:#}", decoded_credential.credential);
 
   // === SELECTIVE DISCLOSURE PRESENTATION CREATION ===
   println!("\n=== SELECTIVE DISCLOSURE PRESENTATION CREATION ===");
-  println!("Owner wants to prove property ownership but hide sensitive details");
+  println!("User wants to prove ownership and asset details while hiding sensitive personal information");
 
   // Determine which KYC method ID was used for signing
   let method_id = decoded_credential
@@ -205,14 +234,16 @@ async fn main() -> anyhow::Result<()> {
   // Create a selective disclosure presentation that hides specific fields
   let mut selective_disclosure = SelectiveDisclosurePresentation::new(&decoded_credential.decoded_jwp);
   
-  // Conceal sensitive fields the property owner doesn't want to share
-  selective_disclosure.conceal_in_subject("propertyDetails.value.amount")?;  // Hide property value
-  selective_disclosure.conceal_in_subject("ownershipDetails.mortgages")?;    // Hide mortgage information
-  selective_disclosure.conceal_in_subject("propertyDetails.address.street")?; // Hide exact street address
-  selective_disclosure.conceal_in_subject("propertyDetails.address.postalCode")?; // Hide postal code
+  // Conceal sensitive fields the user doesn't want to share
+  selective_disclosure.conceal_in_subject("userPersonalDetails.idVerificationNumber")?;  // Hide ID number
+  selective_disclosure.conceal_in_subject("userPersonalDetails.address")?;               // Hide home address
+  selective_disclosure.conceal_in_subject("userPersonalDetails.phoneNumber")?;           // Hide phone number
+  selective_disclosure.conceal_in_subject("ownershipDetails.mortgages")?;                // Hide mortgage information
+  selective_disclosure.conceal_in_subject("assetDetails.valuation.amount")?;             // Hide exact valuation
+  selective_disclosure.conceal_in_subject("tokenizationOptions.tokenizationDetails.initialPrice")?; // Hide token pricing
   
   // Generate a challenge for presentation verification
-  let challenge = "service-provider-challenge-123456";
+  let challenge = "platform-verification-challenge-xyz789";
 
   // Create the ZKP presentation that proves credential validity while hiding concealed fields
   let zkp_presentation: Jpt = kyc_document
@@ -224,7 +255,7 @@ async fn main() -> anyhow::Result<()> {
     .await?;
 
   println!("Selective disclosure presentation created successfully");
-  println!("Owner can now prove their property ownership without revealing all details");
+  println!("User can now prove asset ownership and selected details without revealing sensitive information");
 
   // === SERVICE PROVIDER VERIFIES SELECTIVE DISCLOSURE ===
   println!("\n=== SERVICE PROVIDER VERIFIES SELECTIVE DISCLOSURE ===");
