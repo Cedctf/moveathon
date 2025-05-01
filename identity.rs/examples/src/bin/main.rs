@@ -4,9 +4,16 @@
 use examples::create_did_document;
 use examples::get_funded_client;
 use examples::get_memstorage;
-use examples::pretty_print_json;
+// Remove if not needed: use examples::pretty_print_json;
 use serde_json::json;
 use std::env;
+
+// Correct imports for the identity framework
+use identity_iota::core::{FromJson, Url, Object};
+use identity_iota::credential::{Subject, Credential, CredentialBuilder, Jwt, JwtCredentialValidationOptions, JwtCredentialValidator, DecodedJwtCredential, FailFast};
+use identity_iota::did::DID; // <-- Important for as_str() method
+use identity_iota::storage::{JwkDocumentExt, JwsSignatureOptions}; // <-- Important for create_credential_jwt
+use identity_eddsa_verifier::EdDSAJwsVerifier;
 
 /// Demonstrates how to create a DID Document and publish it on chain,
 /// then perform a simulated KYC process.
@@ -69,49 +76,70 @@ async fn main() -> anyhow::Result<()> {
 
   // === KYC VERIFICATION PROCESS ===
   println!("\n=== KYC VERIFICATION PROCESS ===");
-  println!("1. User shares identity information with KYC provider");
-  println!("2. KYC provider verifies the user's identity documents");
-  println!("3. KYC provider issues a verifiable credential to the user");
 
-  // Create a basic KYC credential as JSON
-  let mock_kyc_credential = json!({
-    "type": ["VerifiableCredential", "KycCredential"],
-    "issuer": kyc_document.id().to_string(),
-    "issuanceDate": "2023-06-30T12:00:00Z",
-    "credentialSubject": {
-      "id": user_document.id().to_string(),
-      "name": "John Doe",
-      "dateOfBirth": "1993-04-15",
-      "nationality": "US",
-      "kycLevel": "Enhanced",
-      "verificationDate": "2023-06-29",
-      "document": {
-        "type": "Passport",
-        "number": "AB123456789",
-        "issuingCountry": "US",
-        "expiryDate": "2030-01-01"
-      },
-      "address": {
-        "street": "123 Blockchain St",
-        "city": "San Francisco",
-        "state": "CA",
-        "postalCode": "94107",
-        "country": "US"
-      }
+  // Create a credential subject with KYC information
+  // Fix: Use directly constructing a Subject instead of from_json_value
+  let subject_json = json!({
+    "id": user_document.id().to_string(), // Use to_string() instead of as_str()
+    "name": "John Doe",
+    "dateOfBirth": "1993-04-15",
+    "nationality": "US", 
+    "kycLevel": "Enhanced",
+    "verificationDate": "2023-06-29",
+    "document": {
+      "type": "Passport",
+      "number": "AB123456789",
+      "issuingCountry": "US",
+      "expiryDate": "2030-01-01"
     },
-    "proof": {
-      "type": "Ed25519Signature2020",
-      "created": "2023-06-30T12:00:00Z",
-      "verificationMethod": kyc_document.id().to_string() + "#" + &kyc_method_fragment,
-      "proofPurpose": "assertionMethod",
-      "proofValue": "zABCDEF123456789..." // In a real scenario, this would be a cryptographic signature
+    "address": {
+      "street": "123 Blockchain St",
+      "city": "San Francisco",
+      "state": "CA",
+      "postalCode": "94107",
+      "country": "US"
     }
   });
+  
+  let subject = Subject::from_json_value(subject_json)?;
 
-  println!("\n=== KYC CREDENTIAL ISSUANCE ===");
-  println!("KYC Provider ({}) issues credential to User ({})", 
-           kyc_document.id(), user_document.id());
-  pretty_print_json("KYC Credential", &mock_kyc_credential.to_string());
+  // Build the KYC credential
+  let kyc_credential: Credential = CredentialBuilder::default()
+    .id(Url::parse("https://example.org/credentials/kyc/1234")?)
+    .issuer(Url::parse(&kyc_document.id().to_string())?) // Use to_string() instead of as_str()
+    .type_("KycCredential")
+    .subject(subject)
+    .build()?;
+
+  // Create a JWT credential signed by the KYC provider
+  let kyc_credential_jwt: Jwt = kyc_document
+    .create_credential_jwt(
+      &kyc_credential,
+      &kyc_storage,
+      &kyc_method_fragment,
+      &JwsSignatureOptions::default(),
+      None,
+    )
+    .await?;
+
+  println!("KYC Verifiable Credential created successfully");
+
+  // === VERIFY THE KYC CREDENTIAL ===
+  println!("\n=== VERIFY THE KYC CREDENTIAL ===");
+
+  // Validate the credential
+  let decoded_credential: DecodedJwtCredential<Object> =
+    JwtCredentialValidator::with_signature_verifier(EdDSAJwsVerifier::default())
+      .validate::<_, Object>(
+        &kyc_credential_jwt,
+        &kyc_document,
+        &JwtCredentialValidationOptions::default(),
+        FailFast::FirstError,
+      )?;
+
+  println!("KYC credential successfully validated!");
+  println!("KYC Credential Details:");
+  println!("{:#}", decoded_credential.credential);
 
   // === SERVICE PROVIDER VERIFICATION ===
   println!("\n=== SERVICE PROVIDER VERIFICATION ===");
