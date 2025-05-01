@@ -7,25 +7,22 @@ use examples::get_memstorage;
 use examples::TEST_GAS_BUDGET;
 use serde_json::json;
 use std::env;
-use std::collections::HashMap;
 
-use identity_iota::core::{FromJson, Url, Object, Duration, Timestamp};
+// Clean up imports to only what's needed
+use identity_iota::core::{FromJson, Url, Object};
 use identity_iota::credential::{
-    Subject, Credential, CredentialBuilder, Jwt, JwtCredentialValidationOptions, 
-    JwtCredentialValidator, DecodedJwtCredential, FailFast, Presentation, PresentationBuilder,
-    JwtPresentationOptions, JwtPresentationValidationOptions, JwtPresentationValidator,
-    DecodedJwtPresentation, JwtPresentationValidatorUtils, JwtCredentialValidatorUtils,
-    SubjectHolderRelationship, 
-    // ZKP related imports
+    Subject, Credential, CredentialBuilder, FailFast, 
+    // ZKP related imports only
     Jpt, JptCredentialValidationOptions, JptCredentialValidator, 
-    JptCredentialValidatorUtils, JptPresentationValidationOptions,
-    JptPresentationValidator, JptPresentationValidatorUtils,
-    JwpCredentialOptions, JwpPresentationOptions, SelectiveDisclosurePresentation
+    JptPresentationValidationOptions, JptPresentationValidator,
+    JptPresentationValidatorUtils, JwpCredentialOptions, 
+    JwpPresentationOptions, SelectiveDisclosurePresentation
 };
-use identity_iota::did::{DID, CoreDID}; 
-use identity_iota::storage::{JwkDocumentExt, JwsSignatureOptions, JwpDocumentExt, KeyType, JwkMemStore};
-use identity_eddsa_verifier::EdDSAJwsVerifier;
-use identity_iota::document::verifiable::JwsVerificationOptions;
+
+// Keep only the necessary imports
+use identity_iota::did::{DID, CoreDID};
+use identity_iota::storage::{JwpDocumentExt, JwkMemStore};
+use identity_iota::verification::MethodScope;
 use identity_iota::resolver::Resolver;
 use identity_iota::iota::IotaDocument;
 use identity_iota::iota::rebased::transaction::TransactionOutput;
@@ -34,7 +31,6 @@ use identity_iota::iota_interaction::OptionalSync;
 use identity_storage::Storage;
 use jsonprooftoken::jpa::algs::ProofAlgorithm;
 use secret_storage::Signer;
-use identity_iota::verification::MethodScope;
 
 /// Demonstrates how to create a DID Document and publish it on chain,
 /// then perform a simulated KYC process with Zero-Knowledge Selective Disclosure.
@@ -220,12 +216,6 @@ async fn main() -> anyhow::Result<()> {
   println!("Service provider can see:");
   println!("{:#}", verified_sd_credential.credential);
   println!("Notice that some fields are hidden while the credential remains valid");
-
-  println!("\n=== BENEFITS OF ZERO-KNOWLEDGE KYC ===");
-  println!("1. Privacy: Users share only necessary information");
-  println!("2. Security: Cryptographic verification ensures authenticity");
-  println!("3. Compliance: KYC requirements met without exposing excess data");
-  println!("4. User Control: Individuals decide what to reveal per service");
 
   Ok(())
 }
