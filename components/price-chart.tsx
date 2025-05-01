@@ -1,168 +1,142 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts"
-import { Card } from "@/components/ui/card"
+import { useEffect, useState } from 'react'
+import { usePriceContext } from '@/contexts/PriceContext'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
-// Generate mock price data
-const generateMockData = () => {
-  const data = []
-  const now = new Date()
-  const basePrice = 2500000
+export default function PriceChart({ symbol = "ETH/USD" }) {
+  const { prices, loading, error } = usePriceContext()
+  const [selectedAsset, setSelectedAsset] = useState(symbol)
+  const [chartData, setChartData] = useState<any[]>([])
 
-  for (let i = 30; i >= 0; i--) {
-    const date = new Date(now)
-    date.setDate(date.getDate() - i)
-
-    // Generate a random price with a slight upward trend
-    const randomFactor = 0.98 + Math.random() * 0.04
-    const price = basePrice * (1 + (30 - i) * 0.005) * randomFactor
-
-    data.push({
-      date: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-      price: Math.round(price),
-      volume: Math.round(Math.random() * 500000 + 200000),
-    })
-  }
-
-  return data
-}
-
-interface ChartData {
-  date: string;
-  price: number;
-  volume: number;
-}
-
-interface TooltipProps {
-  active?: boolean;
-  payload?: any[];
-  label?: string;
-}
-
-export default function PriceChart() {
-  const [data, setData] = useState<ChartData[]>([])
-  const [loading, setLoading] = useState(true)
-  const [animationProgress, setAnimationProgress] = useState(0)
-  const animationRef = useRef<number | null>(null)
-
+  // Update selected asset when symbol prop changes
   useEffect(() => {
-    // Simulate loading data
-    const timer = setTimeout(() => {
-      setData(generateMockData())
-      setLoading(false)
+    setSelectedAsset(symbol)
+  }, [symbol])
 
-      // Start animation
-      let start: number | null = null
-      const animate = (timestamp: number) => {
-        if (!start) start = timestamp
-        const progress = Math.min((timestamp - start) / 1500, 1)
-        setAnimationProgress(progress)
+  // Find the price data for the selected asset
+  const assetPrice = prices.find(p => p.symbol === selectedAsset)
 
-        if (progress < 1) {
-          animationRef.current = requestAnimationFrame(animate)
+  // Generate chart data when asset price changes or when prices array changes
+  useEffect(() => {
+    console.log("Generating chart data for", selectedAsset);
+    console.log("Available prices:", prices);
+    
+    if (prices.length === 0) return;
+    
+    // Find the asset price
+    const foundAssetPrice = prices.find(p => p.symbol === selectedAsset);
+    
+    if (!foundAssetPrice) {
+      console.warn(`No price found for ${selectedAsset}`);
+      return;
+    }
+    
+    console.log("Found price:", foundAssetPrice);
+    
+    // Base price from the API - handle different price formats
+    let basePrice = 2500; // Default fallback
+    if (foundAssetPrice) {
+      if (typeof foundAssetPrice.price === 'number') {
+        basePrice = foundAssetPrice.price;
+      } else if (typeof foundAssetPrice.price === 'string') {
+        // Convert string price to number and handle potential scaling
+        // Pyth prices are often in a fixed-point format with many decimal places
+        const priceNum = parseFloat(foundAssetPrice.price);
+        if (!isNaN(priceNum)) {
+          // If price is very large (like 186585000000), it might need scaling
+          if (priceNum > 1000000) {
+            basePrice = priceNum / 100000000; // Scale down to a reasonable value
+          } else {
+            basePrice = priceNum;
+          }
         }
       }
-
-      animationRef.current = requestAnimationFrame(animate)
-    }, 1000)
-
-    return () => {
-      clearTimeout(timer)
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
-      }
     }
-  }, [])
-
-  const formatYAxis = (value: number) => {
-    if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(1)}M`
+    
+    console.log("Using base price:", basePrice);
+    
+    // Generate sample data for demonstration
+    const currentDate = new Date();
+    const data = [];
+    
+    // Generate 30 days of historical data
+    for (let i = 30; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(currentDate.getDate() - i);
+      
+      // Generate random price data based on the current price
+      // More recent days have less deviation from the current price
+      const volatility = basePrice * 0.02 * (i / 30); // Higher volatility for older dates
+      const randomFactor = (Math.random() - 0.5) * 2; // Between -1 and 1
+      const price = basePrice + (randomFactor * volatility);
+      
+      data.push({
+        date: date.toLocaleDateString(),
+        price: price,
+      });
     }
-    return `${(value / 1000).toFixed(0)}K`
-  }
-
-  const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
-    if (active && payload && payload.length) {
-      return (
-        <Card className="p-3 border shadow-sm bg-white">
-          <p className="font-medium">{label}</p>
-          <p className="text-emerald-600">Price: ${payload[0].value.toLocaleString()}</p>
-          <p className="text-gray-500 text-sm">Volume: ${(payload[1].value / 1000).toFixed(0)}K</p>
-        </Card>
-      )
-    }
-
-    return null
-  }
-
-  // Calculate the visible portion of the data based on animation progress
-  const visibleData = loading ? [] : data.slice(0, Math.ceil(data.length * animationProgress))
-
-  if (loading) {
-    return (
-      <div className="h-full w-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-emerald-600 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-          <p className="mt-2 text-gray-500">Loading chart data...</p>
-        </div>
-      </div>
-    )
-  }
+    
+    console.log("Generated chart data:", data);
+    setChartData(data);
+  }, [prices, selectedAsset]);
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <LineChart
-        data={visibleData}
-        margin={{
-          top: 5,
-          right: 30,
-          left: 20,
-          bottom: 5,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-        <XAxis dataKey="date" tick={{ fontSize: 12 }} tickMargin={10} />
-        <YAxis
-          yAxisId="left"
-          tickFormatter={formatYAxis}
-          tick={{ fontSize: 12 }}
-          tickMargin={10}
-          domain={["auto", "auto"]}
-        />
-        <YAxis
-          yAxisId="right"
-          orientation="right"
-          tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
-          tick={{ fontSize: 12 }}
-          tickMargin={10}
-          domain={[0, "dataMax + 100000"]}
-        />
-        <Tooltip content={<CustomTooltip />} />
-        <Legend />
-        <Line
-          yAxisId="left"
-          type="monotone"
-          dataKey="price"
-          stroke="#10b981"
-          activeDot={{ r: 8 }}
-          name="Price (USD)"
-          strokeWidth={2}
-          dot={false}
-          isAnimationActive={false} // We're handling our own animation
-        />
-        <Line
-          yAxisId="right"
-          type="monotone"
-          dataKey="volume"
-          stroke="#6b7280"
-          name="Volume (USD)"
-          strokeWidth={1.5}
-          strokeDasharray="5 5"
-          dot={false}
-          isAnimationActive={false} // We're handling our own animation
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <div className="w-full h-full">
+      {loading ? (
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        </div>
+      ) : error ? (
+        <div className="flex items-center justify-center h-full flex-col">
+          <p className="text-red-500 mb-2">Error loading price data</p>
+          <p className="text-sm text-gray-500">Unable to connect to Pyth Network. Please try again later.</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700"
+          >
+            Retry
+          </button>
+        </div>
+      ) : chartData.length === 0 ? (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-500">No price data available for {selectedAsset}</p>
+        </div>
+      ) : (
+        <div className="w-full h-[400px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={chartData}
+              margin={{
+                top: 5,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis 
+                domain={['auto', 'auto']}
+                tickFormatter={(value) => value.toLocaleString()}
+              />
+              <Tooltip 
+                formatter={(value: number) => [`$${value.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}`, 'Price']}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="price" 
+                stroke="#10b981" 
+                activeDot={{ r: 8 }} 
+                strokeWidth={2}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
   )
 }
