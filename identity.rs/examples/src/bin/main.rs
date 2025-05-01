@@ -7,13 +7,23 @@ use examples::get_memstorage;
 // Remove if not needed: use examples::pretty_print_json;
 use serde_json::json;
 use std::env;
+use std::collections::HashMap;
 
 // Correct imports for the identity framework
-use identity_iota::core::{FromJson, Url, Object};
-use identity_iota::credential::{Subject, Credential, CredentialBuilder, Jwt, JwtCredentialValidationOptions, JwtCredentialValidator, DecodedJwtCredential, FailFast};
-use identity_iota::did::DID; // <-- Important for as_str() method
-use identity_iota::storage::{JwkDocumentExt, JwsSignatureOptions}; // <-- Important for create_credential_jwt
+use identity_iota::core::{FromJson, Url, Object, Duration, Timestamp};
+use identity_iota::credential::{
+    Subject, Credential, CredentialBuilder, Jwt, JwtCredentialValidationOptions, 
+    JwtCredentialValidator, DecodedJwtCredential, FailFast, Presentation, PresentationBuilder,
+    JwtPresentationOptions, JwtPresentationValidationOptions, JwtPresentationValidator,
+    DecodedJwtPresentation, JwtPresentationValidatorUtils, JwtCredentialValidatorUtils,
+    SubjectHolderRelationship
+};
+use identity_iota::did::{DID, CoreDID}; // Correct import for CoreDID
+use identity_iota::storage::{JwkDocumentExt, JwsSignatureOptions};
 use identity_eddsa_verifier::EdDSAJwsVerifier;
+use identity_iota::document::verifiable::JwsVerificationOptions;
+use identity_iota::resolver::Resolver;
+use identity_iota::iota::IotaDocument; // Correct import for IotaDocument
 
 /// Demonstrates how to create a DID Document and publish it on chain,
 /// then perform a simulated KYC process.
@@ -141,16 +151,100 @@ async fn main() -> anyhow::Result<()> {
   println!("KYC Credential Details:");
   println!("{:#}", decoded_credential.credential);
 
-  // === SERVICE PROVIDER VERIFICATION ===
-  println!("\n=== SERVICE PROVIDER VERIFICATION ===");
-  println!("1. User presents the KYC credential to a service provider");
-  println!("2. Service provider verifies the credential's authenticity");
-  println!("3. Service provider checks the issuer's reputation");
-  println!("4. Service provider grants access based on the verified KYC information");
+  // === VERIFIABLE PRESENTATION CREATION ===
+  println!("\n=== VERIFIABLE PRESENTATION CREATION ===");
+  println!("Creating a Verifiable Presentation to share KYC credential with a service provider");
 
-  // Simulate verification success
-  println!("\nVerification successful! User has been KYC verified by a trusted provider.");
-  println!("Service can now offer appropriate services based on the verified KYC level.");
+  // Generate a unique challenge (in a real scenario, this would come from the service provider)
+  let challenge = "abc123-service-provider-challenge-456xyz";
+
+  // Set an expiry time for the presentation (10 minutes from now)
+  let expires = Timestamp::now_utc().checked_add(Duration::minutes(10)).unwrap();
+
+  // Build a Verifiable Presentation containing the KYC credential
+  let kyc_presentation: Presentation<Jwt> = PresentationBuilder::new(
+      user_document.id().to_url().into(),
+      Default::default()
+    )
+    .credential(kyc_credential_jwt.clone())
+    .build()?;
+
+  println!("Verifiable Presentation built successfully");
+
+  // User signs the presentation with their verification method
+  let kyc_presentation_jwt: Jwt = user_document
+    .create_presentation_jwt(
+      &kyc_presentation,
+      &user_storage,
+      &_user_method_fragment, // Use the actual fragment name you stored earlier
+      &JwsSignatureOptions::default().nonce(challenge.to_owned()),
+      &JwtPresentationOptions::default().expiration_date(expires),
+    )
+    .await?;
+
+  println!("Verifiable Presentation signed successfully");
+
+  // === SERVICE PROVIDER PRESENTATION VERIFICATION ===
+  println!("\n=== SERVICE PROVIDER PRESENTATION VERIFICATION ===");
+  println!("Service provider receives and verifies the Verifiable Presentation");
+
+  // Set up verification options including the challenge
+  let presentation_verifier_options: JwsVerificationOptions =
+    JwsVerificationOptions::default().nonce(challenge.to_owned());
+
+  // Create a resolver for DID resolution
+  let mut resolver: Resolver<IotaDocument> = Resolver::new();
+  resolver.attach_iota_handler((*user_client).clone());
+
+  // Verify the presentation signature first
+  let holder_did: CoreDID = JwtPresentationValidatorUtils::extract_holder(&kyc_presentation_jwt)?;
+  let holder: IotaDocument = resolver.resolve(&holder_did).await?;
+
+  let presentation_validation_options =
+    JwtPresentationValidationOptions::default().presentation_verifier_options(presentation_verifier_options);
+
+  let verified_presentation: DecodedJwtPresentation<Jwt> = JwtPresentationValidator::with_signature_verifier(
+    EdDSAJwsVerifier::default(),
+  )
+  .validate(&kyc_presentation_jwt, &holder, &presentation_validation_options)?;
+
+  println!("Presentation signature verification successful");
+
+  // Now verify the credential inside the presentation
+  let jwt_credentials: &Vec<Jwt> = &verified_presentation.presentation.verifiable_credential;
+  let issuers: Vec<CoreDID> = jwt_credentials
+    .iter()
+    .map(JwtCredentialValidatorUtils::extract_issuer_from_jwt)
+    .collect::<Result<Vec<CoreDID>, _>>()?;
+
+  // Resolve the issuer's document
+  let issuers_documents = resolver.resolve_multiple(&issuers).await?;
+
+  // Validate the credentials in the presentation
+  let credential_validator = JwtCredentialValidator::with_signature_verifier(EdDSAJwsVerifier::default());
+  let validation_options = JwtCredentialValidationOptions::default()
+    .subject_holder_relationship(holder_did.to_url().into(), SubjectHolderRelationship::AlwaysSubject);
+
+  // Verify each credential in the presentation (in this case, just one KYC credential)
+  for (index, jwt_vc) in jwt_credentials.iter().enumerate() {
+    let issuer_document = &issuers_documents[&issuers[index]];
+    
+    let decoded_credential: DecodedJwtCredential<Object> = credential_validator
+      .validate::<_, Object>(jwt_vc, issuer_document, &validation_options, FailFast::FirstError)?;
+      
+    println!("KYC credential in presentation verified: {}", decoded_credential.credential.id.as_ref().unwrap()); // Fix for Option<Url>
+  }
+
+  println!("\n=== COMPLETE KYC VERIFICATION FLOW SUCCESSFUL ===");
+  println!("The service provider has successfully verified:");
+  println!("1. The presentation was signed by the holder (user)");
+  println!("2. The presentation contains a valid KYC credential");
+  println!("3. The KYC credential was issued by a trusted KYC provider");
+  println!("4. The presentation holder is the subject of the KYC credential");
+  println!("5. The presentation hasn't expired and includes the correct challenge");
+
+  println!("\nThe service provider can now grant the user access to their service");
+  println!("based on the verified KYC information");
 
   // === ADDITIONAL KYC APPLICATIONS ===
   println!("\n=== ADDITIONAL KYC APPLICATIONS ===");
