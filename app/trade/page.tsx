@@ -11,23 +11,16 @@ import PriceChart from "@/components/price-chart"
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerContainer, StaggerItem } from "@/components/animations/stagger-container"
 import { CountUp } from "@/components/animations/count-up"
+import { PriceProvider, usePriceContext } from "@/contexts/PriceContext"
 
-export default function TradePage() {
+// Wrapper component to provide price context
+function TradePageContent() {
   const [selectedAsset, setSelectedAsset] = useState("")
   const [amount, setAmount] = useState("")
   const [position, setPosition] = useState("long")
   const [leverage, setLeverage] = useState(1)
   const [isWalletConnected, setIsWalletConnected] = useState(false)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // Simulate loading data
-    const timer = setTimeout(() => {
-      setLoading(false)
-    }, 1500)
-    
-    return () => clearTimeout(timer)
-  }, [])
+  const { prices, loading } = usePriceContext()
 
   const handleTrade = () => {
     // Trade logic will be implemented here
@@ -39,18 +32,16 @@ export default function TradePage() {
     })
   }
 
+  // Get the price for the selected asset
+  const selectedAssetPrice = selectedAsset 
+    ? prices.find(p => p.symbol === selectedAsset)?.price 
+    : null;
+
   return (
-    <div className="container py-8 px-4 mx-auto max-w-7xl">
-      <FadeIn>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Synthetic Trading</h1>
-            <p className="text-gray-500">Trade synthetic versions of real-world assets (sRWAs)</p>
-          </div>
-        </div>
-      </FadeIn>
+    <div className="container mx-auto py-6">
+      <h1 className="text-3xl font-bold mb-6">Trade</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2">
           <FadeIn delay={200}>
             <Card className="mb-6 overflow-hidden transition-all duration-300 hover:shadow-md">
@@ -58,7 +49,7 @@ export default function TradePage() {
                 <div className="flex justify-between items-center">
                   <div>
                     <CardTitle>Price Chart</CardTitle>
-                    <CardDescription>Real-time price data from oracle</CardDescription>
+                    <CardDescription>Real-time price data from Pyth oracle</CardDescription>
                   </div>
                   <Select defaultValue="1d">
                     <SelectTrigger className="w-[80px] bg-white">
@@ -76,7 +67,7 @@ export default function TradePage() {
               </CardHeader>
               <CardContent>
                 <div className="h-[400px] w-full">
-                  <PriceChart />
+                  <PriceChart symbol={selectedAsset || "ETH/USD"} />
                 </div>
               </CardContent>
             </Card>
@@ -164,65 +155,27 @@ export default function TradePage() {
                       ))
                     ) : (
                       <>
-                        <div className="flex justify-between items-center group">
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
-                              MANH-APT
-                            </span>
-                            <span className="text-xs border rounded px-2 py-0.5">
-                              Real Estate
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className="font-medium">$2,500,000</span>
-                            <span className="text-xs text-emerald-600">+2.4%</span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-center group">
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
-                              TKY-COM
-                            </span>
-                            <span className="text-xs border rounded px-2 py-0.5">
-                              Real Estate
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className="font-medium">$8,750,000</span>
-                            <span className="text-xs text-red-600">-0.8%</span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-center group">
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
-                              VRD-LUX
-                            </span>
-                            <span className="text-xs border rounded px-2 py-0.5">
-                              Luxury
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className="font-medium">$125,000</span>
-                            <span className="text-xs text-emerald-600">+5.2%</span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-center group">
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
-                              BDX-VIN
-                            </span>
-                            <span className="text-xs border rounded px-2 py-0.5">
-                              Agricultural
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className="font-medium">$4,200,000</span>
-                            <span className="text-xs text-emerald-600">+1.7%</span>
-                          </div>
-                        </div>
+                        {prices
+                          .filter(p => p.symbol !== "ETH/USD" && p.symbol !== "BTC/USD")
+                          .slice(0, 4)
+                          .map((asset, index) => (
+                            <div key={index} className="flex justify-between items-center group">
+                              <div className="flex items-center">
+                                <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
+                                  {asset.symbol}
+                                </span>
+                                <span className="text-xs border rounded px-2 py-0.5">
+                                  {getAssetCategory(asset.symbol)}
+                                </span>
+                              </div>
+                              <div className="flex flex-col items-end">
+                                <span className="font-medium">${formatPrice(asset.price)}</span>
+                                <span className={`text-xs ${parseFloat(getRandomChange()) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                                  {parseFloat(getRandomChange()) >= 0 ? '+' : ''}{getRandomChange()}%
+                                </span>
+                              </div>
+                            </div>
+                          ))}
                       </>
                     )}
                   </div>
@@ -248,11 +201,15 @@ export default function TradePage() {
                         <SelectValue placeholder="Select asset" />
                       </SelectTrigger>
                       <SelectContent className="bg-white">
-                        <SelectItem value="MANH-APT" className="hover:bg-emerald-50 cursor-pointer">MANH-APT (Manhattan Apartment)</SelectItem>
-                        <SelectItem value="TKY-COM" className="hover:bg-emerald-50 cursor-pointer">TKY-COM (Tokyo Commercial Building)</SelectItem>
-                        <SelectItem value="VRD-LUX" className="hover:bg-emerald-50 cursor-pointer">VRD-LUX (Vintage Rolex Daytona)</SelectItem>
-                        <SelectItem value="BDX-VIN" className="hover:bg-emerald-50 cursor-pointer">BDX-VIN (Bordeaux Vineyard)</SelectItem>
-                        <SelectItem value="BER-ART" className="hover:bg-emerald-50 cursor-pointer">BER-ART (Berlin Art Collection)</SelectItem>
+                        {prices.map((asset, index) => (
+                          <SelectItem 
+                            key={index} 
+                            value={asset.symbol} 
+                            className="hover:bg-emerald-50 cursor-pointer"
+                          >
+                            {asset.symbol} ({getAssetFullName(asset.symbol)})
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -320,16 +277,26 @@ export default function TradePage() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm">Entry Price</span>
-                        <span className="font-medium">$2,500,000</span>
+                        <span className="font-medium">
+                          ${selectedAssetPrice ? formatPrice(selectedAssetPrice) : '—'}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Fees</span>
-                        <span className="font-medium">$25.00 (0.25%)</span>
+                        <span className="font-medium">
+                          ${amount ? formatPrice(parseFloat(amount) * 0.0025) : '0.00'} (0.25%)
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Liquidation Price</span>
                         <div className="flex items-center">
-                          <span className="font-medium">{position === "long" ? "$2,375,000" : "$2,625,000"}</span>
+                          <span className="font-medium">
+                            {selectedAssetPrice && position === "long" 
+                              ? '$' + formatPrice(selectedAssetPrice * 0.95) 
+                              : selectedAssetPrice && position === "short"
+                              ? '$' + formatPrice(selectedAssetPrice * 1.05)
+                              : '—'}
+                          </span>
                           <Info className="h-3.5 w-3.5 ml-1 text-gray-500" />
                         </div>
                       </div>
@@ -343,9 +310,9 @@ export default function TradePage() {
                     position === "long" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"
                   } hover:shadow-md`}
                   onClick={handleTrade}
-                  disabled={!isWalletConnected}
+                  disabled={!isWalletConnected || !selectedAsset || !amount}
                 >
-                  {position === "long" ? "Long" : "Short"} {selectedAsset}
+                  {position === "long" ? "Long" : "Short"} {selectedAsset || "Asset"}
                 </Button>
 
                 {!isWalletConnected && (
@@ -357,5 +324,58 @@ export default function TradePage() {
         </div>
       </div>
     </div>
-  )
+  );
+}
+
+// Helper functions
+function getAssetCategory(symbol: string) {
+  const categories: Record<string, string> = {
+    "MANH-APT": "Real Estate",
+    "TKY-COM": "Real Estate",
+    "VRD-LUX": "Luxury",
+    "BDX-VIN": "Agricultural",
+    "BER-ART": "Art"
+  };
+  
+  return categories[symbol] || "Other";
+}
+
+function getAssetFullName(symbol: string) {
+  const names: Record<string, string> = {
+    "ETH/USD": "Ethereum",
+    "BTC/USD": "Bitcoin",
+    "MANH-APT": "Manhattan Apartment",
+    "TKY-COM": "Tokyo Commercial Building",
+    "VRD-LUX": "Vintage Rolex Daytona",
+    "BDX-VIN": "Bordeaux Vineyard",
+    "BER-ART": "Berlin Art Collection"
+  };
+  
+  return names[symbol] || symbol;
+}
+
+function formatPrice(price: number | null) {
+  if (!price) return "0.00";
+  
+  // Format based on price magnitude
+  if (price >= 1000000) {
+    return (price / 1000000).toFixed(2) + "M";
+  } else if (price >= 1000) {
+    return (price / 1000).toFixed(2) + "K";
+  } else {
+    return price.toFixed(2);
+  }
+}
+
+function getRandomChange(): string {
+  return (Math.random() * 10 - 5).toFixed(2);
+}
+
+// Main component with PriceProvider
+export default function TradePage() {
+  return (
+    <PriceProvider>
+      <TradePageContent />
+    </PriceProvider>
+  );
 }
