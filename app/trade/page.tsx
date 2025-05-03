@@ -7,11 +7,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowDown, ArrowUp, Info } from "lucide-react"
-import PriceChart from "@/components/price-chart"
+import PriceChart from '../../components/price-chart'
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerContainer, StaggerItem } from "@/components/animations/stagger-container"
 import { CountUp } from "@/components/animations/count-up"
 import { PriceProvider, usePriceContext } from "@/contexts/PriceContext"
+import housePricesData from '@/data/housePrices.json'
 
 // Wrapper component to provide price context
 function TradePageContent() {
@@ -21,6 +22,7 @@ function TradePageContent() {
   const [leverage, setLeverage] = useState(1)
   const [isWalletConnected, setIsWalletConnected] = useState(false)
   const { prices, loading } = usePriceContext()
+  const [selectedLocation, setSelectedLocation] = useState<string>("Manhattan")
 
   const handleTrade = () => {
     // Trade logic will be implemented here
@@ -37,9 +39,68 @@ function TradePageContent() {
     ? prices.find(p => p.symbol === selectedAsset)?.price 
     : null;
 
+  // Get top neighborhoods for the selected location with currency conversion
+  const getTopNeighborhoods = () => {
+    if (!housePricesData || !housePricesData.locations) return [];
+    
+    // Find the selected location
+    const location = housePricesData.locations.find(loc => loc.name === selectedLocation);
+    if (!location) return [];
+    
+    // Currency conversion rates to USD (approximate)
+    const conversionRates: Record<string, number> = {
+      'USD': 1,
+      'JPY': 0.0067,
+      'EUR': 1.08,
+      'IDR': 0.000064
+    };
+    
+    const rate = conversionRates[location.currency as keyof typeof conversionRates] || 1;
+    
+    // Get neighborhoods from the selected location only with converted prices
+    return location.neighborhoodData.map(neighborhood => ({
+      ...neighborhood,
+      location: location.name,
+      originalCurrency: location.currency,
+      originalPrice: neighborhood.medianHomePrice,
+      usdPrice: neighborhood.medianHomePrice * rate
+    }))
+    .sort((a, b) => b.medianHomePrice - a.medianHomePrice);
+  };
+  
+  const topNeighborhoods = getTopNeighborhoods();
+  
+  // Format currency for display
+  const formatCurrency = (value: number, currency: string) => {
+    const currencyFormatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      maximumFractionDigits: 0,
+    });
+    
+    return currencyFormatter.format(value);
+  };
+
+  // Add this function to get all neighborhoods from all locations
+  const getAllNeighborhoods = () => {
+    if (!housePricesData || !housePricesData.locations) return [];
+    
+    return housePricesData.locations.flatMap(location => 
+      location.neighborhoodData.map(neighborhood => ({
+        id: `${location.name}-${neighborhood.name}`,
+        name: neighborhood.name,
+        location: location.name,
+        price: neighborhood.medianHomePrice,
+        currency: location.currency
+      }))
+    );
+  };
+
+  const allNeighborhoods = getAllNeighborhoods();
+
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-3xl font-bold mb-6">Trade</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Real Estate Market Dashboard</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2">
@@ -48,26 +109,17 @@ function TradePageContent() {
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
                   <div>
-                    <CardTitle>Price Chart</CardTitle>
-                    <CardDescription>Real-time price data from Pyth oracle</CardDescription>
+                    <CardTitle>House Price Chart</CardTitle>
+                    <CardDescription>Historical house price data</CardDescription>
                   </div>
-                  <Select defaultValue="1d">
-                    <SelectTrigger className="w-[80px] bg-white">
-                      <SelectValue placeholder="Timeframe" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white">
-                      <SelectItem value="1h" className="hover:bg-emerald-50 cursor-pointer">1H</SelectItem>
-                      <SelectItem value="4h" className="hover:bg-emerald-50 cursor-pointer">4H</SelectItem>
-                      <SelectItem value="1d" className="hover:bg-emerald-50 cursor-pointer">1D</SelectItem>
-                      <SelectItem value="1w" className="hover:bg-emerald-50 cursor-pointer">1W</SelectItem>
-                      <SelectItem value="1m" className="hover:bg-emerald-50 cursor-pointer">1M</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="h-[400px] w-full">
-                  <PriceChart symbol={selectedAsset || "ETH/USD"} />
+                  <PriceChart 
+                    selectedLocation={selectedLocation}
+                    setSelectedLocation={setSelectedLocation}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -136,7 +188,7 @@ function TradePageContent() {
             <StaggerItem>
               <Card className="transition-all duration-300 hover:shadow-md">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Top sRWA Assets</CardTitle>
+                  <CardTitle className="text-lg">Top Real Estate Assets</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -155,27 +207,28 @@ function TradePageContent() {
                       ))
                     ) : (
                       <>
-                        {prices
-                          .filter(p => p.symbol !== "ETH/USD" && p.symbol !== "BTC/USD")
-                          .slice(0, 4)
-                          .map((asset, index) => (
-                            <div key={index} className="flex justify-between items-center group">
-                              <div className="flex items-center">
-                                <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
-                                  {asset.symbol}
-                                </span>
-                                <span className="text-xs border rounded px-2 py-0.5">
-                                  {getAssetCategory(asset.symbol)}
-                                </span>
-                              </div>
-                              <div className="flex flex-col items-end">
-                                <span className="font-medium">${formatPrice(asset.price)}</span>
-                                <span className={`text-xs ${parseFloat(getRandomChange()) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                                  {parseFloat(getRandomChange()) >= 0 ? '+' : ''}{getRandomChange()}%
-                                </span>
-                              </div>
+                        {topNeighborhoods.map((neighborhood, index) => (
+                          <div key={index} className="flex justify-between items-center group">
+                            <div className="flex items-center">
+                              <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
+                                {neighborhood.name}
+                              </span>
+                              <span className="text-xs border rounded px-2 py-0.5">
+                                {neighborhood.location}
+                              </span>
                             </div>
-                          ))}
+                            <div className="flex flex-col items-end">
+                              <span className="font-medium">
+                                {formatCurrency(neighborhood.originalPrice, neighborhood.originalCurrency)}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {neighborhood.originalCurrency !== 'USD' ? 
+                                  `($${Math.round(neighborhood.usdPrice).toLocaleString()} USD)` : 
+                                  'Premium Property'}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
                       </>
                     )}
                   </div>
@@ -197,17 +250,17 @@ function TradePageContent() {
                   <div className="space-y-2">
                     <Label htmlFor="asset">Select Asset</Label>
                     <Select value={selectedAsset} onValueChange={setSelectedAsset}>
-                      <SelectTrigger className="bg-white">
+                      <SelectTrigger id="asset" className="w-full bg-white">
                         <SelectValue placeholder="Select asset" />
                       </SelectTrigger>
                       <SelectContent className="bg-white">
-                        {prices.map((asset, index) => (
+                        {allNeighborhoods.map((neighborhood) => (
                           <SelectItem 
-                            key={index} 
-                            value={asset.symbol} 
-                            className="hover:bg-emerald-50 cursor-pointer"
+                            key={neighborhood.id} 
+                            value={neighborhood.id}
+                            className="hover:bg-gray-50"
                           >
-                            {asset.symbol} ({getAssetFullName(asset.symbol)})
+                            {neighborhood.name} ({neighborhood.location})
                           </SelectItem>
                         ))}
                       </SelectContent>
