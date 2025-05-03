@@ -43,11 +43,14 @@ export default function TestPage() {
   // Pool states
   const [tokenAType, setTokenAType] = useState('')
   const [tokenBType, setTokenBType] = useState('')
+  const [tokenAAmount, setTokenAAmount] = useState('')
+  const [tokenBAmount, setTokenBAmount] = useState('')
   const [pools, setPools] = useState<Pool[]>([])
   const [selectedPool, setSelectedPool] = useState<Pool | null>(null)
   const [activeTab, setActiveTab] = useState('add')
   const [amount1, setAmount1] = useState('')
   const [amount2, setAmount2] = useState('')
+  const [transferLoading, setTransferLoading] = useState(false)
 
   // Initialize IOTA client
   useEffect(() => {
@@ -146,6 +149,68 @@ export default function TestPage() {
       setError('Failed to fetch pools from registry')
     } finally {
       setLoadingPools(false)
+    }
+  }
+
+  // Function to transfer tokens to the specified address
+  const transferTokens = async () => {
+    if (!client || !address || connectionStatus !== 'connected') {
+      setError('Client not initialized or wallet not connected')
+      return
+    }
+    
+    if (!tokenAAmount || !tokenBAmount) {
+      setError('Please provide both token amounts')
+      return
+    }
+    
+    const recipientAddress = '0x508b47f23a659fb3cf78adb13b72b647498333f38de6670ef7bc102e40b1b38e'
+    
+    setTransferLoading(true)
+    setError(null)
+    
+    try {
+      // Create a new transaction
+      const tx = new Transaction()
+      
+      // Set gas budget
+      tx.setGasBudget(30000000)
+      
+      // Split coins for token A amount - handle floating point by converting to nano (10^9)
+      const tokenANano = Math.floor(parseFloat(tokenAAmount) * 10 ** 9)
+      const coinA = tx.splitCoins(tx.gas, [tokenANano])
+      
+      // Split coins for token B amount - handle floating point by converting to nano (10^9)
+      const tokenBNano = Math.floor(parseFloat(tokenBAmount) * 10 ** 9)
+      const coinB = tx.splitCoins(tx.gas, [tokenBNano])
+      
+      // Transfer both coins to the recipient
+      tx.transferObjects([coinA, coinB], recipientAddress)
+      
+      // Sign and execute the transaction
+      signAndExecuteTransaction(
+        { transaction: tx },
+        {
+          onSuccess: (result) => {
+            console.log('Tokens transferred successfully:', result)
+            setTxResult(result)
+            setTransferLoading(false)
+            
+            // Clear form fields after successful transfer
+            setTokenAAmount('')
+            setTokenBAmount('')
+          },
+          onError: (err) => {
+            console.error('Failed to transfer tokens:', err)
+            setError(err instanceof Error ? err.message : 'Failed to transfer tokens')
+            setTransferLoading(false)
+          }
+        }
+      )
+    } catch (err) {
+      console.error('Transfer setup failed:', err)
+      setError(err instanceof Error ? err.message : 'Transfer setup failed')
+      setTransferLoading(false)
     }
   }
 
@@ -403,7 +468,39 @@ export default function TestPage() {
                         onChange={(e) => setTokenBType(e.target.value)} 
                       />
                     </div>
+                    
+                    <div className="flex flex-col space-y-1.5">
+                      <Label htmlFor="tokenAAmount">Token A Amount</Label>
+                      <Input 
+                        id="tokenAAmount" 
+                        type="number" 
+                        step="any"
+                        placeholder="Amount of Token A to add" 
+                        value={tokenAAmount}
+                        onChange={(e) => setTokenAAmount(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="flex flex-col space-y-1.5">
+                      <Label htmlFor="tokenBAmount">Token B Amount</Label>
+                      <Input 
+                        id="tokenBAmount" 
+                        type="number" 
+                        step="any"
+                        placeholder="Amount of Token B to add" 
+                        value={tokenBAmount}
+                        onChange={(e) => setTokenBAmount(e.target.value)}
+                      />
+                    </div>
                   </div>
+                  
+                  <Button 
+                    onClick={transferTokens} 
+                    disabled={transferLoading || !client || !address || !tokenAAmount || !tokenBAmount}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white mb-4"
+                  >
+                    {transferLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Transferring Tokens...</> : 'Transfer Tokens'}
+                  </Button>
                   
                   <Button 
                     onClick={createPool} 
