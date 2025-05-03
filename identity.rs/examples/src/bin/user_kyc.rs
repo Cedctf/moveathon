@@ -1,14 +1,12 @@
 // Copyright 2020-2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use clap::Parser;
 use examples::create_did_document;
 use examples::get_funded_client;
 use examples::get_memstorage;
 use examples::TEST_GAS_BUDGET;
-use serde_json::{json, Value};
+use serde_json::json;
 use std::env;
-use chrono::NaiveDate;
 
 // Clean up imports to only what's needed
 use identity_iota::core::{FromJson, Url, Object};
@@ -32,115 +30,78 @@ use identity_storage::Storage;
 use jsonprooftoken::jpa::algs::ProofAlgorithm;
 use secret_storage::Signer;
 
-// Define CLI arguments
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct Args {
-    #[arg(long, help = "Full name of the user")]
-    full_name: String,
-
-    #[arg(long, help = "Email address of the user")]
-    email: String,
-
-    #[arg(long, help = "Phone number of the user")]
-    phone: String,
-
-    #[arg(long, help = "Physical address of the user")]
-    address: String,
-
-    #[arg(long, help = "ID verification type (passport, driversLicense, nationalId)")]
-    id_verification_type: String,
-
-    #[arg(long, help = "ID verification number")]
-    id_verification_number: Option<String>,
-
-    #[arg(long, help = "ID expiry date (YYYY-MM-DD)")]
-    id_expiry_date: Option<String>,
-}
-
 /// Demonstrates how to create a DID Document and publish it on chain,
 /// then perform a simulated KYC process with Zero-Knowledge Selective Disclosure.
 ///
 /// This example focuses only on user personal data verification.
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-  // Parse command line arguments
-  let args = Args::parse();
-
-  // Set default ID values if not provided
-  let id_verification_number = args.id_verification_number.unwrap_or_else(|| "P12345678".to_string());
-  let id_expiry_date = args.id_expiry_date.unwrap_or_else(|| "2028-05-15".to_string());
-  
-  // Validate ID verification type
-  let id_type = match args.id_verification_type.to_lowercase().as_str() {
-    "passport" => "passport",
-    "driverslicense" | "drivers_license" | "driver's license" => "driversLicense",
-    "nationalid" | "national_id" | "national id" => "nationalId",
-    _ => {
-      // Default to passport if not recognized
-      eprintln!("Warning: Unrecognized ID type '{}', defaulting to 'passport'", args.id_verification_type);
-      "passport"
-    }
-  };
-
   // Set the package ID environment variable if not already set
   if env::var("IOTA_IDENTITY_PKG_ID").is_err() {
     // Make sure this package ID is correctly deployed on your network
     env::set_var("IOTA_IDENTITY_PKG_ID", "0xa7cc2c7008993a775e8766f9e0420b21b3f60a7c641f16f66df9466bf6389114");
+    println!("Using default package ID: 0xa7cc2c7008993a775e8766f9e0420b21b3f60a7c641f16f66df9466bf6389114");
+    println!("For production use, set the IOTA_IDENTITY_PKG_ID environment variable");
   }
 
+  // Make sure your local network is running and accessible
+  println!("\nAttempting to connect to the network...");
+  
   // === USER SETUP ===
+  println!("\n=== USER SETUP ===");
   let user_storage = get_memstorage()?;
   
   let user_client = match get_funded_client(&user_storage).await {
     Ok(client) => client,
     Err(e) => {
-      // Return a JSON error message instead of plain text 
-      let error_json = json!({
-        "success": false,
-        "error": "Failed to connect to IOTA network",
-        "details": e.to_string()
-      });
-      println!("{}", error_json);
-      return Ok(());
+      println!("\nError: Failed to create client. This usually means:");
+      println!("1. The identity package is not deployed on the network");
+      println!("2. Your local network isn't running or accessible");
+      println!("3. The package ID is incorrect");
+      return Err(e);
     }
   };
 
   // Create new DID document and publish it (for the user)
   let (user_document, _user_method_fragment) = create_did_document(&user_client, &user_storage).await?;
+  println!("Published USER DID document: {user_document:#}");
 
   // === KYC PROVIDER SETUP WITH BBS+ SUPPORT ===
+  println!("\n=== KYC PROVIDER SETUP WITH ZERO-KNOWLEDGE SUPPORT ===");
   let kyc_storage = get_memstorage()?; 
   let kyc_client = get_funded_client(&kyc_storage).await?;
   
   // Create a KYC provider DID with ZKP capabilities using BBS+
   let (kyc_document, kyc_method_fragment) = create_zkp_did(&kyc_client, &kyc_storage).await?;
+  println!("Published KYC PROVIDER DID document with ZKP support: {kyc_document:#}");
 
   // === ZKP-ENABLED USER KYC CREDENTIAL ISSUANCE ===
-  // Create a credential subject with user information from command line args
+  println!("\n=== ZKP-ENABLED USER KYC CREDENTIAL ISSUANCE ===");
+
+  // Create a credential subject with detailed user information
   let subject: Subject = Subject::from_json_value(json!({
     "id": user_document.id().as_str(),
     "userPersonalDetails": {
-      "fullName": args.full_name,
-      "email": args.email,
-      "phoneNumber": args.phone,
-      "address": args.address,
-      "idVerificationType": id_type,
-      "idVerificationNumber": id_verification_number,
-      "idExpiryDate": id_expiry_date
+      "fullName": "John Alexander Smith",
+      "email": "john.smith@example.com",
+      "phoneNumber": "+1-555-123-4567",
+      "address": "1234 Market Street, Apt 567, San Francisco, CA 94103, United States",
+      "idVerificationType": "passport", // Only allows: "passport", "driversLicense", or "nationalId"
+      "idVerificationNumber": "P12345678",
+      "idExpiryDate": "2028-05-15"
     },
     "verificationDetails": {
-      "verificationDate": chrono::Utc::now().date_naive().to_string(),
+      "verificationDate": "2023-12-05",
       "verificationLevel": "Enhanced Due Diligence",
-      "verifiedBy": "Asseta KYC Solutions",
+      "verifiedBy": "BlockchainKYC Solutions Inc.",
       "verificationStatus": "Approved",
-      "expiryDate": chrono::Utc::now().date_naive().checked_add_months(std::num::NonZeroU32::new(12).unwrap()).unwrap().to_string()
+      "expiryDate": "2024-12-05"
     }
   }))?;
 
   // Build the user KYC credential
   let kyc_credential: Credential = CredentialBuilder::default()
-    .id(Url::parse(format!("https://asseta.io/credentials/user-kyc/{}", uuid::Uuid::new_v4()).as_str())?)
+    .id(Url::parse("https://example.org/credentials/user-kyc/1234")?)
     .issuer(Url::parse(kyc_document.id().as_str())?)
     .type_("UserKycVerificationCredential")
     .subject(subject)
@@ -157,7 +118,11 @@ async fn main() -> anyhow::Result<()> {
     )
     .await?;
 
+  println!("ZKP-enabled User KYC Credential created successfully");
+
   // === VERIFY THE FULL KYC CREDENTIAL ===
+  println!("\n=== VERIFY THE FULL KYC CREDENTIAL ===");
+
   // Validate the credential using JPT validator
   let decoded_credential = JptCredentialValidator::validate::<_, Object>(
     &kyc_credential_jpt,
@@ -166,7 +131,14 @@ async fn main() -> anyhow::Result<()> {
     FailFast::FirstError,
   )?;
 
+  println!("User KYC Credential successfully validated!");
+  println!("KYC Credential Details (all fields):");
+  println!("{:#}", decoded_credential.credential);
+
   // === SELECTIVE DISCLOSURE PRESENTATION CREATION ===
+  println!("\n=== SELECTIVE DISCLOSURE PRESENTATION CREATION ===");
+  println!("User wants to prove identity while hiding sensitive personal information");
+
   // Determine which KYC method ID was used for signing
   let method_id = decoded_credential
     .decoded_jwp
@@ -194,7 +166,12 @@ async fn main() -> anyhow::Result<()> {
     )
     .await?;
 
+  println!("Selective disclosure presentation created successfully");
+  println!("User can now prove identity without revealing sensitive information");
+
   // === SERVICE PROVIDER VERIFIES SELECTIVE DISCLOSURE ===
+  println!("\n=== SERVICE PROVIDER VERIFIES SELECTIVE DISCLOSURE ===");
+
   // Service provider extracts the issuer from the presentation
   let issuer: CoreDID = JptPresentationValidatorUtils::extract_issuer_from_presented_jpt(&zkp_presentation)?;
   
@@ -216,32 +193,11 @@ async fn main() -> anyhow::Result<()> {
     FailFast::FirstError,
   )?;
   
-  // Return the verification result as JSON
-  let result = json!({
-    "success": true,
-    "did": user_document.id().as_str(),
-    "verificationDetails": {
-      "verificationDate": chrono::Utc::now().date_naive().to_string(),
-      "verificationLevel": "Enhanced Due Diligence",
-      "verifiedBy": "Asseta KYC Solutions",
-      "verificationStatus": "Approved",
-      "expiryDate": chrono::Utc::now().date_naive().checked_add_months(std::num::NonZeroU32::new(12).unwrap()).unwrap().to_string()
-    },
-    "presentationProof": {
-      "type": "ZeroKnowledgeProof",
-      "credentialType": "UserKycVerificationCredential",
-      "issuer": kyc_document.id().as_str(),
-      "disclosedFields": [
-        "userPersonalDetails.fullName",
-        "userPersonalDetails.email",
-        "userPersonalDetails.idVerificationType",
-        "userPersonalDetails.idExpiryDate",
-        "verificationDetails"
-      ]
-    }
-  });
-  
-  println!("{}", result.to_string());
+  println!("Selective disclosure successfully validated!");
+  println!("Service provider can see:");
+  println!("{:#}", verified_sd_credential.credential);
+  println!("Notice that sensitive personal information is hidden while the credential remains valid");
+
   Ok(())
 }
 

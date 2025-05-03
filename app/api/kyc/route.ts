@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     // Normal flow - Call the Rust binary with the user data
     try {
       const { stdout, stderr } = await execFileAsync(binaryPath, [
-        "--name",
+        "--full-name",
         fullName,
         "--email",
         email,
@@ -74,6 +74,8 @@ export async function POST(request: Request) {
         address,
         "--id-type",
         idVerificationMethod,
+        "--verification-mode",
+        "production",
       ]);
 
       // Check for errors
@@ -95,7 +97,8 @@ export async function POST(request: Request) {
         success: true,
         message: "KYC verification successful",
         did: result.did,
-        verificationStatus: result.status,
+        verificationStatus: result.verificationStatus,
+        kyc_credential: result.kyc_credential,
       });
     } catch (error) {
       // If we're in development mode, use fallback
