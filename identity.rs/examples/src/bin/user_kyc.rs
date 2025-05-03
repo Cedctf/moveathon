@@ -54,11 +54,11 @@ struct Args {
   id_type: String,
 
   /// ID number
-  #[arg(long)]
+  #[arg(long, default_value = "DEFAULT-ID-NUMBER")]
   id_number: String,
 
   /// ID expiry date (YYYY-MM-DD)
-  #[arg(long)]
+  #[arg(long, default_value = "2030-12-31")]
   id_expiry: String,
   // Add optional arguments for network, package ID etc. if needed
   // #[arg(long, default_value = "http://localhost:14265")]

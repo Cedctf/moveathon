@@ -10,18 +10,42 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
 
-    // Validate required fields - align with frontend state and Rust needs
-    const { fullName, email, phoneNumber, address, idVerificationType } = data;
+    // Log the received data
+    console.log("Received KYC data:", JSON.stringify(data));
 
-    if (
-      !fullName ||
-      !email ||
-      !phoneNumber ||
-      !address ||
-      !idVerificationType
-    ) {
+    // Extract fields and handle both possible names for ID verification type
+    const {
+      fullName,
+      email,
+      phoneNumber,
+      address,
+      idVerificationType,
+      idVerificationMethod,
+    } = data;
+
+    // Use whichever field is defined
+    const verificationType = idVerificationType || idVerificationMethod;
+
+    // Log each field to check what might be missing
+    console.log("fullName:", fullName);
+    console.log("email:", email);
+    console.log("phoneNumber:", phoneNumber);
+    console.log("address:", address);
+    console.log("idVerificationType:", verificationType);
+
+    if (!fullName || !email || !phoneNumber || !address || !verificationType) {
+      // Log which fields are missing
+      const missingFields = [];
+      if (!fullName) missingFields.push("fullName");
+      if (!email) missingFields.push("email");
+      if (!phoneNumber) missingFields.push("phoneNumber");
+      if (!address) missingFields.push("address");
+      if (!verificationType) missingFields.push("idVerificationType");
+
+      console.error("Missing required fields:", missingFields);
+
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Missing required fields", missingFields },
         { status: 400 }
       );
     }
@@ -76,7 +100,7 @@ export async function POST(request: Request) {
         "--address",
         address,
         "--id-type",
-        idVerificationType,
+        verificationType,
         "--id-number",
         data.idVerificationNumber || "DEFAULT-ID-NUMBER",
         "--id-expiry",
