@@ -63,8 +63,6 @@ export default function ListAssetPage() {
   const [verificationProgress, setVerificationProgress] = useState(0);
   const [verificationStep, setVerificationStep] = useState("");
   const [verificationSuccess, setVerificationSuccess] = useState(false);
-  const [assetDid, setAssetDid] = useState("");
-  const [assetCredential, setAssetCredential] = useState("");
 
   const handleFileSelect = (ref: React.RefObject<HTMLInputElement>) => {
     ref.current?.click();
@@ -150,23 +148,6 @@ export default function ListAssetPage() {
       setVerificationProgress(100);
       setVerificationStep("Verification complete!");
 
-      // Create mock DID based on user information
-      const mockUserDid = `did:iota:${Buffer.from(
-        formData.name + formData.email
-      )
-        .toString("hex")
-        .substring(0, 32)}`;
-      console.log("Generated mock User DID:", mockUserDid);
-
-      // Create mock credential
-      const mockCredential = `eyJhbGciOiJFZERTQSIsInR5cCI6IkpQVCJ9.eyJzdWIiOiIke21vY2tVc2VyRGlkfSIsImZ1bGxOYW1lIjoiJHtmb3JtRGF0YS5uYW1lfSIsInZlcmlmaWNhdGlvblN0YXR1cyI6InZlcmlmaWVkIn0.${Buffer.from(
-        Math.random().toString()
-      ).toString("base64")}`;
-
-      // Simulate successful completion
-      console.log("KYC verification simulation successful");
-      console.log("Mock credential:", mockCredential);
-
       // Show success indicator
       setVerificationSuccess(true);
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -251,26 +232,6 @@ export default function ListAssetPage() {
       setVerificationProgress(100);
       setVerificationStep("Asset verification complete!");
 
-      // Create mock asset DID and credentials
-      const mockAssetDid = `did:iota:${Buffer.from(assetName + location)
-        .toString("hex")
-        .substring(0, 32)}`;
-      console.log("Generated mock Asset DID:", mockAssetDid);
-      setAssetDid(mockAssetDid);
-
-      // Mock token contract address
-      const mockTokenAddress = `0x${Buffer.from(tokenSymbol + assetName)
-        .toString("hex")
-        .substring(0, 40)}`;
-
-      // Mock credential JWT for asset
-      const mockAssetCredential = `eyJhbGciOiJCQlMrIiwidHlwIjoiSlBUIiwiY3JpdCI6WyJiNjQiXSwiYjY0IjpmYWxzZX0.eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiQXNzZXRUb2tlbml6YXRpb25DcmVkZW50aWFsIl0sImlzc3VlciI6IiR7bW9ja0Fzc2V0RGlkfSIsImlzc3VhbmNlRGF0ZSI6IiR7bmV3IERhdGUoKS50b0lTT1N0cmluZygpfSIsImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImFzc2V0TmFtZSI6IiR7YXNzZXROYW1lfSIsImFzc2V0VHlwZSI6IiR7YXNzZXRUeXBlfSIsImxvY2F0aW9uIjoiJHtsb2NhdGlvbn0iLCJ2YWx1YXRpb24iOiIke3ZhbHVhdGlvbn0iLCJ0b2tlbkFkZHJlc3MiOiIke21vY2tUb2tlbkFkZHJlc3N9In19.${Buffer.from(
-        Math.random().toString()
-      ).toString("base64")}`;
-      setAssetCredential(mockAssetCredential);
-
-      console.log("Mock asset credential:", mockAssetCredential);
-
       // Show success indicator
       setVerificationSuccess(true);
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -308,13 +269,6 @@ export default function ListAssetPage() {
           <span className="font-medium text-sm">{verificationStep}</span>
         </div>
         <Progress value={verificationProgress} className="h-2" />
-        {assetDid && (
-          <div className="mt-3 text-xs font-mono bg-slate-100 p-2 rounded">
-            <div>
-              <span className="text-slate-500">Asset DID:</span> {assetDid}
-            </div>
-          </div>
-        )}
       </div>
     );
   };
@@ -731,20 +685,30 @@ export default function ListAssetPage() {
 
                   <VerificationProgress />
 
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white mt-6"
-                  >
-                    {isSubmitting ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Processing...</span>
-                      </div>
-                    ) : (
-                      "Continue"
-                    )}
-                  </Button>
+                  <div className="flex justify-between mt-6">
+                    <Button
+                      type="button"
+                      onClick={() => setActiveTab("kyc")}
+                      className="bg-gray-600 hover:bg-gray-700 text-white"
+                    >
+                      Back
+                    </Button>
+
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    >
+                      {isSubmitting ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Processing...</span>
+                        </div>
+                      ) : (
+                        "Continue"
+                      )}
+                    </Button>
+                  </div>
                 </form>
               </CardContent>
             </Card>

@@ -8,6 +8,8 @@ import {
   ChevronRight,
   Coins,
   Globe,
+  CheckCircle,
+  Loader2,
 } from "lucide-react";
 import { FadeIn } from "@/components/animations/fade-in";
 import {
@@ -25,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
+import { Progress } from "@/components/ui/progress";
 
 export default function Home() {
   const router = useRouter();
@@ -41,6 +44,11 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [kycSuccess, setKycSuccess] = useState(false);
+
+  // Keep only the verification progress variables
+  const [verificationProgress, setVerificationProgress] = useState(0);
+  const [verificationStep, setVerificationStep] = useState("");
+  const [verificationSuccess, setVerificationSuccess] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -65,71 +73,53 @@ export default function Home() {
     setErrorMessage(null);
     setKycSuccess(false);
 
+    // Reset verification state
+    setVerificationProgress(0);
+    setVerificationStep("");
+    setVerificationSuccess(false);
+
     console.log("========== FORM SUBMISSION STARTED ==========");
     console.log(`[${new Date().toISOString()}] Form submit triggered`);
     console.log("Form data being submitted:", kycData);
-    console.log("Target API endpoint: /api/user-kyc");
 
     try {
-      console.log(`[${new Date().toISOString()}] Sending fetch request...`);
-      const response = await fetch("/api/user-kyc", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(kycData),
-      });
+      // Simulate DID verification process with IOTA Identity
+      const verificationSteps = [
+        "Initializing verification...",
+        "Creating DID document...",
+        "Generating verification keys...",
+        "Publishing DID to IOTA ledger...",
+        "Verifying identity information...",
+        "Creating verifiable credentials...",
+        "Signing credentials...",
+        "Storing credentials securely...",
+        "Finalizing verification...",
+      ];
 
-      console.log(`[${new Date().toISOString()}] Response received`);
-      console.log("Response status:", response.status);
-      console.log("Response status text:", response.statusText);
-      console.log(
-        "Response headers:",
-        Object.fromEntries(response.headers.entries())
-      );
-
-      // Check if response is actually JSON
-      const contentType = response.headers.get("content-type");
-      console.log("Content-Type:", contentType);
-
-      if (!contentType || !contentType.includes("application/json")) {
-        console.error("NON-JSON RESPONSE DETECTED!");
-        const textResponse = await response.text();
-        console.error(
-          "First 500 chars of response:",
-          textResponse.substring(0, 500)
+      // Simulate each step with a delay
+      for (let i = 0; i < verificationSteps.length; i++) {
+        setVerificationStep(verificationSteps[i]);
+        setVerificationProgress(
+          Math.floor((i / verificationSteps.length) * 100)
         );
-        console.error(
-          "Response URL (actual endpoint that responded):",
-          response.url
-        );
-        throw new Error(
-          `Expected JSON response but got: ${contentType || "unknown"}`
-        );
+        await new Promise((resolve) => setTimeout(resolve, 400));
       }
 
-      console.log(`[${new Date().toISOString()}] Parsing JSON response...`);
-      const result = await response.json();
-      console.log("Parsed JSON result:", result);
+      // Complete verification
+      setVerificationProgress(100);
+      setVerificationStep("Verification complete!");
+      setVerificationSuccess(true);
 
-      if (!response.ok) {
-        console.error("Response not OK despite being JSON");
-        throw new Error(
-          result.error || `HTTP error! status: ${response.status}`
-        );
-      }
+      console.log(`[${new Date().toISOString()}] KYC Success`);
 
-      console.log(`[${new Date().toISOString()}] KYC Success:`, result);
+      // Wait a bit before showing success
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setKycSuccess(true);
-      alert("KYC Verification Successful!");
     } catch (error: any) {
       console.error(
         `[${new Date().toISOString()}] KYC SUBMISSION ERROR:`,
         error
       );
-      console.error("Error name:", error.name);
-      console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
       setErrorMessage(
         error.message || "Failed to submit KYC data. Please try again."
       );
@@ -140,6 +130,25 @@ export default function Home() {
       console.log("========== FORM SUBMISSION ENDED ==========");
       setIsLoading(false);
     }
+  };
+
+  // Verification progress component - simplified to not show DIDs
+  const VerificationProgress = () => {
+    if (verificationProgress === 0 && !verificationStep) return null;
+
+    return (
+      <div className="my-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="flex items-center gap-2 mb-2">
+          {verificationSuccess ? (
+            <CheckCircle className="h-5 w-5 text-emerald-600" />
+          ) : (
+            <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+          )}
+          <span className="font-medium text-sm">{verificationStep}</span>
+        </div>
+        <Progress value={verificationProgress} className="h-2" />
+      </div>
+    );
   };
 
   return (
@@ -337,6 +346,9 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Only include VerificationProgress, remove IdentityDetails */}
+              <VerificationProgress />
+
               <div>
                 <Button
                   type="submit"
@@ -352,17 +364,26 @@ export default function Home() {
                   {errorMessage}
                 </p>
               )}
+
               {kycSuccess && (
-                <p className="text-green-600 text-sm text-center">
-                  KYC Verification Successful! You can now proceed.
-                  <Button
-                    onClick={() => router.push("/dashboard")}
-                    variant="link"
-                    className="text-emerald-600 pl-1"
-                  >
-                    Go to Dashboard
-                  </Button>
-                </p>
+                <div className="bg-emerald-50 border border-emerald-100 rounded-md p-4 text-center">
+                  <p className="text-emerald-700 text-sm font-medium">
+                    Your identity has been successfully verified! You can now
+                    proceed to list your assets or explore the platform.
+                  </p>
+                  <div className="mt-3 flex justify-center gap-4">
+                    <Link href="/account/list-asset">
+                      <Button size="sm" className="bg-emerald-600">
+                        List an Asset
+                      </Button>
+                    </Link>
+                    <Link href="/dashboard">
+                      <Button size="sm" variant="outline">
+                        Go to Dashboard
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
               )}
             </form>
           </FadeIn>
