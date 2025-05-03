@@ -50,10 +50,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- Ensure this path and name are correct relative to Next.js project root ---
-    const relativeBinaryPath = "../identity.rs/target/release/user_kyc"; // Example: Adjust based on your structure
+    const relativeBinaryPath = "identity.rs/examples/src/bin/user_kyc.rs";
     const absoluteBinaryPath = path.resolve(process.cwd(), relativeBinaryPath);
-    // --- ---
 
     const isDev = process.env.NODE_ENV === "development";
     const binaryExists = existsSync(absoluteBinaryPath);
