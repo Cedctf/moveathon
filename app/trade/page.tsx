@@ -23,6 +23,7 @@ function TradePageContent() {
   const [isWalletConnected, setIsWalletConnected] = useState(false)
   const { prices, loading } = usePriceContext()
   const [selectedLocation, setSelectedLocation] = useState<string>("Manhattan")
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState<string>("")
 
   const handleTrade = () => {
     // Trade logic will be implemented here
@@ -81,13 +82,13 @@ function TradePageContent() {
     return currencyFormatter.format(value);
   };
 
-  // Add this function to get all neighborhoods from all locations
-  const getAllNeighborhoods = () => {
+  // Create a list of all neighborhood assets
+  const getNeighborhoodAssets = () => {
     if (!housePricesData || !housePricesData.locations) return [];
     
     return housePricesData.locations.flatMap(location => 
       location.neighborhoodData.map(neighborhood => ({
-        id: `${location.name}-${neighborhood.name}`,
+        symbol: `${neighborhood.name}-${location.name}`,
         name: neighborhood.name,
         location: location.name,
         price: neighborhood.medianHomePrice,
@@ -96,7 +97,32 @@ function TradePageContent() {
     );
   };
 
-  const allNeighborhoods = getAllNeighborhoods();
+  const neighborhoodAssets = getNeighborhoodAssets();
+
+  // Get the selected asset details
+  const getSelectedAssetDetails = () => {
+    if (!selectedAsset) return null;
+    
+    // Parse the asset symbol to extract neighborhood and location
+    // The format should be "NeighborhoodName-LocationName"
+    const parts = selectedAsset.split('-');
+    if (parts.length !== 2) return null;
+    
+    const neighborhoodName = parts[0];
+    const locationName = parts[1];
+    
+    return { neighborhoodName, locationName };
+  };
+
+  // Update selected location and neighborhood when asset is selected
+  useEffect(() => {
+    const assetDetails = getSelectedAssetDetails();
+    if (assetDetails) {
+      console.log("Selected asset details:", assetDetails); // Debug log
+      setSelectedLocation(assetDetails.locationName);
+      setSelectedNeighborhood(assetDetails.neighborhoodName);
+    }
+  }, [selectedAsset]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -119,6 +145,7 @@ function TradePageContent() {
                   <PriceChart 
                     selectedLocation={selectedLocation}
                     setSelectedLocation={setSelectedLocation}
+                    selectedNeighborhood={selectedNeighborhood}
                   />
                 </div>
               </CardContent>
@@ -250,17 +277,17 @@ function TradePageContent() {
                   <div className="space-y-2">
                     <Label htmlFor="asset">Select Asset</Label>
                     <Select value={selectedAsset} onValueChange={setSelectedAsset}>
-                      <SelectTrigger id="asset" className="w-full bg-white">
+                      <SelectTrigger className="bg-white">
                         <SelectValue placeholder="Select asset" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        {allNeighborhoods.map((neighborhood) => (
+                      <SelectContent className="bg-white max-h-[300px]">
+                        {neighborhoodAssets.map((asset, index) => (
                           <SelectItem 
-                            key={neighborhood.id} 
-                            value={neighborhood.id}
-                            className="hover:bg-gray-50"
+                            key={index} 
+                            value={asset.symbol}
+                            className="hover:bg-emerald-50 cursor-pointer"
                           >
-                            {neighborhood.name} ({neighborhood.location})
+                            {asset.name} ({asset.location})
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -313,7 +340,7 @@ function TradePageContent() {
                       type="range"
                       id="leverage"
                       min={1}
-                      max={10}
+                      max={100}
                       step={1}
                       value={leverage}
                       onChange={(e) => setLeverage(Number(e.target.value))}
@@ -321,8 +348,8 @@ function TradePageContent() {
                     />
                     <div className="flex justify-between text-xs text-gray-500">
                       <span>1x</span>
-                      <span>5x</span>
-                      <span>10x</span>
+                      <span>50x</span>
+                      <span>100x</span>
                     </div>
                   </div>
 

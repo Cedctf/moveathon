@@ -2,8 +2,12 @@
 
 import React, { useState, useEffect } from 'react'
 import { usePriceContext } from '@/contexts/PriceContext'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip as ChartTooltip, Legend as ChartLegend } from 'chart.js'
+import { Line } from 'react-chartjs-2'
 import housePricesData from '@/data/housePrices.json'
+
+// Register ChartJS components
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, ChartTooltip, ChartLegend)
 
 type LocationData = {
   name: string;
@@ -19,38 +23,30 @@ type LocationData = {
   neighborhoodData: Array<{
     name: string;
     medianHomePrice: number;
+    priceHistory: Array<{
+      date: string;
+      medianHomePrice: number;
+    }>;
   }>;
 };
 
 type PriceChartProps = {
   selectedLocation: string;
   setSelectedLocation: (location: string) => void;
+  selectedNeighborhood?: string;
 };
 
-export default function PriceChart({ selectedLocation, setSelectedLocation }: PriceChartProps) {
+export default function PriceChart({ selectedLocation, setSelectedLocation, selectedNeighborhood }: PriceChartProps) {
   const { prices, loading, error } = usePriceContext()
-  const [timeframe, setTimeframe] = useState<string>("1D")
-  const [chartData, setChartData] = useState<any[]>([])
+  const [chartData, setChartData] = useState<any>(null)
   const [locations, setLocations] = useState<LocationData[]>([])
 
   useEffect(() => {
     // Load the house price data
     if (housePricesData && housePricesData.locations) {
-      setLocations(housePricesData.locations)
-      
-      // Set initial chart data
-      const initialLocation = housePricesData.locations.find(loc => loc.name === selectedLocation) || housePricesData.locations[0]
-      setChartData(initialLocation.priceData)
+      setLocations(housePricesData.locations as LocationData[])
     }
   }, [])
-
-  useEffect(() => {
-    // Update chart data when selected location changes
-    const locationData = locations.find(loc => loc.name === selectedLocation)
-    if (locationData) {
-      setChartData(locationData.priceData)
-    }
-  }, [selectedLocation, locations])
 
   const formatCurrency = (value: number, currency: string) => {
     const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -67,115 +63,152 @@ export default function PriceChart({ selectedLocation, setSelectedLocation }: Pr
     return location ? location.currency : 'USD'
   }
 
-  const getPriceMetric = (locationName: string) => {
-    const location = locations.find(loc => loc.name === locationName)
-    if (!location) return 'Price per sq ft'
+  useEffect(() => {
+    // Find the selected location data
+    const locationData = housePricesData.locations.find(
+      location => location.name === selectedLocation
+    )
     
-    if (location.priceData[0].averagePricePerSqFt) {
-      return 'Price per sq ft'
-    } else if (location.priceData[0].averagePricePerSqM) {
-      return 'Price per sq m'
-    }
-    return 'Median price'
-  }
-
-  const getYAxisDataKey = (locationName: string) => {
-    const location = locations.find(loc => loc.name === locationName)
-    if (!location) return 'medianHomePrice'
+    if (!locationData) return
     
-    if (location.priceData[0].averagePricePerSqFt) {
-      return 'averagePricePerSqFt'
-    } else if (location.priceData[0].averagePricePerSqM) {
-      return 'averagePricePerSqM'
+    // Format dates for x-axis
+    const labels = locationData.priceData.map(item => {
+      const date = new Date(item.date)
+      return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    })
+    
+    // Get median home prices for the location
+    const locationPrices = locationData.priceData.map(item => item.medianHomePrice)
+    
+    // Get neighborhood data if a neighborhood is selected
+    let neighborhoodPrices: number[] = []
+    let neighborhoodName = ''
+    
+    if (selectedNeighborhood) {
+      const neighborhood = locationData.neighborhoodData.find(
+        n => n.name === selectedNeighborhood
+      )
+      
+      if (neighborhood && neighborhood.priceHistory) {
+        neighborhoodName = neighborhood.name
+        
+        // Create a map of dates to prices for the neighborhood
+        const neighborhoodPriceMap = new Map(
+          neighborhood.priceHistory.map(item => [item.date, item.medianHomePrice])
+        )
+        
+        // Map the neighborhood prices to the same dates as the location data
+        neighborhoodPrices = locationData.priceData.map(item => {
+          // Find exact date match or use the closest previous date
+          const exactMatch = neighborhoodPriceMap.get(item.date)
+          if (exactMatch) return exactMatch
+          
+          // If no exact match, find the closest previous date
+          const dates = neighborhood.priceHistory.map(h => h.date)
+          const closestDate = dates
+            .filter(date => date <= item.date)
+            .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0]
+          
+          return closestDate ? neighborhoodPriceMap.get(closestDate) || 0 : 0
+        })
+      }
     }
-    return 'medianHomePrice'
+    
+    // Create chart data
+    setChartData({
+      labels,
+      datasets: [
+        {
+          label: `${selectedLocation} Median Home Price`,
+          data: locationPrices,
+          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 2,
+          pointHoverRadius: 5,
+        },
+        ...(selectedNeighborhood && neighborhoodPrices.length > 0 ? [
+          {
+            label: `${neighborhoodName} Home Price`,
+            data: neighborhoodPrices,
+            borderColor: 'rgb(16, 185, 129)',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+          }
+        ] : [])
+      ]
+    })
+  }, [selectedLocation, selectedNeighborhood])
+  
+  // Chart options
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            const locationData = housePricesData.locations.find(
+              location => location.name === selectedLocation
+            )
+            if (!locationData) return context.raw
+            
+            // Format based on currency
+            if (locationData.currency === 'USD') {
+              return `${context.dataset.label}: $${context.raw.toLocaleString()}`
+            } else if (locationData.currency === 'JPY') {
+              return `${context.dataset.label}: ¥${context.raw.toLocaleString()}`
+            } else if (locationData.currency === 'EUR') {
+              return `${context.dataset.label}: €${context.raw.toLocaleString()}`
+            } else if (locationData.currency === 'IDR') {
+              return `${context.dataset.label}: Rp${context.raw.toLocaleString()}`
+            }
+            return `${context.dataset.label}: ${context.raw}`
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        ticks: {
+          callback: function(value: any) {
+            const locationData = housePricesData.locations.find(
+              location => location.name === selectedLocation
+            )
+            if (!locationData) return value
+            
+            if (locationData.currency === 'USD') {
+              return `$${(value / 1000).toFixed(0)}k`
+            } else if (locationData.currency === 'JPY') {
+              return `¥${(value / 1000000).toFixed(1)}M`
+            } else if (locationData.currency === 'EUR') {
+              return `€${(value / 1000).toFixed(0)}k`
+            } else if (locationData.currency === 'IDR') {
+              return `Rp${(value / 1000000000).toFixed(1)}B`
+            }
+            return value
+          }
+        }
+      }
+    }
   }
 
   return (
-    <div className="bg-white">
-      <div className="flex space-x-2 mb-4 justify-end">
-        <select 
-          className="border rounded-md p-2"
-          value={selectedLocation}
-          onChange={(e) => setSelectedLocation(e.target.value)}
-        >
-          {locations.map((location) => (
-            <option key={location.name} value={location.name}>
-              {location.name}
-            </option>
-          ))}
-        </select>
-        <select 
-          className="border rounded-md p-2"
-          value={timeframe}
-          onChange={(e) => setTimeframe(e.target.value)}
-        >
-          <option value="1D">1 Year</option>
-          <option value="1W">All Data</option>
-        </select>
-      </div>
-      
-      <div className="h-80">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={chartData}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="date" 
-              tickFormatter={(date) => {
-                return new Date(date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-              }}
-            />
-            <YAxis 
-              domain={['auto', 'auto']}
-              tickFormatter={(value) => {
-                return formatCurrency(value, getCurrencySymbol(selectedLocation))
-              }}
-            />
-            <Tooltip 
-              formatter={(value: number) => [
-                formatCurrency(value, getCurrencySymbol(selectedLocation)),
-                getPriceMetric(selectedLocation)
-              ]}
-              labelFormatter={(label) => new Date(label).toLocaleDateString('en-US', { 
-                month: 'long', 
-                year: 'numeric' 
-              })}
-            />
-            <Legend />
-            <Line 
-              type="monotone" 
-              dataKey={getYAxisDataKey(selectedLocation)} 
-              stroke="#10b981" 
-              activeDot={{ r: 8 }} 
-              name={getPriceMetric(selectedLocation)}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="medianHomePrice" 
-              stroke="#3b82f6" 
-              name="Median Home Price" 
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-      
-      {/* Neighborhood data section */}
-      <div className="mt-6">
-        <h3 className="text-lg font-semibold mb-2">Neighborhood Prices in {selectedLocation}</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {locations.find(loc => loc.name === selectedLocation)?.neighborhoodData.map((neighborhood) => (
-            <div key={neighborhood.name} className="bg-gray-50 p-3 rounded-md">
-              <p className="font-medium">{neighborhood.name}</p>
-              <p className="text-gray-700">
-                {formatCurrency(neighborhood.medianHomePrice, getCurrencySymbol(selectedLocation))}
-              </p>
-            </div>
-          ))}
+    <div className="w-full h-full">
+      {chartData ? (
+        <Line data={chartData} options={options} />
+      ) : (
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

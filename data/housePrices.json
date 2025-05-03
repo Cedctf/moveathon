@@ -111,19 +111,55 @@
       "neighborhoodData": [
         {
           "name": "Upper East Side",
-          "medianHomePrice": 1450000
+          "medianHomePrice": 1450000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 1380000 },
+            { "date": "2023-03-01", "medianHomePrice": 1395000 },
+            { "date": "2023-06-01", "medianHomePrice": 1410000 },
+            { "date": "2023-09-01", "medianHomePrice": 1425000 },
+            { "date": "2023-12-01", "medianHomePrice": 1440000 },
+            { "date": "2024-03-01", "medianHomePrice": 1445000 },
+            { "date": "2024-05-01", "medianHomePrice": 1450000 }
+          ]
         },
         {
           "name": "Chelsea",
-          "medianHomePrice": 1350000
+          "medianHomePrice": 1350000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 1320000 },
+            { "date": "2023-03-01", "medianHomePrice": 1310000 },
+            { "date": "2023-06-01", "medianHomePrice": 1300000 },
+            { "date": "2023-09-01", "medianHomePrice": 1315000 },
+            { "date": "2023-12-01", "medianHomePrice": 1330000 },
+            { "date": "2024-03-01", "medianHomePrice": 1345000 },
+            { "date": "2024-05-01", "medianHomePrice": 1350000 }
+          ]
         },
         {
           "name": "Tribeca",
-          "medianHomePrice": 3200000
+          "medianHomePrice": 3200000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 3050000 },
+            { "date": "2023-03-01", "medianHomePrice": 3080000 },
+            { "date": "2023-06-01", "medianHomePrice": 3120000 },
+            { "date": "2023-09-01", "medianHomePrice": 3150000 },
+            { "date": "2023-12-01", "medianHomePrice": 3170000 },
+            { "date": "2024-03-01", "medianHomePrice": 3190000 },
+            { "date": "2024-05-01", "medianHomePrice": 3200000 }
+          ]
         },
         {
           "name": "Harlem",
-          "medianHomePrice": 850000
+          "medianHomePrice": 850000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 790000 },
+            { "date": "2023-03-01", "medianHomePrice": 800000 },
+            { "date": "2023-06-01", "medianHomePrice": 815000 },
+            { "date": "2023-09-01", "medianHomePrice": 825000 },
+            { "date": "2023-12-01", "medianHomePrice": 835000 },
+            { "date": "2024-03-01", "medianHomePrice": 845000 },
+            { "date": "2024-05-01", "medianHomePrice": 850000 }
+          ]
         }
       ]
     },
@@ -238,19 +274,55 @@
       "neighborhoodData": [
         {
           "name": "Shibuya",
-          "medianHomePrice": 95000000
+          "medianHomePrice": 95000000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 88000000 },
+            { "date": "2023-03-01", "medianHomePrice": 89500000 },
+            { "date": "2023-06-01", "medianHomePrice": 91000000 },
+            { "date": "2023-09-01", "medianHomePrice": 92500000 },
+            { "date": "2023-12-01", "medianHomePrice": 93500000 },
+            { "date": "2024-03-01", "medianHomePrice": 94500000 },
+            { "date": "2024-05-01", "medianHomePrice": 95000000 }
+          ]
         },
         {
           "name": "Shinjuku",
-          "medianHomePrice": 88000000
+          "medianHomePrice": 88000000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 82000000 },
+            { "date": "2023-03-01", "medianHomePrice": 83500000 },
+            { "date": "2023-06-01", "medianHomePrice": 84000000 },
+            { "date": "2023-09-01", "medianHomePrice": 85000000 },
+            { "date": "2023-12-01", "medianHomePrice": 86000000 },
+            { "date": "2024-03-01", "medianHomePrice": 87000000 },
+            { "date": "2024-05-01", "medianHomePrice": 88000000 }
+          ]
         },
         {
           "name": "Minato",
-          "medianHomePrice": 120000000
+          "medianHomePrice": 120000000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 112000000 },
+            { "date": "2023-03-01", "medianHomePrice": 114000000 },
+            { "date": "2023-06-01", "medianHomePrice": 116000000 },
+            { "date": "2023-09-01", "medianHomePrice": 117500000 },
+            { "date": "2023-12-01", "medianHomePrice": 118500000 },
+            { "date": "2024-03-01", "medianHomePrice": 119500000 },
+            { "date": "2024-05-01", "medianHomePrice": 120000000 }
+          ]
         },
         {
           "name": "Setagaya",
-          "medianHomePrice": 70000000
+          "medianHomePrice": 70000000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 65000000 },
+            { "date": "2023-03-01", "medianHomePrice": 66000000 },
+            { "date": "2023-06-01", "medianHomePrice": 67000000 },
+            { "date": "2023-09-01", "medianHomePrice": 68000000 },
+            { "date": "2023-12-01", "medianHomePrice": 68500000 },
+            { "date": "2024-03-01", "medianHomePrice": 69500000 },
+            { "date": "2024-05-01", "medianHomePrice": 70000000 }
+          ]
         }
       ]
     },
@@ -365,19 +437,55 @@
       "neighborhoodData": [
         {
           "name": "Saint-Pierre",
-          "medianHomePrice": 520000
+          "medianHomePrice": 520000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 495000 },
+            { "date": "2023-03-01", "medianHomePrice": 500000 },
+            { "date": "2023-06-01", "medianHomePrice": 505000 },
+            { "date": "2023-09-01", "medianHomePrice": 510000 },
+            { "date": "2023-12-01", "medianHomePrice": 515000 },
+            { "date": "2024-03-01", "medianHomePrice": 518000 },
+            { "date": "2024-05-01", "medianHomePrice": 520000 }
+          ]
         },
         {
           "name": "Chartrons",
-          "medianHomePrice": 490000
+          "medianHomePrice": 490000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 470000 },
+            { "date": "2023-03-01", "medianHomePrice": 475000 },
+            { "date": "2023-06-01", "medianHomePrice": 480000 },
+            { "date": "2023-09-01", "medianHomePrice": 482000 },
+            { "date": "2023-12-01", "medianHomePrice": 485000 },
+            { "date": "2024-03-01", "medianHomePrice": 488000 },
+            { "date": "2024-05-01", "medianHomePrice": 490000 }
+          ]
         },
         {
           "name": "Saint-Michel",
-          "medianHomePrice": 380000
+          "medianHomePrice": 380000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 365000 },
+            { "date": "2023-03-01", "medianHomePrice": 368000 },
+            { "date": "2023-06-01", "medianHomePrice": 370000 },
+            { "date": "2023-09-01", "medianHomePrice": 373000 },
+            { "date": "2023-12-01", "medianHomePrice": 375000 },
+            { "date": "2024-03-01", "medianHomePrice": 378000 },
+            { "date": "2024-05-01", "medianHomePrice": 380000 }
+          ]
         },
         {
           "name": "Bastide",
-          "medianHomePrice": 420000
+          "medianHomePrice": 420000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 395000 },
+            { "date": "2023-03-01", "medianHomePrice": 400000 },
+            { "date": "2023-06-01", "medianHomePrice": 405000 },
+            { "date": "2023-09-01", "medianHomePrice": 410000 },
+            { "date": "2023-12-01", "medianHomePrice": 415000 },
+            { "date": "2024-03-01", "medianHomePrice": 418000 },
+            { "date": "2024-05-01", "medianHomePrice": 420000 }
+          ]
         }
       ]
     },
@@ -492,19 +600,55 @@
       "neighborhoodData": [
         {
           "name": "Seminyak",
-          "medianHomePrice": 4500000000
+          "medianHomePrice": 4500000000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 4100000000 },
+            { "date": "2023-03-01", "medianHomePrice": 4180000000 },
+            { "date": "2023-06-01", "medianHomePrice": 4250000000 },
+            { "date": "2023-09-01", "medianHomePrice": 4320000000 },
+            { "date": "2023-12-01", "medianHomePrice": 4400000000 },
+            { "date": "2024-03-01", "medianHomePrice": 4450000000 },
+            { "date": "2024-05-01", "medianHomePrice": 4500000000 }
+          ]
         },
         {
           "name": "Ubud",
-          "medianHomePrice": 3200000000
+          "medianHomePrice": 3200000000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 2900000000 },
+            { "date": "2023-03-01", "medianHomePrice": 2950000000 },
+            { "date": "2023-06-01", "medianHomePrice": 3000000000 },
+            { "date": "2023-09-01", "medianHomePrice": 3050000000 },
+            { "date": "2023-12-01", "medianHomePrice": 3100000000 },
+            { "date": "2024-03-01", "medianHomePrice": 3150000000 },
+            { "date": "2024-05-01", "medianHomePrice": 3200000000 }
+          ]
         },
         {
           "name": "Canggu",
-          "medianHomePrice": 4000000000
+          "medianHomePrice": 4000000000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 3600000000 },
+            { "date": "2023-03-01", "medianHomePrice": 3650000000 },
+            { "date": "2023-06-01", "medianHomePrice": 3750000000 },
+            { "date": "2023-09-01", "medianHomePrice": 3850000000 },
+            { "date": "2023-12-01", "medianHomePrice": 3900000000 },
+            { "date": "2024-03-01", "medianHomePrice": 3950000000 },
+            { "date": "2024-05-01", "medianHomePrice": 4000000000 }
+          ]
         },
         {
           "name": "Uluwatu",
-          "medianHomePrice": 5200000000
+          "medianHomePrice": 5200000000,
+          "priceHistory": [
+            { "date": "2023-01-01", "medianHomePrice": 4700000000 },
+            { "date": "2023-03-01", "medianHomePrice": 4800000000 },
+            { "date": "2023-06-01", "medianHomePrice": 4900000000 },
+            { "date": "2023-09-01", "medianHomePrice": 5000000000 },
+            { "date": "2023-12-01", "medianHomePrice": 5100000000 },
+            { "date": "2024-03-01", "medianHomePrice": 5150000000 },
+            { "date": "2024-05-01", "medianHomePrice": 5200000000 }
+          ]
         }
       ]
     }
