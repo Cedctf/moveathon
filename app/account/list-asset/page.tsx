@@ -104,6 +104,9 @@ export default function ListAssetPage() {
     setIsSubmitting(true);
     setKycError("");
 
+    console.log("========== KYC FORM SUBMISSION STARTED ==========");
+    console.log(`[${new Date().toISOString()}] KYC form submit triggered`);
+
     try {
       // Prepare data for submission
       const kycData = {
@@ -111,13 +114,15 @@ export default function ListAssetPage() {
         email: formData.email,
         phoneNumber: formData.phone,
         address: formData.address,
-        idVerificationMethod: formData.idVerificationMethod,
+        idVerificationType: formData.idVerificationMethod,
         documentFile: selectedFile ? selectedFile.name : null, // Just sending file name for now
       };
 
-      // Send data to API
+      console.log("KYC Data being submitted:", kycData);
+      console.log("Target API endpoint: /api/user-kyc");
+
       try {
-        const response = await fetch("/api/kyc", {
+        const response = await fetch("/api/user-kyc", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -125,7 +130,14 @@ export default function ListAssetPage() {
           body: JSON.stringify(kycData),
         });
 
+        console.log("KYC Response status:", response.status);
+        console.log(
+          "KYC Response headers:",
+          Object.fromEntries(response.headers.entries())
+        );
+
         const result = await response.json();
+        console.log("KYC API response:", result);
 
         if (!response.ok) {
           throw new Error(result.error || "KYC verification failed");
@@ -153,16 +165,79 @@ export default function ListAssetPage() {
       );
     } finally {
       setIsSubmitting(false);
+      console.log("========== KYC FORM SUBMISSION ENDED ==========");
     }
   };
 
-  const handleAssetDetailsSubmit = (e: React.FormEvent) => {
+  const handleAssetDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate asset details submission
-    setTimeout(() => {
+    console.log("========== ASSET DETAILS SUBMISSION STARTED ==========");
+    console.log(`[${new Date().toISOString()}] Asset details submit triggered`);
+
+    // Get form data from the asset details form
+    const assetForm = e.target as HTMLFormElement;
+
+    // Create an object to store asset data
+    const assetData = {
+      assetName: (assetForm.querySelector("#asset-name") as HTMLInputElement)
+        ?.value,
+      assetType: (assetForm.querySelector("#asset-type") as HTMLSelectElement)
+        ?.value,
+      location: (assetForm.querySelector("#location") as HTMLInputElement)
+        ?.value,
+      valuation: (assetForm.querySelector("#valuation") as HTMLInputElement)
+        ?.value,
+      tokenSymbol: (
+        assetForm.querySelector("#token-symbol") as HTMLInputElement
+      )?.value,
+      description: (
+        assetForm.querySelector("#description") as HTMLTextAreaElement
+      )?.value,
+    };
+
+    console.log("Asset data being submitted:", assetData);
+    console.log("Target API endpoint: /api/asset-kyc");
+
+    try {
+      // Make the actual API call to the asset-kyc endpoint
+      const response = await fetch("/api/asset-kyc", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(assetData),
+      });
+
+      console.log("Asset Details Response status:", response.status);
+      console.log(
+        "Asset Details Response headers:",
+        Object.fromEntries(response.headers.entries())
+      );
+
+      const result = await response.json();
+      console.log("Asset Details API response:", result);
+
+      if (!response.ok) {
+        console.error("Asset verification failed:", result);
+        throw new Error(result.error || "Asset verification failed");
+      }
+
+      console.log("Asset verification successful:", result);
+
+      // Continue with the original logic
       setAssetDetailsCompleted(true);
       setActiveTab("documents");
-    }, 1500);
+    } catch (error) {
+      console.error("Asset details submission error:", error);
+      // You may want to add error handling UI here
+      alert(
+        `Error submitting asset details: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      console.log("========== ASSET DETAILS SUBMISSION ENDED ==========");
+    }
   };
 
   return (
