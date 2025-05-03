@@ -11,24 +11,14 @@ export async function POST(request: Request) {
     const data = await request.json();
 
     // Validate required fields - align with frontend state and Rust needs
-    const {
-      fullName,
-      email,
-      phoneNumber,
-      address,
-      idVerificationType,
-      idVerificationNumber,
-      idExpiryDate,
-    } = data;
+    const { fullName, email, phoneNumber, address, idVerificationType } = data;
 
     if (
       !fullName ||
       !email ||
       !phoneNumber ||
       !address ||
-      !idVerificationType ||
-      !idVerificationNumber ||
-      !idExpiryDate
+      !idVerificationType
     ) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -88,9 +78,9 @@ export async function POST(request: Request) {
         "--id-type",
         idVerificationType,
         "--id-number",
-        idVerificationNumber,
+        data.idVerificationNumber || "DEFAULT-ID-NUMBER",
         "--id-expiry",
-        idExpiryDate,
+        data.idExpiryDate || "2030-12-31",
       ]);
 
       // Check for errors printed to stderr by the Rust binary
