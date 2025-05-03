@@ -50,7 +50,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const relativeBinaryPath = "identity.rs/examples/src/bin/user_kyc.rs";
+    const relativeBinaryPath =
+      "/Users/edw/Desktop/moveathon/identity.rs/target/release/user_kyc";
     const absoluteBinaryPath = path.resolve(process.cwd(), relativeBinaryPath);
 
     const isDev = process.env.NODE_ENV === "development";

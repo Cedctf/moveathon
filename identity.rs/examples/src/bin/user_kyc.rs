@@ -60,9 +60,6 @@ struct Args {
   /// ID expiry date (YYYY-MM-DD)
   #[arg(long)]
   id_expiry: String,
-  // Add optional arguments for network, package ID etc. if needed
-  // #[arg(long, default_value = "http://localhost:14265")]
-  // network_endpoint: String,
 }
 
 // Output Structure for JSON
