@@ -65,10 +65,14 @@ export default function Home() {
     setErrorMessage(null);
     setKycSuccess(false);
 
-    console.log("Submitting KYC Data:", kycData);
+    console.log("========== FORM SUBMISSION STARTED ==========");
+    console.log(`[${new Date().toISOString()}] Form submit triggered`);
+    console.log("Form data being submitted:", kycData);
+    console.log("Target API endpoint: /api/user-kyc");
 
     try {
-      const response = await fetch("/api/kyc", {
+      console.log(`[${new Date().toISOString()}] Sending fetch request...`);
+      const response = await fetch("/api/user-kyc", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -76,23 +80,64 @@ export default function Home() {
         body: JSON.stringify(kycData),
       });
 
+      console.log(`[${new Date().toISOString()}] Response received`);
+      console.log("Response status:", response.status);
+      console.log("Response status text:", response.statusText);
+      console.log(
+        "Response headers:",
+        Object.fromEntries(response.headers.entries())
+      );
+
+      // Check if response is actually JSON
+      const contentType = response.headers.get("content-type");
+      console.log("Content-Type:", contentType);
+
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("NON-JSON RESPONSE DETECTED!");
+        const textResponse = await response.text();
+        console.error(
+          "First 500 chars of response:",
+          textResponse.substring(0, 500)
+        );
+        console.error(
+          "Response URL (actual endpoint that responded):",
+          response.url
+        );
+        throw new Error(
+          `Expected JSON response but got: ${contentType || "unknown"}`
+        );
+      }
+
+      console.log(`[${new Date().toISOString()}] Parsing JSON response...`);
       const result = await response.json();
+      console.log("Parsed JSON result:", result);
 
       if (!response.ok) {
+        console.error("Response not OK despite being JSON");
         throw new Error(
           result.error || `HTTP error! status: ${response.status}`
         );
       }
 
-      console.log("KYC Success:", result);
+      console.log(`[${new Date().toISOString()}] KYC Success:`, result);
       setKycSuccess(true);
       alert("KYC Verification Successful!");
     } catch (error: any) {
-      console.error("KYC Submission Error:", error);
+      console.error(
+        `[${new Date().toISOString()}] KYC SUBMISSION ERROR:`,
+        error
+      );
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
       setErrorMessage(
         error.message || "Failed to submit KYC data. Please try again."
       );
     } finally {
+      console.log(
+        `[${new Date().toISOString()}] Form submission process complete`
+      );
+      console.log("========== FORM SUBMISSION ENDED ==========");
       setIsLoading(false);
     }
   };
