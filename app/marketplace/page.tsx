@@ -91,51 +91,51 @@ const assets = [
   const pools = [
     {
       id: 1,
-      name: "USDC / MANH-APT",
-      totalLiquidity: 4500000,
+      name: "USDC / IOTA",
+      totalLiquidity: 4500,
       apr: 12.5,
       userShare: 0.05,
-      userLiquidity: 225000,
-      rewards: 28125,
+      userLiquidity: 225,
+      rewards: 28.12,
       token1: "USDC",
-      token2: "MANH-APT",
+      token2: "IOTA",
       token1Logo: "/placeholder.svg?height=40&width=40",
       token2Logo: "/placeholder.svg?height=40&width=40",
     },
     {
       id: 2,
-      name: "USDC / TKY-COM",
-      totalLiquidity: 8200000,
+      name: "USDT / IOTA",
+      totalLiquidity: 8200,
       apr: 9.8,
       userShare: 0.02,
-      userLiquidity: 164000,
-      rewards: 16072,
-      token1: "USDC",
-      token2: "TKY-COM",
+      userLiquidity: 164,
+      rewards: 160.72,
+      token1: "USDT",
+      token2: "IOTA",
       token1Logo: "/placeholder.svg?height=40&width=40",
       token2Logo: "/placeholder.svg?height=40&width=40",
     },
     {
       id: 3,
-      name: "USDC / VRD-LUX",
-      totalLiquidity: 950000,
+      name: "USDT / IOTA",
+      totalLiquidity: 9500,
       apr: 18.2,
       userShare: 0.1,
-      userLiquidity: 95000,
-      rewards: 17290,
-      token1: "USDC",
-      token2: "VRD-LUX",
+      userLiquidity: 950,
+      rewards: 172.9,
+      token1: "USDT",
+      token2: "IOTA",
       token1Logo: "/placeholder.svg?height=40&width=40",
       token2Logo: "/placeholder.svg?height=40&width=40",
     },
     {
       id: 4,
       name: "USDC / BDX-VIN",
-      totalLiquidity: 3800000,
+      totalLiquidity: 1000,
       apr: 11.4,
-      userShare: 0,
-      userLiquidity: 0,
-      rewards: 0,
+      userShare: 0.1,
+      userLiquidity: 100,
+      rewards: 1.14,
       token1: "USDC",
       token2: "BDX-VIN",
       token1Logo: "/placeholder.svg?height=40&width=40",
@@ -144,11 +144,11 @@ const assets = [
     {
       id: 5,
       name: "USDC / BER-ART",
-      totalLiquidity: 1250000,
+      totalLiquidity: 1250,
       apr: 15.7,
       userShare: 0.08,
-      userLiquidity: 100000,
-      rewards: 15700,
+      userLiquidity: 100,
+      rewards: 15.70,
       token1: "USDC",
       token2: "BER-ART",
       token1Logo: "/placeholder.svg?height=40&width=40",
@@ -691,16 +691,16 @@ export default function MarketplacePage() {
                       <div className="border rounded-lg p-4">
                         <div className="flex justify-between items-center mb-4">
                           <h3 className="font-medium">Total Value</h3>
-                          <span className="font-bold text-xl">$584,000</span>
+                          <span className="font-bold text-xl">$21,200</span>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="bg-gray-50 p-3 rounded-lg">
                             <div className="text-sm text-gray-500">Active Pools</div>
-                            <div className="font-bold text-lg">4</div>
+                            <div className="font-bold text-lg">3</div>
                           </div>
                           <div className="bg-gray-50 p-3 rounded-lg">
                             <div className="text-sm text-gray-500">Total Rewards</div>
-                            <div className="font-bold text-lg text-emerald-600">$77,187</div>
+                            <div className="font-bold text-lg text-emerald-600">$361.74</div>
                           </div>
                         </div>
                       </div>
@@ -715,7 +715,7 @@ export default function MarketplacePage() {
                             .map((pool) => (
                               <div key={pool.id} className="flex justify-between items-center">
                                 <div className="flex items-center">
-                                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs mr-2">
+                                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs mr-6">
                                     {pool.token1}/{pool.token2}
                                   </div>
                                   <span className="text-sm">{pool.name}</span>
@@ -726,29 +726,6 @@ export default function MarketplacePage() {
                         </div>
                       </div>
 
-                      <button
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-md flex items-center justify-center"
-                        onClick={() => {
-                          // If we have real pools, select the first one
-                          if (realPools.length > 0) {
-                            const firstPool = realPools[0];
-                            const mockPool = pools[0];
-                            handlePoolSelect({
-                              ...mockPool,
-                              id: firstPool.id,
-                              token1: getTokenName(firstPool.tokenA),
-                              token2: getTokenName(firstPool.tokenB),
-                              name: `${getTokenName(firstPool.tokenA)} / ${getTokenName(firstPool.tokenB)}`,
-                              realData: true,
-                            });
-                          } else {
-                            handlePoolSelect(pools[0]);
-                          }
-                          setActiveTab("add");
-                        }}
-                      >
-                        <PlusCircle className="mr-2 h-4 w-4" /> Add New Liquidity
-                      </button>
                     </div>
                   ) : (
                     <div className="text-center py-8">
