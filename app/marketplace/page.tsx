@@ -18,12 +18,27 @@ import {
   Percent,
   PlusCircle,
   Wallet,
+  Loader2,
+  RefreshCw
 } from "lucide-react"
 import Image from "next/image"
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerContainer, StaggerItem } from "@/components/animations/stagger-container"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
+import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client'
+import { ConnectButton, useCurrentWallet, useCurrentAccount } from '@iota/dapp-kit'
+
+// Constants
+const LIQUIDITY_POOL_PACKAGE_ID = '0x6a4fea4813774d803ac7e6478335d06a38591a695147f2d66d651f59bb354a7f'
+const POOL_REGISTRY_ID = '0x7b958e3e2c475b85722e861e002a119ecab324533ede3a294eab21f036ea9abf'
+
+// Real pool interface - minimal for fetching
+interface RealPool {
+  id: string;
+  tokenA: string;
+  tokenB: string;
+}
 
 // Mock data for assets
 const assets = [
@@ -154,9 +169,125 @@ export default function MarketplacePage() {
   const [amount1, setAmount1] = useState("")
   const [amount2, setAmount2] = useState("")
   const [marketplaceTab, setMarketplaceTab] = useState("assets")
+  
+  // IOTA related states - minimal for fetching pools
+  const { currentWallet, connectionStatus } = useCurrentWallet()
+  const currentAccount = useCurrentAccount()
+  
+  const [client, setClient] = useState<IotaClient | null>(null)
+  const [loadingPools, setLoadingPools] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  
+  // Registry state and pools
+  const [registryId, setRegistryId] = useState<string>(POOL_REGISTRY_ID)
+  const [realPools, setRealPools] = useState<RealPool[]>([])
+  
+  // Helper function to get token name from full type
+  const getTokenName = (tokenType: string) => {
+    if (!tokenType) return '';
+    const parts = tokenType.split('::');
+    return parts[parts.length - 1];
+  }
+  
+  // Initialize IOTA client and fetch pools
+  useEffect(() => {
+    try {
+      // Use getFullnodeUrl to define Testnet RPC location
+      const rpcUrl = getFullnodeUrl('testnet')
+      
+      // Create a client connected to testnet
+      const iotaClient = new IotaClient({ url: rpcUrl })
+      setClient(iotaClient)
+      
+      // Fetch pools
+      fetchPools(iotaClient, POOL_REGISTRY_ID)
+    } catch (err) {
+      console.error('Failed to initialize IOTA client:', err)
+      setError(err instanceof Error ? err.message : 'Failed to initialize IOTA client')
+    }
+  }, [])
+  
+  // Update wallet connection status
+  useEffect(() => {
+    if (connectionStatus === 'connected') {
+      setIsWalletConnected(true)
+    } else {
+      setIsWalletConnected(false)
+    }
+  }, [connectionStatus])
+  
+  // Fetch pools from registry - simplified version
+  const fetchPools = async (clientInstance: IotaClient | null = null, regId: string | null = null) => {
+    const activeClient = clientInstance || client
+    const activeRegistryId = regId || registryId
+    
+    if (!activeClient || !activeRegistryId) {
+      console.warn('Cannot fetch pools: client or registry ID not available')
+      return
+    }
+    
+    setLoadingPools(true)
+    
+    try {
+      // Get the registry object directly by ID
+      const registry = await activeClient.getObject({
+        id: activeRegistryId,
+        options: {
+          showContent: true
+        }
+      })
+      
+      // Safely access content using type assertions
+      const content = registry.data?.content as any
+      
+      if (!content?.fields?.pools) {
+        console.warn('Registry has no pools field:', registry)
+        setLoadingPools(false)
+        return
+      }
+      
+      // Extract pool IDs from the registry
+      const poolIds = content.fields.pools.map((idObj: any) => idObj)
+      
+      // Fetch minimal details for each pool
+      const poolDetails: RealPool[] = []
+      
+      for (const poolId of poolIds) {
+        try {
+          const poolObj = await activeClient.getObject({
+            id: poolId,
+            options: {
+              showContent: true
+            }
+          })
+          
+          // Use type assertion to safely access fields
+          const fields = (poolObj.data?.content as any)?.fields
+          
+          if (fields) {
+            poolDetails.push({
+              id: poolId,
+              tokenA: fields.token_a_type || 'Unknown Token A',
+              tokenB: fields.token_b_type || 'Unknown Token B'
+            })
+          }
+        } catch (poolErr) {
+          console.error(`Failed to fetch pool ${poolId}:`, poolErr)
+        }
+      }
+      
+      setRealPools(poolDetails)
+      console.log('Fetched pools:', poolDetails)
+    } catch (err) {
+      console.error('Failed to fetch pools from registry:', err)
+      setError('Failed to fetch pools from registry')
+    } finally {
+      setLoadingPools(false)
+    }
+  }
 
   useEffect(() => {
-    // Simulate loading data
+    // Simulate loading data for assets
     const timer = setTimeout(() => {
       setLoading(false)
       setFilteredAssets(assets)
@@ -410,95 +541,139 @@ export default function MarketplacePage() {
 
         <TabsContent value="pools" className="mt-0 mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mx-auto">
+            {error && (
+              <div className="lg:col-span-3 bg-red-50 text-red-600 p-4 rounded-md mb-4">
+                {error}
+                <button className="text-xs underline ml-2" onClick={() => setError(null)}>Dismiss</button>
+              </div>
+            )}
             <div className="lg:col-span-2">
               <Card>
-                <CardHeader>
-                  <CardTitle>Available Pools</CardTitle>
-                  <CardDescription>Provide liquidity to earn rewards from trading fees</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Liquidity Pools</CardTitle>
+                    <CardDescription>Provide liquidity to earn rewards from trading fees</CardDescription>
+                  </div>
+                  <div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => fetchPools()}
+                      disabled={loadingPools}
+                    >
+                      {loadingPools ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                      )}
+                      Refresh Pools
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {loading
-                      ? Array.from({ length: 4 }).map((_, index) => (
-                          <div key={index} className="border rounded-lg p-4">
-                            <div className="flex justify-between items-center">
-                              <div className="flex items-center">
-                                <div className="relative mr-3">
-                                  <Skeleton className="h-10 w-10 rounded-full" />
-                                  <Skeleton className="h-6 w-6 rounded-full absolute -bottom-1 -right-1" />
-                                </div>
-                                <div>
-                                  <Skeleton className="h-5 w-32 mb-1" />
-                                  <Skeleton className="h-4 w-24" />
-                                </div>
+                    {loadingPools ? (
+                      // Loading skeleton
+                      Array.from({ length: 4 }).map((_, index) => (
+                        <div key={index} className="border rounded-lg p-4">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center">
+                              <div className="relative mr-3">
+                                <Skeleton className="h-10 w-10 rounded-full" />
+                                <Skeleton className="h-6 w-6 rounded-full absolute -bottom-1 -right-1" />
                               </div>
-                              <div className="text-right">
-                                <Skeleton className="h-5 w-24 mb-1" />
-                                <Skeleton className="h-4 w-32" />
+                              <div>
+                                <Skeleton className="h-5 w-32 mb-1" />
+                                <Skeleton className="h-4 w-24" />
                               </div>
-                              <Skeleton className="h-5 w-5" />
+                            </div>
+                            <div className="text-right">
+                              <Skeleton className="h-5 w-24 mb-1" />
+                              <Skeleton className="h-4 w-32" />
                             </div>
                           </div>
-                        ))
-                      : pools.map((pool) => (
+                        </div>
+                      ))
+                    ) : realPools.length === 0 ? (
+                      // No pools message
+                      <div className="text-center py-8 text-muted-foreground">
+                        No liquidity pools found. Create one to get started!
+                      </div>
+                    ) : (
+                      // Map real pools but preserve mock data for UI
+                      realPools.map((pool, index) => {
+                        // Use real pool data but combine with mock data for UI
+                        const mockPool = pools[index % pools.length]; // Cycle through mock pools if there are more real pools
+                        return (
                           <div
                             key={pool.id}
                             className="border rounded-lg p-4 hover:border-emerald-600 transition-colors cursor-pointer"
-                            onClick={() => handlePoolSelect(pool)}
+                            onClick={() => handlePoolSelect({
+                              ...mockPool, // Keep the mock UI data
+                              id: pool.id, // But use the real ID
+                              token1: getTokenName(pool.tokenA), // Use real token names
+                              token2: getTokenName(pool.tokenB),
+                              name: `${getTokenName(pool.tokenA)} / ${getTokenName(pool.tokenB)}`, // Format real name
+                              realData: true, // Flag to know this has real data
+                            })}
                           >
                             <div className="flex justify-between items-center">
                               <div className="flex items-center">
                                 <div className="relative mr-3">
-                                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                    {pool.token1}
+                                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-xs">
+                                    {getTokenName(pool.tokenA)}
                                   </div>
                                   <div className="w-6 h-6 rounded-full bg-gray-100 absolute -bottom-1 -right-1 flex items-center justify-center text-xs">
-                                    {pool.token2}
+                                    {getTokenName(pool.tokenB)}
                                   </div>
                                 </div>
                                 <div>
-                                  <h3 className="font-medium">{pool.name}</h3>
+                                  <h3 className="font-medium">{getTokenName(pool.tokenA)} / {getTokenName(pool.tokenB)}</h3>
                                   <div className="flex items-center text-sm text-gray-500">
-                                    <span>APR: </span>
-                                    <span className="text-emerald-600 font-medium ml-1">{pool.apr}%</span>
+                                    <span>Pool ID: </span>
+                                    <span className="ml-1 truncate max-w-[150px]">{pool.id.substring(0, 10)}...</span>
                                   </div>
                                 </div>
                               </div>
                               <div className="text-right">
-                                <div className="font-medium">${pool.totalLiquidity.toLocaleString()}</div>
+                                {/* Keep mock data for visual consistency */}
+                                <div className="font-medium">${mockPool.totalLiquidity.toLocaleString()}</div>
                                 <div className="text-sm text-gray-500">Total Liquidity</div>
                               </div>
                               <ChevronRight className="h-5 w-5 text-gray-400" />
                             </div>
 
-                            {pool.userLiquidity > 0 && (
+                            {/* Mock UI for user liquidity */}
+                            {mockPool.userLiquidity > 0 && (
                               <div className="mt-4 pt-4 border-t">
                                 <div className="flex justify-between items-center mb-2">
                                   <span className="text-sm text-gray-500">Your Share</span>
-                                  <span className="text-sm font-medium">{(pool.userShare * 100).toFixed(2)}%</span>
+                                  <span className="text-sm font-medium">{(mockPool.userShare * 100).toFixed(2)}%</span>
                                 </div>
                                 <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
                                   <div 
                                     className="bg-emerald-500 h-2 rounded-full" 
-                                    style={{ width: `${pool.userShare * 100}%` }}
+                                    style={{ width: `${mockPool.userShare * 100}%` }}
                                   ></div>
                                 </div>
                                 <div className="flex justify-between mt-2">
                                   <div className="text-sm">
                                     <span className="text-gray-500">Your Liquidity:</span>
-                                    <span className="font-medium ml-1">${pool.userLiquidity.toLocaleString()}</span>
+                                    <span className="font-medium ml-1">${mockPool.userLiquidity.toLocaleString()}</span>
                                   </div>
                                   <div className="text-sm">
                                     <span className="text-gray-500">Rewards:</span>
                                     <span className="font-medium ml-1 text-emerald-600">
-                                      ${pool.rewards.toLocaleString()}
+                                      ${mockPool.rewards.toLocaleString()}
                                     </span>
                                   </div>
                                 </div>
                               </div>
                             )}
                           </div>
-                        ))}
+                        );
+                      })
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -511,7 +686,7 @@ export default function MarketplacePage() {
                   <CardDescription>Manage your liquidity positions</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {isWalletConnected ? (
+                  {connectionStatus === 'connected' ? (
                     <div className="space-y-4">
                       <div className="border rounded-lg p-4">
                         <div className="flex justify-between items-center mb-4">
@@ -554,7 +729,21 @@ export default function MarketplacePage() {
                       <button
                         className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-md flex items-center justify-center"
                         onClick={() => {
-                          handlePoolSelect(pools[0]);
+                          // If we have real pools, select the first one
+                          if (realPools.length > 0) {
+                            const firstPool = realPools[0];
+                            const mockPool = pools[0];
+                            handlePoolSelect({
+                              ...mockPool,
+                              id: firstPool.id,
+                              token1: getTokenName(firstPool.tokenA),
+                              token2: getTokenName(firstPool.tokenB),
+                              name: `${getTokenName(firstPool.tokenA)} / ${getTokenName(firstPool.tokenB)}`,
+                              realData: true,
+                            });
+                          } else {
+                            handlePoolSelect(pools[0]);
+                          }
                           setActiveTab("add");
                         }}
                       >
@@ -568,9 +757,7 @@ export default function MarketplacePage() {
                       <p className="text-gray-500 mb-4">
                         Connect your wallet to view and manage your liquidity positions
                       </p>
-                      <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={toggleWalletConnection}>
-                        Connect Wallet
-                      </Button>
+                      <ConnectButton />
                     </div>
                   )}
                 </CardContent>
@@ -629,7 +816,6 @@ export default function MarketplacePage() {
                         value={amount1}
                         onChange={(e) => setAmount1(e.target.value)}
                       />
-                      <div className="text-right text-sm text-gray-500">Balance: 10,000 {selectedPool.token1}</div>
                     </div>
 
                     <div className="flex justify-center">
@@ -647,7 +833,6 @@ export default function MarketplacePage() {
                         value={amount2}
                         onChange={(e) => setAmount2(e.target.value)}
                       />
-                      <div className="text-right text-sm text-gray-500">Balance: 5 {selectedPool.token2}</div>
                     </div>
                   </div>
 
