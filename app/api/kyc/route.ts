@@ -10,16 +10,25 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
 
-    // Validate required fields
-    const { fullName, email, phoneNumber, address, idVerificationMethod } =
-      data;
+    // Validate required fields - align with frontend state and Rust needs
+    const {
+      fullName,
+      email,
+      phoneNumber,
+      address,
+      idVerificationType,
+      idVerificationNumber,
+      idExpiryDate,
+    } = data;
 
     if (
       !fullName ||
       !email ||
       !phoneNumber ||
       !address ||
-      !idVerificationMethod
+      !idVerificationType ||
+      !idVerificationNumber ||
+      !idExpiryDate
     ) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -27,20 +36,24 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if we're in development mode and binary exists
-    const binaryPath = "target/release/kyc_verification";
+    // --- Ensure this path and name are correct relative to Next.js project root ---
+    const relativeBinaryPath = "../identity.rs/target/release/user_kyc"; // Example: Adjust based on your structure
+    const absoluteBinaryPath = path.resolve(process.cwd(), relativeBinaryPath);
+    // --- ---
+
     const isDev = process.env.NODE_ENV === "development";
-    const binaryExists = existsSync(path.resolve(process.cwd(), binaryPath));
+    const binaryExists = existsSync(absoluteBinaryPath);
 
     // Log environment information
     console.log(`Environment: ${process.env.NODE_ENV}`);
-    console.log(`Binary path: ${path.resolve(process.cwd(), binaryPath)}`);
+    console.log(`Binary path: ${absoluteBinaryPath}`);
     console.log(`Binary exists: ${binaryExists}`);
 
     // Use fallback in dev mode if binary doesn't exist
     if (isDev && !binaryExists) {
-      console.log("Development mode: Using fallback KYC verification");
-
+      console.log(
+        "Development mode: Using fallback KYC verification (Binary not found)"
+      );
       // Mock a successful verification response
       const mockResult = {
         success: true,
@@ -48,14 +61,13 @@ export async function POST(request: Request) {
           .toString("hex")
           .substring(0, 32)}`,
         status: "verified",
-        message: "KYC verification successful (DEVELOPMENT MODE)",
+        message:
+          "KYC verification successful (DEVELOPMENT MODE - BINARY NOT FOUND)",
       };
-
       console.log("Fallback KYC verification result:", mockResult);
-
       return NextResponse.json({
         success: true,
-        message: "KYC verification successful (DEV MODE)",
+        message: "KYC verification successful (DEV MODE - BINARY NOT FOUND)",
         did: mockResult.did,
         verificationStatus: mockResult.status,
       });
@@ -63,51 +75,73 @@ export async function POST(request: Request) {
 
     // Normal flow - Call the Rust binary with the user data
     try {
-      const { stdout, stderr } = await execFileAsync(binaryPath, [
+      console.log(`Executing binary: ${absoluteBinaryPath}`);
+      const { stdout, stderr } = await execFileAsync(absoluteBinaryPath, [
         "--full-name",
         fullName,
         "--email",
         email,
-        "--phone",
+        "--phone-number",
         phoneNumber,
         "--address",
         address,
         "--id-type",
-        idVerificationMethod,
-        "--verification-mode",
-        "production",
+        idVerificationType,
+        "--id-number",
+        idVerificationNumber,
+        "--id-expiry",
+        idExpiryDate,
       ]);
 
-      // Check for errors
+      // Check for errors printed to stderr by the Rust binary
       if (stderr) {
-        console.error("KYC verification error:", stderr);
+        console.error("KYC verification stderr:", stderr);
         return NextResponse.json(
           { error: "KYC verification failed", details: stderr },
           { status: 500 }
         );
       }
 
-      // Parse the output from the Rust program
-      const result = JSON.parse(stdout);
+      // Parse the JSON output from the Rust program's stdout
+      let result;
+      try {
+        result = JSON.parse(stdout);
+      } catch (parseError) {
+        console.error("Failed to parse Rust binary output:", stdout);
+        console.error("Parse error:", parseError);
+        return NextResponse.json(
+          { error: "Failed to parse verification result", details: stdout },
+          { status: 500 }
+        );
+      }
 
-      // Handle successful KYC
+      // Handle successful KYC based on parsed result
       console.log("KYC verification successful:", result);
 
-      return NextResponse.json({
-        success: true,
-        message: "KYC verification successful",
-        did: result.did,
-        verificationStatus: result.verificationStatus,
-        kyc_credential: result.kyc_credential,
-      });
-    } catch (error) {
-      // If we're in development mode, use fallback
-      if (isDev) {
-        console.error(
-          "Error executing binary but continuing in dev mode:",
-          error
+      if (result.success) {
+        return NextResponse.json({
+          success: true,
+          message: result.message || "KYC verification successful",
+          did: result.did,
+          verificationStatus: result.status,
+          kyc_credential: result.credentialJpt,
+        });
+      } else {
+        return NextResponse.json(
+          {
+            error: "KYC verification reported failure",
+            details: result.error || stderr,
+          },
+          { status: 400 }
         );
+      }
+    } catch (error: any) {
+      // Handle errors during binary execution (e.g., process crash, file not executable)
+      console.error("Error executing Rust binary:", error);
 
+      // Fallback logic during development if execution fails
+      if (isDev) {
+        console.warn("Execution error, using fallback in dev mode.");
         // Mock a successful verification response
         const mockResult = {
           success: true,
@@ -115,26 +149,32 @@ export async function POST(request: Request) {
             .toString("hex")
             .substring(0, 32)}`,
           status: "verified",
-          message: "KYC verification successful (DEVELOPMENT MODE - FALLBACK)",
+          message:
+            "KYC verification successful (DEVELOPMENT MODE - EXECUTION FALLBACK)",
         };
-
         console.log("Fallback KYC verification result:", mockResult);
-
         return NextResponse.json({
           success: true,
-          message: "KYC verification successful (DEV MODE)",
+          message:
+            "KYC verification successful (DEV MODE - EXECUTION FALLBACK)",
           did: mockResult.did,
           verificationStatus: mockResult.status,
         });
       }
 
-      // In production, report the error
-      throw error;
+      // In production, report the execution error
+      return NextResponse.json(
+        {
+          error: "Failed to execute KYC verification process",
+          details: error.message,
+        },
+        { status: 500 }
+      );
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("API route error:", error);
     return NextResponse.json(
-      { error: "Server error processing KYC request" },
+      { error: "Server error processing KYC request", details: error.message },
       { status: 500 }
     );
   }

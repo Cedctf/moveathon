@@ -1,27 +1,26 @@
 // Copyright 2020-2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use clap::Parser;
 use examples::create_did_document;
 use examples::get_funded_client;
 use examples::get_memstorage;
 use examples::TEST_GAS_BUDGET;
+use serde::Serialize;
 use serde_json::json;
 use std::env;
+use std::io::{stderr, stdout, Write};
 
 // Clean up imports to only what's needed
-use identity_iota::core::{FromJson, Url, Object};
+use identity_iota::core::{FromJson, Url};
 use identity_iota::credential::{
-    Subject, Credential, CredentialBuilder, FailFast, 
-    Jpt, JptCredentialValidationOptions, JptCredentialValidator, 
-    JptPresentationValidationOptions, JptPresentationValidator,
-    JptPresentationValidatorUtils, JwpCredentialOptions, 
-    JwpPresentationOptions, SelectiveDisclosurePresentation
+    Subject, Credential, CredentialBuilder, 
+    Jpt, JwpCredentialOptions
 };
 
-use identity_iota::did::{DID, CoreDID};
+use identity_iota::did::DID;
 use identity_iota::storage::{JwpDocumentExt, JwkMemStore};
 use identity_iota::verification::MethodScope;
-use identity_iota::resolver::Resolver;
 use identity_iota::iota::IotaDocument;
 use identity_iota::iota::rebased::transaction::TransactionOutput;
 use identity_iota::iota::rebased::client::{IdentityClient, IotaKeySignature};
@@ -30,12 +29,129 @@ use identity_storage::Storage;
 use jsonprooftoken::jpa::algs::ProofAlgorithm;
 use secret_storage::Signer;
 
+// Command Line Argument Parsing
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+  /// Full name of the user
+  #[arg(long)]
+  full_name: String,
+
+  /// User's email address
+  #[arg(long)]
+  email: String,
+
+  /// User's phone number
+  #[arg(long)]
+  phone_number: String,
+
+  /// User's address
+  #[arg(long)]
+  address: String,
+
+  /// Type of ID used for verification (e.g., passport)
+  #[arg(long)]
+  id_type: String,
+
+  /// ID number
+  #[arg(long)]
+  id_number: String,
+
+  /// ID expiry date (YYYY-MM-DD)
+  #[arg(long)]
+  id_expiry: String,
+  // Add optional arguments for network, package ID etc. if needed
+  // #[arg(long, default_value = "http://localhost:14265")]
+  // network_endpoint: String,
+}
+
+// Output Structure for JSON
+#[derive(Serialize, Debug)]
+struct KycOutput {
+  success: bool,
+  message: String,
+  did: Option<String>,
+  #[serde(rename = "credentialJpt")] // Match expected field name in route.ts
+  credential_jpt: Option<String>,
+  status: Option<String>, // e.g., "verified"
+  error: Option<String>,
+}
+
 /// Demonstrates how to create a DID Document and publish it on chain,
 /// then perform a simulated KYC process with Zero-Knowledge Selective Disclosure.
 ///
 /// This example focuses only on user personal data verification.
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() {
+  // Parse command line arguments
+  let args = Args::parse();
+
+  // Run the core KYC logic
+  match run_kyc(args).await {
+    Ok(output) => {
+      // Serialize the successful output to JSON
+      match serde_json::to_string(&output) {
+        Ok(json_output) => {
+          // Print the JSON to stdout
+          if let Err(e) = writeln!(stdout(), "{}", json_output) {
+            // Handle potential error writing to stdout
+            eprintln!("Error writing success JSON to stdout: {}", e);
+            std::process::exit(1); // Exit with error code
+          }
+          // Success exit code is 0 (default)
+        }
+        Err(e) => {
+          // Handle error during JSON serialization of success output
+          let err_msg = format!("Failed to serialize success output to JSON: {}", e);
+          let error_output = KycOutput {
+            success: false,
+            message: "Internal server error during output serialization.".to_string(),
+            did: None,
+            credential_jpt: None,
+            status: None,
+            error: Some(err_msg.clone()),
+          };
+          // Attempt to print error JSON to stderr
+          if let Ok(json_err) = serde_json::to_string(&error_output) {
+             eprintln!("{}", json_err);
+          } else {
+             eprintln!("Failed to serialize error output: {}", err_msg); // Fallback plain text
+          }
+          std::process::exit(1); // Exit with error code
+        }
+      }
+    }
+    Err(e) => {
+      // Prepare error output
+      let error_output = KycOutput {
+        success: false,
+        message: "KYC verification failed.".to_string(),
+        did: None,
+        credential_jpt: None,
+        status: Some("failed".to_string()),
+        error: Some(format!("{}", e)), // Include the error details
+      };
+      // Serialize the error output to JSON
+      match serde_json::to_string(&error_output) {
+        Ok(json_error) => {
+          // Print the JSON error to stderr
+          if let Err(write_err) = writeln!(stderr(), "{}", json_error) {
+             eprintln!("Error writing error JSON to stderr: {}", write_err); // Fallback plain text
+             eprintln!("Original error: {}", e); // Print original error if JSON write fails
+          }
+        }
+        Err(ser_err) => {
+          // Handle error during JSON serialization of error output
+          eprintln!("Failed to serialize error output to JSON: {}", ser_err);
+          eprintln!("Original error: {}", e); // Fallback plain text
+        }
+      }
+      std::process::exit(1); // Exit with a non-zero status code to indicate failure
+    }
+  }
+}
+
+async fn run_kyc(args: Args) -> anyhow::Result<KycOutput> {
   // Set the package ID environment variable if not already set
   if env::var("IOTA_IDENTITY_PKG_ID").is_err() {
     // Make sure this package ID is correctly deployed on your network
@@ -78,30 +194,30 @@ async fn main() -> anyhow::Result<()> {
   // === ZKP-ENABLED USER KYC CREDENTIAL ISSUANCE ===
   println!("\n=== ZKP-ENABLED USER KYC CREDENTIAL ISSUANCE ===");
 
-  // Create a credential subject with detailed user information
+  // Create a credential subject using the data from command line arguments
   let subject: Subject = Subject::from_json_value(json!({
     "id": user_document.id().as_str(),
     "userPersonalDetails": {
-      "fullName": "John Alexander Smith",
-      "email": "john.smith@example.com",
-      "phoneNumber": "+1-555-123-4567",
-      "address": "1234 Market Street, Apt 567, San Francisco, CA 94103, United States",
-      "idVerificationType": "passport", // Only allows: "passport", "driversLicense", or "nationalId"
-      "idVerificationNumber": "P12345678",
-      "idExpiryDate": "2028-05-15"
+      "fullName": args.full_name,
+      "email": args.email,
+      "phoneNumber": args.phone_number,
+      "address": args.address,
+      "idVerificationType": args.id_type,
+      "idVerificationNumber": args.id_number,
+      "idExpiryDate": args.id_expiry
     },
     "verificationDetails": {
-      "verificationDate": "2023-12-05",
-      "verificationLevel": "Enhanced Due Diligence",
-      "verifiedBy": "BlockchainKYC Solutions Inc.",
-      "verificationStatus": "Approved",
-      "expiryDate": "2024-12-05"
+      "verificationDate": chrono::Utc::now().format("%Y-%m-%d").to_string(),
+      "verificationLevel": "Basic Due Diligence",
+      "verifiedBy": "Asseta KYC Service (Automated)",
+      "verificationStatus": "Verified",
+      "expiryDate": (chrono::Utc::now() + chrono::Duration::days(365)).format("%Y-%m-%d").to_string()
     }
   }))?;
 
   // Build the user KYC credential
   let kyc_credential: Credential = CredentialBuilder::default()
-    .id(Url::parse("https://example.org/credentials/user-kyc/1234")?)
+    .id(Url::parse(&format!("urn:uuid:{}", uuid::Uuid::new_v4()))?)
     .issuer(Url::parse(kyc_document.id().as_str())?)
     .type_("UserKycVerificationCredential")
     .subject(subject)
@@ -118,87 +234,17 @@ async fn main() -> anyhow::Result<()> {
     )
     .await?;
 
-  println!("ZKP-enabled User KYC Credential created successfully");
+  println!("ZKP-enabled User KYC Credential created successfully as JPT.");
 
-  // === VERIFY THE FULL KYC CREDENTIAL ===
-  println!("\n=== VERIFY THE FULL KYC CREDENTIAL ===");
-
-  // Validate the credential using JPT validator
-  let decoded_credential = JptCredentialValidator::validate::<_, Object>(
-    &kyc_credential_jpt,
-    &kyc_document,
-    &JptCredentialValidationOptions::default(),
-    FailFast::FirstError,
-  )?;
-
-  println!("User KYC Credential successfully validated!");
-  println!("KYC Credential Details (all fields):");
-  println!("{:#}", decoded_credential.credential);
-
-  // === SELECTIVE DISCLOSURE PRESENTATION CREATION ===
-  println!("\n=== SELECTIVE DISCLOSURE PRESENTATION CREATION ===");
-  println!("User wants to prove identity while hiding sensitive personal information");
-
-  // Determine which KYC method ID was used for signing
-  let method_id = decoded_credential
-    .decoded_jwp
-    .get_issuer_protected_header()
-    .kid()
-    .unwrap();
-
-  // Create a selective disclosure presentation that hides specific fields
-  let mut selective_disclosure = SelectiveDisclosurePresentation::new(&decoded_credential.decoded_jwp);
-  
-  // Conceal sensitive fields the user doesn't want to share
-  selective_disclosure.conceal_in_subject("userPersonalDetails.idVerificationNumber")?;  // Hide ID number
-  selective_disclosure.conceal_in_subject("userPersonalDetails.address")?;               // Hide home address
-  selective_disclosure.conceal_in_subject("userPersonalDetails.phoneNumber")?;           // Hide phone number
-  
-  // Generate a challenge for presentation verification
-  let challenge = "platform-verification-challenge-xyz789";
-
-  // Create the ZKP presentation that proves credential validity while hiding concealed fields
-  let zkp_presentation: Jpt = kyc_document
-    .create_presentation_jpt(
-      &mut selective_disclosure,
-      method_id,
-      &JwpPresentationOptions::default().nonce(challenge),
-    )
-    .await?;
-
-  println!("Selective disclosure presentation created successfully");
-  println!("User can now prove identity without revealing sensitive information");
-
-  // === SERVICE PROVIDER VERIFIES SELECTIVE DISCLOSURE ===
-  println!("\n=== SERVICE PROVIDER VERIFIES SELECTIVE DISCLOSURE ===");
-
-  // Service provider extracts the issuer from the presentation
-  let issuer: CoreDID = JptPresentationValidatorUtils::extract_issuer_from_presented_jpt(&zkp_presentation)?;
-  
-  // Create a resolver for DID resolution
-  let mut resolver: Resolver<IotaDocument> = Resolver::new();
-  resolver.attach_iota_handler((*user_client).clone());
-  
-  // Resolve the issuer's document
-  let issuer_document: IotaDocument = resolver.resolve(&issuer).await?;
-  
-  // Validate the ZKP presentation with the challenge
-  let presentation_validation_options = JptPresentationValidationOptions::default().nonce(challenge);
-  
-  // Verify the selective disclosure presentation
-  let verified_sd_credential = JptPresentationValidator::validate::<_, Object>(
-    &zkp_presentation,
-    &issuer_document,
-    &presentation_validation_options,
-    FailFast::FirstError,
-  )?;
-  
-  println!("Selective disclosure successfully validated!");
-  println!("Service provider can see:");
-  println!("{:#}", verified_sd_credential.credential);
-  println!("Notice that sensitive personal information is hidden while the credential remains valid");
-
-  Ok(())
+  // --- Prepare successful output ---
+  Ok(KycOutput {
+    success: true,
+    message: "KYC verification successful and credential issued.".to_string(),
+    did: Some(user_document.id().to_string()),
+    credential_jpt: Some(kyc_credential_jpt.as_str().to_string()),
+    status: Some("verified".to_string()),
+    error: None,
+  })
 }
 
 // Helper function to create a DID with ZKP capabilities using BBS+
