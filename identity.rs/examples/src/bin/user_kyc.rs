@@ -168,9 +168,6 @@ async fn run_kyc(args: Args) -> anyhow::Result<KycOutput> {
     Ok(client) => client,
     Err(e) => {
       println!("\nError: Failed to create client. This usually means:");
-      println!("1. The identity package is not deployed on the network");
-      println!("2. Your local network isn't running or accessible");
-      println!("3. The package ID is incorrect");
       return Err(e);
     }
   };

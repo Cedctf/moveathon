@@ -53,8 +53,7 @@ export async function POST(request: Request) {
     console.log("Environment:", environment);
 
     // Path to the Rust binary
-    const relativeBinaryPath =
-      "/Users/edw/Desktop/moveathon/identity.rs/target/release/asset_kyc";
+    const relativeBinaryPath = "identity.rs/target/release/asset_kyc";
     const absoluteBinaryPath = path.resolve(process.cwd(), relativeBinaryPath);
 
     console.log("Binary path:", absoluteBinaryPath);
