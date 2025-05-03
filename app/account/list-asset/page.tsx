@@ -729,21 +729,22 @@ export default function ListAssetPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between mt-6">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setActiveTab("kyc")}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                    >
-                      Continue
-                    </Button>
-                  </div>
+                  <VerificationProgress />
+
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white mt-6"
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Processing...</span>
+                      </div>
+                    ) : (
+                      "Continue"
+                    )}
+                  </Button>
                 </form>
               </CardContent>
             </Card>
