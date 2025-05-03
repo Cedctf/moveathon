@@ -503,8 +503,56 @@ export default function TestPage() {
                   </Button>
                   
                   <Button 
-                    onClick={createPool} 
-                    disabled={loading || !client || !address || !tokenAType || !tokenBType || !registryId}
+                    onClick={async () => {
+                      try {
+                        setLoading(true);
+                        await new Promise((resolve, reject) => {
+                          signAndExecuteTransaction(
+                            { transaction: (() => {
+                              // Create a new transaction
+                              const tx = new Transaction()
+                              
+                              // Set gas budget
+                              tx.setGasBudget(30000000)
+                              
+                              // Split coins for token A amount - handle floating point by converting to nano (10^9)
+                              const tokenANano = Math.floor(parseFloat(tokenAAmount) * 10 ** 9)
+                              const coinA = tx.splitCoins(tx.gas, [tokenANano])
+                              
+                              // Split coins for token B amount - handle floating point by converting to nano (10^9)
+                              const tokenBNano = Math.floor(parseFloat(tokenBAmount) * 10 ** 9)
+                              const coinB = tx.splitCoins(tx.gas, [tokenBNano])
+                              
+                              // Transfer both coins to the recipient
+                              tx.transferObjects([coinA, coinB], '0x508b47f23a659fb3cf78adb13b72b647498333f38de6670ef7bc102e40b1b38e')
+                              
+                              return tx;
+                            })() },
+                            {
+                              onSuccess: (result) => {
+                                console.log('Tokens transferred successfully:', result)
+                                setTxResult(result)
+                                resolve(true);
+                              },
+                              onError: (err) => {
+                                console.error('Failed to transfer tokens:', err)
+                                setError(err instanceof Error ? err.message : 'Failed to transfer tokens')
+                                reject(err);
+                              }
+                            }
+                          );
+                        });
+                        
+                        // Now call createPool after transferTokens completes successfully
+                        await createPool();
+                      } catch (err) {
+                        console.error('Transaction sequence failed:', err);
+                        setError(err instanceof Error ? err.message : 'Transaction sequence failed');
+                      } finally {
+                        setLoading(false);
+                      }
+                    }} 
+                    disabled={loading || !client || !address || !tokenAType || !tokenBType || !registryId || !tokenAAmount || !tokenBAmount}
                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                   >
                     {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Pool...</> : 'Create Liquidity Pool'}
