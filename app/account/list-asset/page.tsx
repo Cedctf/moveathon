@@ -20,7 +20,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, Check, AlertCircle, FileText, ImageIcon } from "lucide-react";
+import {
+  Upload,
+  Check,
+  AlertCircle,
+  FileText,
+  ImageIcon,
+  CheckCircle,
+  Loader2,
+} from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 export default function ListAssetPage() {
@@ -51,6 +59,12 @@ export default function ListAssetPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [kycError, setKycError] = useState("");
+
+  const [verificationProgress, setVerificationProgress] = useState(0);
+  const [verificationStep, setVerificationStep] = useState("");
+  const [verificationSuccess, setVerificationSuccess] = useState(false);
+  const [assetDid, setAssetDid] = useState("");
+  const [assetCredential, setAssetCredential] = useState("");
 
   const handleFileSelect = (ref: React.RefObject<HTMLInputElement>) => {
     ref.current?.click();
@@ -104,212 +118,205 @@ export default function ListAssetPage() {
     setIsSubmitting(true);
     setKycError("");
 
-    console.log("========== KYC FORM SUBMISSION STARTED ==========");
-    console.log(`[${new Date().toISOString()}] KYC form submit triggered`);
+    console.log("========== SIMULATED KYC VERIFICATION STARTED ==========");
+    console.log(
+      `[${new Date().toISOString()}] KYC verification simulation triggered`
+    );
 
     try {
-      // Prepare data for submission
-      const kycData = {
-        fullName: formData.name,
-        email: formData.email,
-        phoneNumber: formData.phone,
-        address: formData.address,
-        idVerificationType: formData.idVerificationMethod,
-        documentFile: selectedFile ? selectedFile.name : null, // Just sending file name for now
-      };
+      // Simulate verification steps with progress
+      const steps = [
+        "Initializing verification...",
+        "Creating DID document...",
+        "Generating verification keys...",
+        "Publishing DID to ledger...",
+        "Verifying identity information...",
+        "Creating verifiable credentials...",
+        "Signing credentials...",
+        "Storing credentials securely...",
+        "Finalizing verification...",
+      ];
 
-      console.log("KYC Data being submitted:", kycData);
-      console.log("Target API endpoint: /api/user-kyc");
+      // Simulate each step with a delay to make it look realistic
+      for (let i = 0; i < steps.length; i++) {
+        setVerificationStep(steps[i]);
+        setVerificationProgress(Math.floor((i / steps.length) * 100));
 
-      try {
-        const response = await fetch("/api/user-kyc", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(kycData),
-        });
-
-        console.log("KYC Response status:", response.status);
-        console.log(
-          "KYC Response headers:",
-          Object.fromEntries(response.headers.entries())
-        );
-
-        const result = await response.json();
-        console.log("KYC API response:", result);
-
-        if (!response.ok) {
-          throw new Error(result.error || "KYC verification failed");
-        }
-
-        // Handle successful KYC
-        console.log("KYC verification successful:", result);
-      } catch (error) {
-        console.error("API error but continuing for development:", error);
-        // For development, allow continuing even if API fails
-        console.log("Development mode: proceeding despite API error");
+        // Show each step for a realistic amount of time
+        await new Promise((resolve) => setTimeout(resolve, 400));
       }
+
+      // Simulation complete
+      setVerificationProgress(100);
+      setVerificationStep("Verification complete!");
+
+      // Create mock DID based on user information
+      const mockUserDid = `did:iota:${Buffer.from(
+        formData.name + formData.email
+      )
+        .toString("hex")
+        .substring(0, 32)}`;
+      console.log("Generated mock User DID:", mockUserDid);
+
+      // Create mock credential
+      const mockCredential = `eyJhbGciOiJFZERTQSIsInR5cCI6IkpQVCJ9.eyJzdWIiOiIke21vY2tVc2VyRGlkfSIsImZ1bGxOYW1lIjoiJHtmb3JtRGF0YS5uYW1lfSIsInZlcmlmaWNhdGlvblN0YXR1cyI6InZlcmlmaWVkIn0.${Buffer.from(
+        Math.random().toString()
+      ).toString("base64")}`;
+
+      // Simulate successful completion
+      console.log("KYC verification simulation successful");
+      console.log("Mock credential:", mockCredential);
+
+      // Show success indicator
+      setVerificationSuccess(true);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Mark KYC as completed and move to next step
       setKycCompleted(true);
-
-      // Use setTimeout to ensure state update happens before tab change
-      setTimeout(() => {
-        setActiveTab("asset-details");
-      }, 100);
+      setActiveTab("asset-details");
     } catch (error) {
-      console.error("KYC submission error:", error);
-      setKycError(
-        error instanceof Error ? error.message : "Unknown error occurred"
-      );
+      console.error("Simulated KYC error:", error);
+      setKycError("An unexpected error occurred during verification.");
     } finally {
       setIsSubmitting(false);
-      console.log("========== KYC FORM SUBMISSION ENDED ==========");
+      setVerificationProgress(0);
+      setVerificationStep("");
+      setVerificationSuccess(false);
+      console.log("========== SIMULATED KYC VERIFICATION ENDED ==========");
     }
   };
 
   const handleAssetDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("========== ASSET DETAILS SUBMISSION STARTED ==========");
-    console.log(`[${new Date().toISOString()}] Asset details submit triggered`);
+    console.log("========== SIMULATED ASSET VERIFICATION STARTED ==========");
+    console.log(
+      `[${new Date().toISOString()}] Asset verification simulation triggered`
+    );
 
     // Get form data from the asset details form
     const assetForm = e.target as HTMLFormElement;
 
-    // Dump all form elements for debugging
-    console.log(
-      "All form elements:",
-      Array.from(assetForm.elements).map((el) => {
-        const element = el as HTMLElement;
-        return {
-          tagName: element.tagName,
-          id: element.id,
-          className: element.className,
-          name: (element as any).name,
-          value: (element as any).value,
-        };
-      })
-    );
-
-    // Use a more direct approach to get asset type
-    // Try multiple selectors to find the asset type dropdown
-    let assetTypeValue;
-    const assetTypeSelectors = [
-      "#asset-type",
-      'select[id="asset-type"]',
-      'select[name="asset-type"]',
-      ".asset-type",
-      "select.asset-type",
-      'select[id*="type"]',
-      "select", // Last resort - get any select element
-    ];
-
-    for (const selector of assetTypeSelectors) {
-      const element = assetForm.querySelector(selector) as HTMLSelectElement;
-      if (element) {
-        console.log(`Found element with selector ${selector}:`, element);
-        assetTypeValue = element.value;
-        if (assetTypeValue) {
-          console.log(
-            `Asset type value found using ${selector}: ${assetTypeValue}`
-          );
-          break;
-        }
-      }
-    }
-
     // Create an object to store asset data
-    const assetData = {
-      assetName: (assetForm.querySelector("#asset-name") as HTMLInputElement)
-        ?.value,
-      assetType: assetTypeValue || "real-estate-residential", // Use the found value or hardcode a fallback
-      location: (assetForm.querySelector("#location") as HTMLInputElement)
-        ?.value,
-      valuation: (assetForm.querySelector("#valuation") as HTMLInputElement)
-        ?.value,
-      tokenSymbol: (
-        assetForm.querySelector("#token-symbol") as HTMLInputElement
-      )?.value,
-      description: (
-        assetForm.querySelector("#description") as HTMLTextAreaElement
-      )?.value,
-    };
+    const assetName =
+      (assetForm.querySelector("#asset-name") as HTMLInputElement)?.value ||
+      "Unnamed Asset";
+    const assetType =
+      document.querySelector("select")?.value || "real-estate-residential";
+    const location =
+      (assetForm.querySelector("#location") as HTMLInputElement)?.value ||
+      "Unknown Location";
+    const valuation =
+      (assetForm.querySelector("#valuation") as HTMLInputElement)?.value ||
+      "10000";
+    const tokenSymbol =
+      (assetForm.querySelector("#token-symbol") as HTMLInputElement)?.value ||
+      "TOKEN";
 
-    console.log("Final asset data being submitted:", assetData);
-    console.log("Target API endpoint: /api/asset-kyc");
+    console.log("Asset data collected:", {
+      assetName,
+      assetType,
+      location,
+      valuation,
+      tokenSymbol,
+    });
 
     try {
-      const response = await fetch("/api/asset-kyc", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(assetData),
-      });
+      // Reset state
+      setVerificationSuccess(false);
+      setVerificationProgress(0);
 
-      console.log("Asset Details Response status:", response.status);
+      // Simulate verification steps with progress
+      const steps = [
+        "Initializing asset verification...",
+        "Creating asset DID document...",
+        "Generating ZKP-enabled verification keys...",
+        "Publishing asset DID to IOTA ledger...",
+        "Creating asset metadata...",
+        "Generating token contract address...",
+        "Creating zero-knowledge proof credentials...",
+        "Signing asset credentials...",
+        "Finalizing asset verification...",
+      ];
 
-      const result = await response.json();
-      console.log("Asset Details API response:", result);
+      // Simulate each step with a delay
+      for (let i = 0; i < steps.length; i++) {
+        setVerificationStep(steps[i]);
+        setVerificationProgress(Math.floor((i / steps.length) * 100));
 
-      if (!response.ok) {
-        console.warn(
-          "API returned an error, but continuing for development purposes"
-        );
-
-        // In development environment, we'll continue despite the error
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            "DEVELOPMENT MODE: Proceeding to documents tab despite API error"
-          );
-          setAssetDetailsCompleted(true);
-          setTimeout(() => {
-            console.log("Switching to 'documents' tab...");
-            setActiveTab("documents");
-          }, 100);
-          return;
-        }
-
-        throw new Error(
-          result.error || `Asset verification failed: ${JSON.stringify(result)}`
-        );
+        // Show each step for a realistic amount of time
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
-      console.log("Asset verification successful:", result);
+      // Simulation complete
+      setVerificationProgress(100);
+      setVerificationStep("Asset verification complete!");
 
-      // Mark asset details as completed
-      console.log("Marking asset details as completed");
+      // Create mock asset DID and credentials
+      const mockAssetDid = `did:iota:${Buffer.from(assetName + location)
+        .toString("hex")
+        .substring(0, 32)}`;
+      console.log("Generated mock Asset DID:", mockAssetDid);
+      setAssetDid(mockAssetDid);
+
+      // Mock token contract address
+      const mockTokenAddress = `0x${Buffer.from(tokenSymbol + assetName)
+        .toString("hex")
+        .substring(0, 40)}`;
+
+      // Mock credential JWT for asset
+      const mockAssetCredential = `eyJhbGciOiJCQlMrIiwidHlwIjoiSlBUIiwiY3JpdCI6WyJiNjQiXSwiYjY0IjpmYWxzZX0.eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiQXNzZXRUb2tlbml6YXRpb25DcmVkZW50aWFsIl0sImlzc3VlciI6IiR7bW9ja0Fzc2V0RGlkfSIsImlzc3VhbmNlRGF0ZSI6IiR7bmV3IERhdGUoKS50b0lTT1N0cmluZygpfSIsImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImFzc2V0TmFtZSI6IiR7YXNzZXROYW1lfSIsImFzc2V0VHlwZSI6IiR7YXNzZXRUeXBlfSIsImxvY2F0aW9uIjoiJHtsb2NhdGlvbn0iLCJ2YWx1YXRpb24iOiIke3ZhbHVhdGlvbn0iLCJ0b2tlbkFkZHJlc3MiOiIke21vY2tUb2tlbkFkZHJlc3N9In19.${Buffer.from(
+        Math.random().toString()
+      ).toString("base64")}`;
+      setAssetCredential(mockAssetCredential);
+
+      console.log("Mock asset credential:", mockAssetCredential);
+
+      // Show success indicator
+      setVerificationSuccess(true);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Mark asset details as completed and move to documents tab
       setAssetDetailsCompleted(true);
+      setActiveTab("documents");
 
-      // Switch to the documents tab
-      console.log("Preparing to switch to documents tab");
-      setTimeout(() => {
-        console.log("Switching to 'documents' tab");
-        setActiveTab("documents");
-      }, 100);
+      console.log("Asset verification simulation successful");
     } catch (error) {
-      console.error("Asset details submission error:", error);
-      alert(
-        `Error submitting asset details: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
+      console.error("Simulated asset verification error:", error);
 
-      // For development purposes, still allow continuing to the next tab
-      if (process.env.NODE_ENV === "development") {
-        console.log(
-          "DEVELOPMENT MODE: Proceeding to documents tab despite error"
-        );
-        setAssetDetailsCompleted(true);
-        setTimeout(() => {
-          console.log("Switching to 'documents' tab...");
-          setActiveTab("documents");
-        }, 100);
-      }
+      // For demo purposes, still allow continuing
+      setVerificationSuccess(true);
+      setAssetDetailsCompleted(true);
+      setTimeout(() => {
+        setActiveTab("documents");
+      }, 1000);
     } finally {
-      console.log("========== ASSET DETAILS SUBMISSION ENDED ==========");
+      console.log("========== SIMULATED ASSET VERIFICATION ENDED ==========");
     }
+  };
+
+  const VerificationProgress = () => {
+    if (verificationProgress === 0 && !verificationStep) return null;
+
+    return (
+      <div className="my-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="flex items-center gap-2 mb-2">
+          {verificationSuccess ? (
+            <CheckCircle className="h-5 w-5 text-emerald-600" />
+          ) : (
+            <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+          )}
+          <span className="font-medium text-sm">{verificationStep}</span>
+        </div>
+        <Progress value={verificationProgress} className="h-2" />
+        {assetDid && (
+          <div className="mt-3 text-xs font-mono bg-slate-100 p-2 rounded">
+            <div>
+              <span className="text-slate-500">Asset DID:</span> {assetDid}
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -560,15 +567,22 @@ export default function ListAssetPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-end mt-6">
-                    <Button
-                      type="submit"
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? "Processing..." : "Submit KYC"}
-                    </Button>
-                  </div>
+                  <VerificationProgress />
+
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Verifying...</span>
+                      </div>
+                    ) : (
+                      "Continue"
+                    )}
+                  </Button>
                 </form>
               </CardContent>
             </Card>
