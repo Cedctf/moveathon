@@ -30,9 +30,11 @@ import { StaggerContainer, StaggerItem } from "@/components/animations/stagger-c
 import { CountUp } from "@/components/animations/count-up"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCurrentWallet, useCurrentAccount } from '@iota/dapp-kit'
+import { useWalletKYCData, getWalletKYCData, updateKYCData, KYCData, emptyKYCData } from '@/lib/kyc-service'
+import { KYCBanner } from '@/components/kyc-banner'
 
-// Mock user data
-const userData = {
+// Mock user data - will be replaced with actual KYC data when available
+const defaultUserData = {
   name: "Alex Johnson",
   email: "alex.johnson@example.com",
   kycStatus: "verified",
@@ -109,15 +111,45 @@ export default function AccountPage() {
   const { currentWallet, connectionStatus } = useCurrentWallet()
   const currentAccount = useCurrentAccount()
   const [walletAddress, setWalletAddress] = useState("")
+  const [userData, setUserData] = useState<KYCData | null>(null)
+
+  // Get wallet KYC data using our custom hook
+  const { needsKYC, kycData, isVerified } = useWalletKYCData(walletAddress)
 
   useEffect(() => {
     // Update wallet address when wallet connection changes
     if (currentWallet && connectionStatus === 'connected' && currentAccount) {
-      setWalletAddress(currentAccount.address || "")
+      const address = currentAccount.address || "";
+      setWalletAddress(address);
+      
+      // Record wallet connection in localStorage
+      if (address) {
+        const existingData = getWalletKYCData(address);
+        
+        if (existingData) {
+          // If we have existing data for this wallet, use it
+          setUserData(existingData);
+        } else {
+          // Initialize with empty data
+          updateKYCData(address, {
+            ...emptyKYCData,
+            joinDate: new Date().toISOString()
+          });
+        }
+      }
     } else {
-      setWalletAddress("")
+      setWalletAddress("");
+      setUserData(null);
     }
-  }, [currentWallet, connectionStatus, currentAccount])
+  }, [currentWallet, connectionStatus, currentAccount]);
+
+  useEffect(() => {
+    // Load KYC data whenever wallet address changes
+    if (walletAddress) {
+      const data = getWalletKYCData(walletAddress);
+      setUserData(data);
+    }
+  }, [walletAddress]);
 
   useEffect(() => {
     // Simulate loading data
@@ -144,6 +176,19 @@ export default function AccountPage() {
     }
   }, [])
 
+  // Get the display data (either from KYC or default)
+  const displayData = userData ? {
+    name: userData.name || defaultUserData.name,
+    email: userData.email || defaultUserData.email,
+    kycStatus: userData.verified ? "verified" : "pending",
+    joinDate: new Date(userData.joinDate).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }),
+    avatar: userData.avatar || defaultUserData.avatar
+  } : defaultUserData;
+
   const toggleWalletConnection = () => {
     setIsWalletConnected(!isWalletConnected)
   }
@@ -161,9 +206,18 @@ export default function AccountPage() {
             <h1 className="text-3xl font-bold mb-2">Account</h1>
             <p className="text-gray-500">Manage your profile and assets</p>
           </div>
-          {/* Wallet button removed */}
+          {walletAddress && (
+            <Link href="/kyc">
+              <Button variant="outline" className="transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600">
+                <Shield className="h-4 w-4 mr-2" /> Manage KYC
+              </Button>
+            </Link>
+          )}
         </div>
       </FadeIn>
+
+      {/* KYC Banner */}
+      <KYCBanner walletAddress={walletAddress} needsKYC={needsKYC} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mx-auto">
         <div className="lg:mx-auto w-full">
@@ -184,17 +238,24 @@ export default function AccountPage() {
                 ) : (
                   <div className="flex flex-col items-center text-center mb-6">
                     <div className="h-24 w-24 mb-4 animate-fadeIn rounded-full bg-gray-100 flex items-center justify-center relative overflow-hidden">
-                      {userData.avatar ? (
-                        <img src={userData.avatar} alt={userData.name} className="h-full w-full object-cover" />
+                      {displayData.avatar ? (
+                        <img src={displayData.avatar} alt={displayData.name} className="h-full w-full object-cover" />
                       ) : (
-                        <span className="text-2xl font-semibold">{userData.name.charAt(0)}</span>
+                        <span className="text-2xl font-semibold">{displayData.name.charAt(0)}</span>
                       )}
                     </div>
-                    <h3 className="font-bold text-xl">{userData.name}</h3>
-                    <p className="text-gray-500">{userData.email}</p>
+                    <h3 className="font-bold text-xl">{displayData.name}</h3>
+                    <p className="text-gray-500">{displayData.email}</p>
                     <div className="flex items-center mt-2">
-                      <span className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 flex items-center gap-1 text-sm px-2 py-1 rounded-full">
-                        <Check className="h-3 w-3" /> KYC Verified
+                      <span className={`${displayData.kycStatus === "verified" 
+                        ? "bg-emerald-100 text-emerald-800" 
+                        : "bg-yellow-100 text-yellow-800"} 
+                        hover:bg-emerald-100 flex items-center gap-1 text-sm px-2 py-1 rounded-full`}>
+                        {displayData.kycStatus === "verified" ? (
+                          <><Check className="h-3 w-3" /> KYC Verified</>
+                        ) : (
+                          <><Clock className="h-3 w-3" /> KYC Pending</>
+                        )}
                       </span>
                     </div>
                   </div>
@@ -220,9 +281,67 @@ export default function AccountPage() {
                     )}
                   </div>
 
+                  {userData && !loading && (
+                    <>
+                      <div className="mt-4">
+                        <div className="text-sm font-medium mb-2">Personal Details</div>
+                        <div className="bg-gray-50 p-3 rounded-md space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-500">Phone:</span>
+                            <span className="text-sm">{userData.phone || "Not provided"}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-500">Country:</span>
+                            <span className="text-sm">{userData.country || "Not provided"}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-500">Date of Birth:</span>
+                            <span className="text-sm">{userData.dateOfBirth ? new Date(userData.dateOfBirth).toLocaleDateString() : "Not provided"}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <div className="text-sm font-medium mb-2">Address Information</div>
+                        <div className="bg-gray-50 p-3 rounded-md">
+                          {userData.address && Object.values(userData.address).some(value => value) ? (
+                            <div className="space-y-1">
+                              <p className="text-sm">{userData.address.street || ""}</p>
+                              <p className="text-sm">
+                                {[userData.address.city, userData.address.state, userData.address.postalCode]
+                                  .filter(Boolean)
+                                  .join(", ")}
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500">No address information provided</p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <div className="text-sm font-medium mb-2">ID Verification</div>
+                        <div className="bg-gray-50 p-3 rounded-md space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-500">Document Type:</span>
+                            <span className="text-sm capitalize">{userData.documentType.replace(/([A-Z])/g, ' $1') || "Not provided"}</span>
+                          </div>
+                          {userData.documentId && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs text-gray-500">Document ID:</span>
+                              <span className="text-sm">
+                                {userData.documentId.substring(0, 4) + "••••" + userData.documentId.substring(userData.documentId.length - 4)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
                   <div className="flex justify-between items-center">
                     <div className="text-sm font-medium">Member Since</div>
-                    {loading ? <Skeleton className="h-5 w-24" /> : <div className="text-sm">{userData.joinDate}</div>}
+                    {loading ? <Skeleton className="h-5 w-24" /> : <div className="text-sm">{displayData.joinDate}</div>}
                   </div>
 
                   <hr className="border-t border-gray-200 my-4" />
