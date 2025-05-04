@@ -35,10 +35,6 @@ Most attempts at asset tokenization fall short due to a combination of deep-root
 
 These gaps make RWA integration into DeFi risky.
 
-# Our Solution 🔑
-
-
-
 ## How Our Project Works 🛠️
 
 1. **User Onboarding via IOTA Wallet**
@@ -63,6 +59,21 @@ These gaps make RWA integration into DeFi risky.
 6. **Long/Short Trading Mechanics**
    - **Speculative Market Access:** Traders can take long or short positions on the asset token’s value, unlocking hedging, leverage, and real-time market sentiment.
    - **Decentralized Price Discovery:** Asset prices are continuously updated using oracle feeds, providing real-time datas that reflect both on-chain activity and off-chain market data.
+
+## Future Roadmap 🚀 
+
+### 1. **Expand Asset Categories**
+   - **Action:** We will integrate support for a wider variety of real-world assets (e.g., commodities, fine art, intellectual property) and refine the IOTA One-Time Witness to accommodate these new asset types.
+   - **Goal:** Ensure that Asseta can handle any type of physical asset.
+
+### 2. **Enhanced Liquidity Solutions & AMM Pools**
+   - **Action:** We plan to incentivize liquidity providers through rewards and lower fees for early participants.
+   - **Goal:** Increase liquidity depth and volume on the platform, enabling more dynamic and efficient market trades.
+
+### 3. **Improved Price Feeds & Market Stability**
+   - **Action:** Introduce multiple decentralized oracle providers and employ dynamic price smoothing to ensure consistent and reliable price feeds for asset backed tokens.
+   - **Goal:** Achieve more stable price discovery and reduce volatility in early stage markets.
+
 
 
 
