@@ -5,11 +5,50 @@
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-rgb: 255, 255, 255;
+  --input-background: 255, 255, 255;
+  --input-text: 0, 0, 0;
+  --input-border: 226, 232, 240;
+  --input-placeholder: 148, 163, 184;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
+}
+
+/* Style all input elements to match white theme */
+input, 
+textarea, 
+select,
+.textarea {
+  background-color: rgb(var(--input-background)) !important;
+  color: rgb(var(--input-text)) !important;
+  border-color: rgb(var(--input-border));
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgb(var(--input-placeholder)) !important;
+}
+
+/* Fix for dark mode inputs */
+[type="text"],
+[type="email"],
+[type="url"],
+[type="password"],
+[type="number"],
+[type="date"],
+[type="datetime-local"],
+[type="month"],
+[type="search"],
+[type="tel"],
+[type="time"],
+[type="week"],
+[type="file"],
+textarea {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid rgb(var(--input-border));
 }
 
 @layer utilities {

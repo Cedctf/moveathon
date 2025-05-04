@@ -29,18 +29,18 @@ import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerContainer, StaggerItem } from "@/components/animations/stagger-container"
 import { CountUp } from "@/components/animations/count-up"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useCurrentWallet, useCurrentAccount } from '@iota/dapp-kit'
 
 // Mock user data
 const userData = {
   name: "Alex Johnson",
   email: "alex.johnson@example.com",
-  walletAddress: "0x1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t",
   kycStatus: "verified",
   joinDate: "Jan 15, 2023",
-  avatar: "/placeholder.svg?height=100&width=100",
+  avatar: "https://play-lh.googleusercontent.com/f-g42HMgOFg48mNaSKNbOkarjGjRjOLJjXo5StgOFj5ItbTweGrk5lI26rezmjlKl4g=w240-h480-rw",
 }
 
-// Mock assets data
+// Mock assets data (removed Rolex Daytona)
 const assets = [
   {
     id: 1,
@@ -50,19 +50,10 @@ const assets = [
     value: 2500000,
     ownership: 0.05,
     status: "active",
-  },
-  {
-    id: 2,
-    name: "Vintage Rolex Daytona",
-    symbol: "VRD-LUX",
-    type: "Luxury Item",
-    value: 125000,
-    ownership: 0.2,
-    status: "pending",
-  },
+  }
 ]
 
-// Mock transactions data
+// Mock transactions data (keeping all transactions for history)
 const transactions = [
   {
     id: 1,
@@ -115,6 +106,18 @@ export default function AccountPage() {
   const [isWalletConnected, setIsWalletConnected] = useState(true)
   const [loading, setLoading] = useState(true)
   const [securityProgress, setSecurityProgress] = useState(0)
+  const { currentWallet, connectionStatus } = useCurrentWallet()
+  const currentAccount = useCurrentAccount()
+  const [walletAddress, setWalletAddress] = useState("")
+
+  useEffect(() => {
+    // Update wallet address when wallet connection changes
+    if (currentWallet && connectionStatus === 'connected' && currentAccount) {
+      setWalletAddress(currentAccount.address || "")
+    } else {
+      setWalletAddress("")
+    }
+  }, [currentWallet, connectionStatus, currentAccount])
 
   useEffect(() => {
     // Simulate loading data
@@ -200,16 +203,16 @@ export default function AccountPage() {
                 <div className="space-y-4">
                   <div>
                     <div className="text-sm font-medium mb-1">Wallet Address</div>
-                    {loading ? (
+                    {loading || !walletAddress ? (
                       <Skeleton className="h-10 w-full" />
                     ) : (
                       <div className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
-                        <code className="text-xs truncate max-w-[180px]">{userData.walletAddress}</code>
+                        <code className="text-xs truncate max-w-[180px]">{walletAddress}</code>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 transition-all duration-300 hover:bg-emerald-100 hover:text-emerald-600"
-                          onClick={() => copyToClipboard(userData.walletAddress)}
+                          onClick={() => copyToClipboard(walletAddress)}
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
@@ -306,7 +309,7 @@ export default function AccountPage() {
                   </div>
 
                   {loading ? (
-                    Array.from({ length: 2 }).map((_, index) => (
+                    Array.from({ length: 1 }).map((_, index) => (
                       <Card key={index} className="transition-all duration-300 hover:shadow-md">
                         <CardContent className="p-6">
                           <div className="flex justify-between items-start">
@@ -431,7 +434,7 @@ export default function AccountPage() {
                               <Skeleton className="h-8 w-24" />
                             ) : (
                               <div className="font-bold text-2xl">
-                                $<CountUp end={150000} />
+                                $<CountUp end={125000} />
                               </div>
                             )}
                           </div>
@@ -441,7 +444,7 @@ export default function AccountPage() {
                               <Skeleton className="h-8 w-16" />
                             ) : (
                               <div className="font-bold text-2xl">
-                                <CountUp end={2} />
+                                <CountUp end={1} />
                               </div>
                             )}
                           </div>
@@ -451,7 +454,7 @@ export default function AccountPage() {
                               <Skeleton className="h-8 w-24" />
                             ) : (
                               <div className="font-bold text-2xl text-emerald-600">
-                                $<CountUp end={12500} />
+                                $<CountUp end={10500} />
                               </div>
                             )}
                           </div>
@@ -464,7 +467,6 @@ export default function AccountPage() {
                               <Skeleton className="h-8 w-full mb-3" />
                               <div className="flex gap-4">
                                 <Skeleton className="h-5 w-32" />
-                                <Skeleton className="h-5 w-32" />
                               </div>
                             </>
                           ) : (
@@ -472,23 +474,14 @@ export default function AccountPage() {
                               <div className="h-8 w-full rounded-full overflow-hidden bg-gray-100 flex">
                                 <div
                                   className="h-full bg-emerald-600 transition-all duration-1000"
-                                  style={{ width: "0%" }}
+                                  style={{ width: "100%" }}
                                   id="real-estate-bar"
-                                ></div>
-                                <div
-                                  className="h-full bg-blue-500 transition-all duration-1000"
-                                  style={{ width: "0%" }}
-                                  id="luxury-bar"
                                 ></div>
                               </div>
                               <div className="flex gap-4 mt-3">
                                 <div className="flex items-center">
                                   <div className="w-3 h-3 bg-emerald-600 rounded-full mr-2"></div>
-                                  <span className="text-sm">Real Estate (83.3%)</span>
-                                </div>
-                                <div className="flex items-center">
-                                  <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                                  <span className="text-sm">Luxury Items (16.7%)</span>
+                                  <span className="text-sm">Real Estate (100%)</span>
                                 </div>
                               </div>
                             </>
@@ -662,27 +655,6 @@ export default function AccountPage() {
                   <div>
                     <h4 className="font-medium">Manhattan Apartment - Appraisal</h4>
                     <div className="text-sm text-gray-500">Uploaded on Mar 8, 2023</div>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
-                >
-                  <Download className="h-4 w-4 mr-2" /> Download
-                </Button>
-              </div>
-            </StaggerItem>
-
-            <StaggerItem>
-              <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
-                    <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Vintage Rolex Daytona - Authentication</h4>
-                    <div className="text-sm text-gray-500">Uploaded on Feb 10, 2023</div>
                   </div>
                 </div>
                 <Button

@@ -355,6 +355,7 @@ export default function ListAssetPage() {
                         required
                         value={formData.name}
                         onChange={handleInputChange}
+                        className="bg-white text-black border-gray-200"
                       />
                     </div>
 
@@ -368,6 +369,7 @@ export default function ListAssetPage() {
                           required
                           value={formData.email}
                           onChange={handleInputChange}
+                          className="bg-white text-black border-gray-200"
                         />
                       </div>
                       <div className="grid gap-3">
@@ -378,6 +380,7 @@ export default function ListAssetPage() {
                           required
                           value={formData.phone}
                           onChange={handleInputChange}
+                          className="bg-white text-black border-gray-200"
                         />
                       </div>
                     </div>
@@ -390,6 +393,7 @@ export default function ListAssetPage() {
                         required
                         value={formData.address}
                         onChange={handleInputChange}
+                        className="bg-white text-black border-gray-200"
                       />
                     </div>
 
@@ -559,6 +563,7 @@ export default function ListAssetPage() {
                         id="asset-name"
                         placeholder="Enter asset name"
                         required
+                        className="bg-white text-black border-gray-200"
                       />
                     </div>
 
@@ -566,7 +571,7 @@ export default function ListAssetPage() {
                       <div className="grid gap-3">
                         <Label htmlFor="asset-type">Asset Type</Label>
                         <Select required>
-                          <SelectTrigger className="bg-white">
+                          <SelectTrigger className="bg-white text-black border-gray-200">
                             <SelectValue placeholder="Select asset type" />
                           </SelectTrigger>
                           <SelectContent className="bg-white">
@@ -592,6 +597,7 @@ export default function ListAssetPage() {
                           id="location"
                           placeholder="Enter asset location"
                           required
+                          className="bg-white text-black border-gray-200"
                         />
                       </div>
                     </div>
@@ -604,6 +610,7 @@ export default function ListAssetPage() {
                           type="number"
                           placeholder="Enter asset valuation"
                           required
+                          className="bg-white text-black border-gray-200"
                         />
                       </div>
 
@@ -613,6 +620,7 @@ export default function ListAssetPage() {
                           id="token-symbol"
                           placeholder="e.g., NYC-APT"
                           required
+                          className="bg-white text-black border-gray-200"
                         />
                       </div>
                     </div>
@@ -624,6 +632,7 @@ export default function ListAssetPage() {
                         placeholder="Describe your asset in detail"
                         rows={4}
                         required
+                        className="bg-white text-black border-gray-200"
                       />
                     </div>
 
