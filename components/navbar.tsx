@@ -1,13 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { ConnectButton } from "@iota/dapp-kit"
+import { ConnectButton, useAccounts } from "@iota/dapp-kit"
+import { KYCModal } from "./kyc-modal"
+import { hasCompletedKYC } from "@/lib/wallet-service"
 
 const navLinks = [
   { name: "Marketplace", href: "/marketplace" },
@@ -17,7 +19,48 @@ const navLinks = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isKYCModalOpen, setIsKYCModalOpen] = useState(false)
+  const [hasKYC, setHasKYC] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+  const accounts = useAccounts()
+  const isConnected = accounts.length > 0
+  const currentAccount = accounts[0]
+  const address = currentAccount?.address
+  
+  // Check if wallet has completed KYC when connected
+  useEffect(() => {
+    if (address) {
+      const completed = hasCompletedKYC(address)
+      setHasKYC(completed)
+    } else {
+      setHasKYC(false)
+    }
+  }, [address, isConnected])
+  
+  // This function will be exported and can be used by other components
+  const handleGetStarted = () => {
+    if (!isConnected) {
+      // If not connected, show KYC modal
+      setIsKYCModalOpen(true)
+    } else if (!hasKYC) {
+      // If connected but hasn't completed KYC, show KYC modal
+      setIsKYCModalOpen(true)
+    } else {
+      // If connected and has completed KYC, go to account page
+      router.push('/account')
+    }
+  }
+
+  const handleKYCComplete = () => {
+    setHasKYC(true)
+    // Close the modal with a slight delay to allow animation
+    setTimeout(() => {
+      setIsKYCModalOpen(false)
+      // Navigate to account page
+      router.push('/account')
+    }, 500)
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-sm">
@@ -75,6 +118,14 @@ export default function Navbar() {
           </Sheet>
         </div>
       </div>
+      
+      {/* KYC Modal */}
+      <KYCModal 
+        isOpen={isKYCModalOpen} 
+        onOpenChange={setIsKYCModalOpen}
+        walletAddress={address ?? undefined}
+        onKYCComplete={handleKYCComplete}
+      />
     </header>
   )
 }

@@ -6,77 +6,266 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowDown, ArrowUp, Info } from "lucide-react"
-import PriceChart from "@/components/price-chart"
+import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client'
+import { ConnectButton, useCurrentWallet, useSignAndExecuteTransaction, useCurrentAccount } from '@iota/dapp-kit'
+import { Transaction } from '@iota/iota-sdk/transactions'
+import { ArrowDown, ArrowUp, Info, Loader2 } from "lucide-react"
+import PriceChart from '../../components/price-chart'
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerContainer, StaggerItem } from "@/components/animations/stagger-container"
 import { CountUp } from "@/components/animations/count-up"
+import { PriceProvider, usePriceContext } from "@/contexts/PriceContext"
+import housePricesData from '@/data/housePrices.json'
 
-export default function TradePage() {
-  const [selectedAsset, setSelectedAsset] = useState("")
+// Predefined recipient address from test2/page.tsx
+const RECIPIENT_ADDRESS = '0x508b47f23a659fb3cf78adb13b72b647498333f38de6670ef7bc102e40b1b38e'
+
+// Wrapper component to provide price context
+function TradePageContent() {
+  const [selectedAsset, setSelectedAsset] = useState("Chelsea-Manhattan")
   const [amount, setAmount] = useState("")
-  const [position, setPosition] = useState("long")
+  const [position, setPosition] = useState<"long" | "short">("long")
   const [leverage, setLeverage] = useState(1)
-  const [isWalletConnected, setIsWalletConnected] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const { prices, loading: priceLoading } = usePriceContext()
+  const [selectedLocation, setSelectedLocation] = useState<string>("Manhattan")
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState<string>("Chelsea")
+
+  const { currentWallet, connectionStatus } = useCurrentWallet()
+  const currentAccount = useCurrentAccount()
+  const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction()
+  const [iotaClient, setIotaClient] = useState<IotaClient | null>(null)
+  const [walletAddress, setWalletAddress] = useState<string | null>(null)
+  const [transferLoading, setTransferLoading] = useState(false)
+  const [transferError, setTransferError] = useState<string | null>(null)
+  const [transferTxResult, setTransferTxResult] = useState<any>(null)
+  // State to hold the details of the "opened" position
+  const [activePosition, setActivePosition] = useState<{
+    asset: string;
+    assetFullName: string;
+    positionType: 'long' | 'short';
+    entryPrice: number;
+    size: number;
+    leverage: number;
+    liquidationPrice: number | null;
+  } | null>(null)
 
   useEffect(() => {
-    // Simulate loading data
-    const timer = setTimeout(() => {
-      setLoading(false)
-    }, 1500)
-    
-    return () => clearTimeout(timer)
+    try {
+      const rpcUrl = getFullnodeUrl('testnet')
+      const client = new IotaClient({ url: rpcUrl })
+      setIotaClient(client)
+    } catch (err) {
+      console.error('Failed to initialize IOTA client:', err)
+      setTransferError(err instanceof Error ? err.message : 'Failed to initialize IOTA client')
+    }
   }, [])
 
+  useEffect(() => {
+    if (currentWallet && connectionStatus === 'connected' && currentAccount) {
+      setWalletAddress(currentAccount.address || null)
+    } else {
+      setWalletAddress(null)
+    }
+  }, [currentWallet, connectionStatus, currentAccount])
+
   const handleTrade = () => {
-    // Trade logic will be implemented here
-    console.log({
+    console.log("Original Trade Action Triggered (Short button?)", {
       asset: selectedAsset,
       amount,
       position,
       leverage
     })
   }
+  
+  const transferTokens = async () => {
+    if (!iotaClient || !walletAddress || connectionStatus !== 'connected') {
+      setTransferError('Client not initialized or wallet not connected')
+      return
+    }
+    
+    if (!amount || parseFloat(amount) <= 0) {
+      setTransferError('Please provide a valid amount')
+      return
+    }
+    
+    setTransferLoading(true)
+    setTransferError(null)
+    setTransferTxResult(null)
+    
+    try {
+      const tx = new Transaction()
+      tx.setGasBudget(30000000)
+      
+      const amountNano = Math.floor(parseFloat(amount) * 10 ** 9)
+      
+      const coin = tx.splitCoins(tx.gas, [amountNano])
+      tx.transferObjects([coin], RECIPIENT_ADDRESS)
+      
+      signAndExecuteTransaction(
+        { transaction: tx },
+        {
+          onSuccess: (result) => {
+            console.log('Tokens transferred successfully:', result)
+            
+            // Find the selected asset details from the JSON data
+            const assetDetail = neighborhoodAssets.find(a => a.symbol === selectedAsset);
+
+            // Use price and details from the found assetDetail
+            const entryPrice = assetDetail?.price ?? 0; // Use price from JSON data
+            const currentLeverage = leverage
+            const positionType = position // 'long' or 'short' from state
+            const size = parseFloat(amount)
+            // Construct full name from JSON data fields
+            const assetFullName = assetDetail ? `${assetDetail.name} (${assetDetail.location})` : selectedAsset;
+
+            let liquidationPrice: number | null = null
+            // Use the entryPrice derived from JSON
+            if (entryPrice > 0 && currentLeverage > 0) { 
+              if (positionType === 'long') {
+                liquidationPrice = entryPrice * (1 - 1 / currentLeverage)
+              } else { // short
+                liquidationPrice = entryPrice * (1 + 1 / currentLeverage)
+              }
+            }
+
+            setActivePosition({
+              asset: selectedAsset,
+              assetFullName: assetFullName,
+              positionType: positionType,
+              entryPrice: entryPrice,
+              size: size,
+              leverage: currentLeverage,
+              liquidationPrice: liquidationPrice
+            })
+            setTransferTxResult(result) // Still store tx result if needed elsewhere
+            setTransferLoading(false)
+            setAmount('')
+          },
+          onError: (err) => {
+            console.error('Failed to transfer tokens:', err)
+            setTransferError(err instanceof Error ? err.message : 'Failed to transfer tokens')
+            setTransferLoading(false)
+          }
+        }
+      )
+    } catch (err) {
+      console.error('Transfer setup failed:', err)
+      setTransferError(err instanceof Error ? err.message : 'Transfer setup failed')
+      setTransferLoading(false)
+    }
+  }
+
+  const selectedAssetPrice = selectedAsset 
+    ? prices.find(p => p.symbol === selectedAsset)?.price 
+    : null;
+
+  // Get top neighborhoods for the selected location with currency conversion
+  const getTopNeighborhoods = () => {
+    if (!housePricesData || !housePricesData.locations) return [];
+    
+    // Find the selected location
+    const location = housePricesData.locations.find(loc => loc.name === selectedLocation);
+    if (!location) return [];
+    
+    // Currency conversion rates to USD (approximate)
+    const conversionRates: Record<string, number> = {
+      'USD': 1,
+      'JPY': 0.0067,
+      'EUR': 1.08,
+      'IDR': 0.000064
+    };
+    
+    const rate = conversionRates[location.currency as keyof typeof conversionRates] || 1;
+    
+    // Get neighborhoods from the selected location only with converted prices
+    return location.neighborhoodData.map(neighborhood => ({
+      ...neighborhood,
+      location: location.name,
+      originalCurrency: location.currency,
+      originalPrice: neighborhood.medianHomePrice,
+      usdPrice: neighborhood.medianHomePrice * rate
+    }))
+    .sort((a, b) => b.medianHomePrice - a.medianHomePrice);
+  };
+  
+  const topNeighborhoods = getTopNeighborhoods();
+  
+  // Format currency for display
+  const formatCurrency = (value: number, currency: string) => {
+    const currencyFormatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      maximumFractionDigits: 0,
+    });
+    
+    return currencyFormatter.format(value);
+  };
+
+  // Create a list of all neighborhood assets
+  const getNeighborhoodAssets = () => {
+    if (!housePricesData || !housePricesData.locations) return [];
+    
+    return housePricesData.locations.flatMap(location => 
+      location.neighborhoodData.map(neighborhood => ({
+        symbol: `${neighborhood.name}-${location.name}`,
+        name: neighborhood.name,
+        location: location.name,
+        price: neighborhood.medianHomePrice,
+        currency: location.currency
+      }))
+    );
+  };
+
+  const neighborhoodAssets = getNeighborhoodAssets();
+
+  // Get the selected asset details
+  const getSelectedAssetDetails = () => {
+    if (!selectedAsset) return null;
+    
+    // Parse the asset symbol to extract neighborhood and location
+    // The format should be "NeighborhoodName-LocationName"
+    const parts = selectedAsset.split('-');
+    if (parts.length !== 2) return null;
+    
+    const neighborhoodName = parts[0];
+    const locationName = parts[1];
+    
+    return { neighborhoodName, locationName };
+  };
+
+  // Update selected location and neighborhood when asset is selected
+  useEffect(() => {
+    const assetDetails = getSelectedAssetDetails();
+    if (assetDetails) {
+      console.log("Selected asset details:", assetDetails); // Debug log
+      setSelectedLocation(assetDetails.locationName);
+      setSelectedNeighborhood(assetDetails.neighborhoodName);
+    }
+  }, [selectedAsset]);
 
   return (
-    <div className="container py-8 px-4 mx-auto max-w-7xl">
-      <FadeIn>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Synthetic Trading</h1>
-            <p className="text-gray-500">Trade synthetic versions of real-world assets (sRWAs)</p>
-          </div>
-        </div>
-      </FadeIn>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Real Estate Market Dashboard</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2">
           <FadeIn delay={200}>
             <Card className="mb-6 overflow-hidden transition-all duration-300 hover:shadow-md">
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
                   <div>
-                    <CardTitle>Price Chart</CardTitle>
-                    <CardDescription>Real-time price data from oracle</CardDescription>
+                    <CardTitle>House Price Chart</CardTitle>
+                    <CardDescription>Historical house price data</CardDescription>
                   </div>
-                  <Select defaultValue="1d">
-                    <SelectTrigger className="w-[80px] bg-white">
-                      <SelectValue placeholder="Timeframe" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white">
-                      <SelectItem value="1h" className="hover:bg-emerald-50 cursor-pointer">1H</SelectItem>
-                      <SelectItem value="4h" className="hover:bg-emerald-50 cursor-pointer">4H</SelectItem>
-                      <SelectItem value="1d" className="hover:bg-emerald-50 cursor-pointer">1D</SelectItem>
-                      <SelectItem value="1w" className="hover:bg-emerald-50 cursor-pointer">1W</SelectItem>
-                      <SelectItem value="1m" className="hover:bg-emerald-50 cursor-pointer">1M</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="h-[400px] w-full">
-                  <PriceChart />
+                  <PriceChart 
+                    selectedLocation={selectedLocation}
+                    setSelectedLocation={setSelectedLocation}
+                    selectedNeighborhood={selectedNeighborhood}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -90,7 +279,7 @@ export default function TradePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {loading ? (
+                    {priceLoading ? (
                       <>
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-500">24h Volume</span>
@@ -145,11 +334,11 @@ export default function TradePage() {
             <StaggerItem>
               <Card className="transition-all duration-300 hover:shadow-md">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Top sRWA Assets</CardTitle>
+                  <CardTitle className="text-lg">Top Real Estate Assets</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {loading ? (
+                    {priceLoading ? (
                       Array.from({ length: 4 }).map((_, index) => (
                         <div key={index} className="flex justify-between items-center">
                           <div className="flex items-center">
@@ -164,65 +353,28 @@ export default function TradePage() {
                       ))
                     ) : (
                       <>
-                        <div className="flex justify-between items-center group">
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
-                              MANH-APT
-                            </span>
-                            <span className="text-xs border rounded px-2 py-0.5">
-                              Real Estate
-                            </span>
+                        {topNeighborhoods.map((neighborhood, index) => (
+                          <div key={index} className="flex justify-between items-center group">
+                            <div className="flex items-center">
+                              <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
+                                {neighborhood.name}
+                              </span>
+                              <span className="text-xs border rounded px-2 py-0.5">
+                                {neighborhood.location}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-end">
+                              <span className="font-medium">
+                                {formatCurrency(neighborhood.originalPrice, neighborhood.originalCurrency)}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {neighborhood.originalCurrency !== 'USD' ? 
+                                  `($${Math.round(neighborhood.usdPrice).toLocaleString()} USD)` : 
+                                  'Premium Property'}
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex flex-col items-end">
-                            <span className="font-medium">$2,500,000</span>
-                            <span className="text-xs text-emerald-600">+2.4%</span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-center group">
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
-                              TKY-COM
-                            </span>
-                            <span className="text-xs border rounded px-2 py-0.5">
-                              Real Estate
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className="font-medium">$8,750,000</span>
-                            <span className="text-xs text-red-600">-0.8%</span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-center group">
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
-                              VRD-LUX
-                            </span>
-                            <span className="text-xs border rounded px-2 py-0.5">
-                              Luxury
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className="font-medium">$125,000</span>
-                            <span className="text-xs text-emerald-600">+5.2%</span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-center group">
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
-                              BDX-VIN
-                            </span>
-                            <span className="text-xs border rounded px-2 py-0.5">
-                              Agricultural
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className="font-medium">$4,200,000</span>
-                            <span className="text-xs text-emerald-600">+1.7%</span>
-                          </div>
-                        </div>
+                        ))}
                       </>
                     )}
                   </div>
@@ -243,24 +395,39 @@ export default function TradePage() {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="asset">Select Asset</Label>
-                    <Select value={selectedAsset} onValueChange={setSelectedAsset}>
+                    <Select 
+                      value={selectedAsset} 
+                      onValueChange={setSelectedAsset}
+                    >
                       <SelectTrigger className="bg-white">
                         <SelectValue placeholder="Select asset" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="MANH-APT" className="hover:bg-emerald-50 cursor-pointer">MANH-APT (Manhattan Apartment)</SelectItem>
-                        <SelectItem value="TKY-COM" className="hover:bg-emerald-50 cursor-pointer">TKY-COM (Tokyo Commercial Building)</SelectItem>
-                        <SelectItem value="VRD-LUX" className="hover:bg-emerald-50 cursor-pointer">VRD-LUX (Vintage Rolex Daytona)</SelectItem>
-                        <SelectItem value="BDX-VIN" className="hover:bg-emerald-50 cursor-pointer">BDX-VIN (Bordeaux Vineyard)</SelectItem>
-                        <SelectItem value="BER-ART" className="hover:bg-emerald-50 cursor-pointer">BER-ART (Berlin Art Collection)</SelectItem>
+                      <SelectContent className="bg-white max-h-[300px]">
+                        {neighborhoodAssets.map((asset, index) => (
+                          <SelectItem 
+                            key={index} 
+                            value={asset.symbol}
+                            className="hover:bg-emerald-50 cursor-pointer"
+                          >
+                            {asset.name} ({asset.location})
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
+                    {/* Hidden placeholder that shows the actual selected asset */}
+                    {selectedAsset && (
+                      <div className="text-xs text-gray-500">
+                        Default pricing based on: {neighborhoodAssets.find(a => a.symbol === selectedAsset)?.name || ''} ({neighborhoodAssets.find(a => a.symbol === selectedAsset)?.location || ''})
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <Label htmlFor="amount">Amount (USD)</Label>
-                      <span className="text-sm text-gray-500">Balance: $10,000</span>
+                      <Label htmlFor="amount">Amount (IOTA)</Label>
+                      <span className="text-sm text-gray-500">
+                        {connectionStatus === 'connected' ? `Balance: Fetching...` : `Balance: Connect Wallet`}
+                      </span>
                     </div>
                     <Input
                       id="amount"
@@ -281,7 +448,7 @@ export default function TradePage() {
                         }`}
                         onClick={() => setPosition("long")}
                       >
-                        <ArrowUp className="h-4 w-4" /> Long
+                        <ArrowUp className="h-4 w-4" /> Long 
                       </button>
                       <button
                         className={`flex items-center justify-center gap-1 p-2 rounded-md transition-colors duration-300 ${
@@ -303,7 +470,7 @@ export default function TradePage() {
                       type="range"
                       id="leverage"
                       min={1}
-                      max={10}
+                      max={100}
                       step={1}
                       value={leverage}
                       onChange={(e) => setLeverage(Number(e.target.value))}
@@ -311,8 +478,8 @@ export default function TradePage() {
                     />
                     <div className="flex justify-between text-xs text-gray-500">
                       <span>1x</span>
-                      <span>5x</span>
-                      <span>10x</span>
+                      <span>50x</span>
+                      <span>100x</span>
                     </div>
                   </div>
 
@@ -320,16 +487,25 @@ export default function TradePage() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm">Entry Price</span>
-                        <span className="font-medium">$2,500,000</span>
+                        <span className="font-medium">
+                          ${selectedAssetPrice ? formatPrice(selectedAssetPrice) : '—'}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Fees</span>
-                        <span className="font-medium">$25.00 (0.25%)</span>
+                        <span className="font-medium">
+                          ${amount ? formatPrice(parseFloat(amount) * 0.0025) : '0.00'} (0.25%)
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Liquidation Price</span>
                         <div className="flex items-center">
-                          <span className="font-medium">{position === "long" ? "$2,375,000" : "$2,625,000"}</span>
+                          <span className="font-medium">
+                            {selectedAssetPrice ? (position === 'long' 
+                              ? `$${formatPrice(selectedAssetPrice * (1 - 1/leverage))}`
+                              : `$${formatPrice(selectedAssetPrice * (1 + 1/leverage))}`) 
+                              : '—'}
+                          </span>
                           <Info className="h-3.5 w-3.5 ml-1 text-gray-500" />
                         </div>
                       </div>
@@ -337,25 +513,145 @@ export default function TradePage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex flex-col gap-4">
-                <Button
-                  className={`w-full transition-all duration-300 ${
-                    position === "long" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"
-                  } hover:shadow-md`}
-                  onClick={handleTrade}
-                  disabled={!isWalletConnected}
-                >
-                  {position === "long" ? "Long" : "Short"} {selectedAsset}
-                </Button>
-
-                {!isWalletConnected && (
-                  <p className="text-sm text-gray-500 text-center">Please connect your wallet to start trading</p>
+              <CardFooter className="flex flex-col gap-4 pt-6">
+                {position === 'long' ? (
+                  <Button
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 hover:shadow-md transition-all duration-300"
+                    onClick={transferTokens}
+                    disabled={transferLoading || !walletAddress || !amount || parseFloat(amount) <= 0}
+                  >
+                    {transferLoading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Transferring...</>
+                    ) : (
+                      `Long`
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    className="w-full bg-red-600 hover:bg-red-700 hover:shadow-md transition-all duration-300"
+                    onClick={transferTokens}
+                    disabled={transferLoading || !walletAddress || !amount || parseFloat(amount) <= 0}
+                  >
+                    {transferLoading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Transferring...</>
+                    ) : (
+                      `Short`
+                    )}
+                  </Button>
                 )}
               </CardFooter>
             </Card>
           </FadeIn>
+          
+          {/* Display Active Position Card instead of just Tx Result */}
+          {activePosition && (
+            <FadeIn delay={100}>
+              <Card className="mt-4 transition-all duration-300 bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base text-gray-800">Position Opened</CardTitle>
+                  <CardDescription>Details of your simulated position</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Asset:</span>
+                      <span className="font-medium">{activePosition.assetFullName} ({activePosition.asset})</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Type:</span>
+                      <span className="font-medium">{activePosition.assetFullName}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Entry Price:</span>
+                      <span className="font-medium">
+                        {formatCurrency(activePosition.entryPrice, neighborhoodAssets.find(a => a.symbol === activePosition.asset)?.currency || 'USD')}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Size (IOTA):</span>
+                      <span className="font-medium">{activePosition.size}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Leverage:</span>
+                      <span className="font-medium">{activePosition.leverage}x</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-2 mt-2">
+                      <span className="text-gray-500">Est. Liq. Price:</span>
+                      <span className="font-medium">
+                        {activePosition.liquidationPrice !== null 
+                          ? formatCurrency(activePosition.liquidationPrice, neighborhoodAssets.find(a => a.symbol === activePosition.asset)?.currency || 'USD')
+                          : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </FadeIn>
+          )}
+          
+          {transferError && (
+            <FadeIn delay={100}>
+              <div className="bg-red-50 text-red-600 p-4 rounded-md mt-4 transition-all duration-300">
+                {transferError}
+              </div>
+            </FadeIn>
+          )}
         </div>
       </div>
     </div>
-  )
+  );
+}
+
+// Helper functions
+function getAssetCategory(symbol: string) {
+  const categories: Record<string, string> = {
+    "MANH-APT": "Real Estate",
+    "TKY-COM": "Real Estate",
+    "VRD-LUX": "Luxury",
+    "BDX-VIN": "Agricultural",
+    "BER-ART": "Art"
+  };
+  
+  return categories[symbol] || "Other";
+}
+
+function getAssetFullName(symbol: string) {
+  const names: Record<string, string> = {
+    "ETH/USD": "Ethereum",
+    "BTC/USD": "Bitcoin",
+    "MANH-APT": "Manhattan Apartment",
+    "TKY-COM": "Tokyo Commercial Building",
+    "VRD-LUX": "Vintage Rolex Daytona",
+    "BDX-VIN": "Bordeaux Vineyard",
+    "BER-ART": "Berlin Art Collection"
+  };
+  
+  return names[symbol] || symbol;
+}
+
+function formatPrice(price: number | null) {
+  if (!price && price !== 0) return "—";
+
+  if (isNaN(price)) return "—"; 
+  
+  if (price >= 1000000) {
+    return (price / 1000000).toFixed(2) + "M";
+  } else if (price >= 1000) {
+    return (price / 1000).toFixed(2) + "K";
+  } else {
+    return price.toFixed(2); 
+  }
+}
+
+function getRandomChange(): string {
+  return (Math.random() * 10 - 5).toFixed(2);
+}
+
+// Main component with PriceProvider
+export default function TradePage() {
+  return (
+    <PriceProvider>
+      <TradePageContent />
+    </PriceProvider>
+  );
 }

@@ -21,9 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-white`} suppressHydrationWarning>
+      <body className={`${inter.className} bg-white text-black`} suppressHydrationWarning>
         <ClientLayout>
-        <ThemeProvider attribute="class" defaultTheme="light">
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <div className="flex flex-col min-h-screen bg-white">
             <Navbar />
             <main className="flex-1 bg-white">{children}</main>
