@@ -22,13 +22,13 @@ const RECIPIENT_ADDRESS = '0x508b47f23a659fb3cf78adb13b72b647498333f38de6670ef7b
 
 // Wrapper component to provide price context
 function TradePageContent() {
-  const [selectedAsset, setSelectedAsset] = useState("")
+  const [selectedAsset, setSelectedAsset] = useState("Chelsea-Manhattan")
   const [amount, setAmount] = useState("")
   const [position, setPosition] = useState<"long" | "short">("long")
   const [leverage, setLeverage] = useState(1)
   const { prices, loading: priceLoading } = usePriceContext()
   const [selectedLocation, setSelectedLocation] = useState<string>("Manhattan")
-  const [selectedNeighborhood, setSelectedNeighborhood] = useState<string>("")
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState<string>("Chelsea")
 
   const { currentWallet, connectionStatus } = useCurrentWallet()
   const currentAccount = useCurrentAccount()
@@ -395,7 +395,10 @@ function TradePageContent() {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="asset">Select Asset</Label>
-                    <Select value={selectedAsset} onValueChange={setSelectedAsset}>
+                    <Select 
+                      value={selectedAsset} 
+                      onValueChange={setSelectedAsset}
+                    >
                       <SelectTrigger className="bg-white">
                         <SelectValue placeholder="Select asset" />
                       </SelectTrigger>
@@ -411,6 +414,12 @@ function TradePageContent() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {/* Hidden placeholder that shows the actual selected asset */}
+                    {selectedAsset && (
+                      <div className="text-xs text-gray-500">
+                        Default pricing based on: {neighborhoodAssets.find(a => a.symbol === selectedAsset)?.name || ''} ({neighborhoodAssets.find(a => a.symbol === selectedAsset)?.location || ''})
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -477,28 +486,27 @@ function TradePageContent() {
                   <div className="pt-4 border-t">
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm">{position === 'long' ? 'Entry Price' : 'Transfer Details'}</span>
+                        <span className="text-sm">Entry Price</span>
                         <span className="font-medium">
-                          {position === 'long' ? `$${selectedAssetPrice ? formatPrice(selectedAssetPrice) : '—'}` : 'N/A'}
+                          ${selectedAssetPrice ? formatPrice(selectedAssetPrice) : '—'}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm">{position === 'long' ? 'Fees' : 'Recipient'}</span>
+                        <span className="text-sm">Fees</span>
                         <span className="font-medium">
-                          {position === 'long' 
-                            ? `$${amount ? formatPrice(parseFloat(amount) * 0.0025) : '0.00'} (0.25%)` 
-                            : <span className="text-xs truncate max-w-[120px]" title={RECIPIENT_ADDRESS}>{RECIPIENT_ADDRESS}</span>}
+                          ${amount ? formatPrice(parseFloat(amount) * 0.0025) : '0.00'} (0.25%)
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm">{position === 'long' ? 'Liquidation Price' : 'Network'}</span>
+                        <span className="text-sm">Liquidation Price</span>
                         <div className="flex items-center">
                           <span className="font-medium">
-                            {position === 'long' 
-                              ? (selectedAssetPrice ? `$${formatPrice(selectedAssetPrice * 0.95)}` : '—')
-                              : 'IOTA Testnet'}
+                            {selectedAssetPrice ? (position === 'long' 
+                              ? `$${formatPrice(selectedAssetPrice * (1 - 1/leverage))}`
+                              : `$${formatPrice(selectedAssetPrice * (1 + 1/leverage))}`) 
+                              : '—'}
                           </span>
-                          {position === 'long' && <Info className="h-3.5 w-3.5 ml-1 text-gray-500" />}
+                          <Info className="h-3.5 w-3.5 ml-1 text-gray-500" />
                         </div>
                       </div>
                     </div>
