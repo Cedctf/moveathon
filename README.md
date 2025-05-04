@@ -34,3 +34,31 @@ Most attempts at asset tokenization fall short due to a combination of deep-root
 - **Fragmented workflows**: KYC, verification, minting, trading, and liquidity provisioning are often spread across multiple systems with no unified flow.
 
 These gaps make RWA integration into DeFi risky.
+
+## How Our Project Works 🛠️
+
+1. **User Onboarding via IOTA Wallet**
+   - **Wallet Login:** Users begin by connecting their IOTA wallet to the platform.
+
+2. **KYC Verification & Identity Minting**
+   - **KYC Submission:** Users complete a Know Your Customer (KYC) process using a regulated identity provider to confirm their legal identity and ownership rights.
+   - **On-Chain Identity (DID):** After passing KYC, a decentralized identifier (DID) is minted and permanently linked to the user’s IOTA wallet, forming the root of all asset ownership and activity on the platform.
+
+3. **Asset Listing & One-Time Verification**
+   - **Asset Submission:** Users submit asset details, proof of ownership, and any supporting documentation.
+   - **IOTA One-Time Witness:** Each asset undergoes one-time validation using IOTA’s One-Time Witness mechanism, ensuring it can only be listed once.
+
+4. **NFT Minting & Tokenization**
+   - **NFT Creation:** A unique NFT is minted to represent the verified physical asset.
+   - **Fungible Token Mapping:** The NFT is linked than to a fungible token allowing for broader participation and liquidity.
+
+5. **Liquidity Pool Deployment & Trading Access**
+   - **Pool Creation:** Users launch a liquidity pool pairing the asset token with a stable or volatile token (e.g., USDC, IOTA).
+   - **Open Participation:** Anyone can supply liquidity or interact with the token, enabling active market engagement.
+
+6. **Long/Short Trading Mechanics**
+   - **Speculative Market Access:** Traders can take long or short positions on the asset token’s value, unlocking hedging, leverage, and real-time market sentiment.
+   - **Decentralized Price Discovery:** Asset prices are continuously updated using oracle feeds, providing real-time datas that reflect both on-chain activity and off-chain market data.
+
+
+
