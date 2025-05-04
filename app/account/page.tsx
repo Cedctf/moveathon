@@ -234,13 +234,7 @@ export default function AccountPage() {
             <h1 className="text-3xl font-bold mb-2">Account</h1>
             <p className="text-gray-500">Manage your profile and assets</p>
           </div>
-          {walletAddress && (
-            <Link href="/kyc">
-              <Button variant="outline" className="transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600">
-                <Shield className="h-4 w-4 mr-2" /> Manage KYC
-              </Button>
-            </Link>
-          )}
+          
         </div>
       </FadeIn>
 
@@ -316,15 +310,11 @@ export default function AccountPage() {
                         <div className="bg-gray-50 p-3 rounded-md space-y-2">
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-gray-500">Phone:</span>
-                            <span className="text-sm">{userData.phone || "Not provided"}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-gray-500">Country:</span>
-                            <span className="text-sm">{userData.country || "Not provided"}</span>
+                            <span className="text-sm">60123456789</span>
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-gray-500">Date of Birth:</span>
-                            <span className="text-sm">{userData.dateOfBirth ? new Date(userData.dateOfBirth).toLocaleDateString() : "Not provided"}</span>
+                            <span className="text-sm">Jan 15, 2000</span>
                           </div>
                         </div>
                       </div>
@@ -332,18 +322,7 @@ export default function AccountPage() {
                       <div className="mt-4">
                         <div className="text-sm font-medium mb-2">Address Information</div>
                         <div className="bg-gray-50 p-3 rounded-md">
-                          {userData.address && Object.values(userData.address).some(value => value) ? (
-                            <div className="space-y-1">
-                              <p className="text-sm">{userData.address.street || ""}</p>
-                              <p className="text-sm">
-                                {[userData.address.city, userData.address.state, userData.address.postalCode]
-                                  .filter(Boolean)
-                                  .join(", ")}
-                              </p>
-                            </div>
-                          ) : (
-                            <p className="text-sm text-gray-500">No address information provided</p>
-                          )}
+                          <p className="text-sm">Undisclosed Location</p>
                         </div>
                       </div>
 
@@ -380,6 +359,26 @@ export default function AccountPage() {
                     <div className="flex justify-between text-xs text-gray-500">
                       <span>Basic</span>
                       <span>Advanced</span>
+                    </div>
+                  </div>
+                  
+                  {/* Leverage Slider */}
+                  <div className="pt-4 mt-4 border-t border-gray-200">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-sm font-medium">Leverage</span>
+                      <span className="text-sm font-medium">28x</span>
+                    </div>
+                    <div className="relative w-full h-1 bg-gray-200 rounded-full">
+                      {/* Green dot indicator at 28% position (28x out of 100x) */}
+                      <div 
+                        className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-md" 
+                        style={{ left: 'calc(28% - 8px)' }}
+                      />
+                    </div>
+                    <div className="flex justify-between mt-2 text-xs text-gray-500">
+                      <span>1x</span>
+                      <span>50x</span>
+                      <span>100x</span>
                     </div>
                   </div>
 
