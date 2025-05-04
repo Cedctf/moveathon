@@ -1,14 +1,14 @@
-# Trade Me Baby 🏡
+# Asseta 🏡
 
 **Reimagining assets by enabling real-world items to live, trade, and evolve on-chain through verifiable identity, one-time proof, and decentralized finance mechanics**
 
-Trade Me Baby is a next-generation RWA infrastructure that brings physical assets into the digital world with trust and liquidity. Users begin by verifying their identity, anchoring it securely on-chain. Assets are then introduced with a unique, one-time proof mechanism—ensuring authenticity and preventing duplication.
+Asseta is a next-generation RWA infrastructure that brings physical assets into the digital world with trust and liquidity. Users begin by verifying their identity, anchoring it securely on-chain. Assets are then introduced with a unique, one-time proof mechanism—ensuring authenticity and preventing duplication.
 
 Each asset becomes a living digital entity through NFT minting, and is instantly linked to a dynamic token economy that allows market exposure, and full tradability. Investors can engage in open liquidity pools, hedge their positions, or speculate via long/short strategies, all while retaining confidence in the origin and integrity of the underlying asset.
 
 # How We Came Up With This Idea 💡
 
-The inspiration behind Trade Me Baby came from a simple question: *"Why can't I trade a real-world asset the same way I trade a token?"*
+The inspiration behind Asseta came from a simple question: *"Why can't I trade a real-world asset the same way I trade a token?"*
 
 While crypto markets offer instant liquidity, leveraged positions, and seamless swaps, real-world assets remain locked in legal frameworks, paper documents, and third-party approvals. Even when tokenized, they’re often untradeable.
 
@@ -35,6 +35,10 @@ Most attempts at asset tokenization fall short due to a combination of deep-root
 
 These gaps make RWA integration into DeFi risky.
 
+# Our Solution 🔑
+
+
+
 ## How Our Project Works 🛠️
 
 1. **User Onboarding via IOTA Wallet**
@@ -59,6 +63,8 @@ These gaps make RWA integration into DeFi risky.
 6. **Long/Short Trading Mechanics**
    - **Speculative Market Access:** Traders can take long or short positions on the asset token’s value, unlocking hedging, leverage, and real-time market sentiment.
    - **Decentralized Price Discovery:** Asset prices are continuously updated using oracle feeds, providing real-time datas that reflect both on-chain activity and off-chain market data.
+
+
 
 
 
