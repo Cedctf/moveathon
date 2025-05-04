@@ -6,7 +6,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowDown, ArrowUp, Info } from "lucide-react"
+import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client'
+import { ConnectButton, useCurrentWallet, useSignAndExecuteTransaction, useCurrentAccount } from '@iota/dapp-kit'
+import { Transaction } from '@iota/iota-sdk/transactions'
+import { ArrowDown, ArrowUp, Info, Loader2 } from "lucide-react"
 import PriceChart from '../../components/price-chart'
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerContainer, StaggerItem } from "@/components/animations/stagger-container"
@@ -14,28 +17,139 @@ import { CountUp } from "@/components/animations/count-up"
 import { PriceProvider, usePriceContext } from "@/contexts/PriceContext"
 import housePricesData from '@/data/housePrices.json'
 
+// Predefined recipient address from test2/page.tsx
+const RECIPIENT_ADDRESS = '0x508b47f23a659fb3cf78adb13b72b647498333f38de6670ef7bc102e40b1b38e'
+
 // Wrapper component to provide price context
 function TradePageContent() {
   const [selectedAsset, setSelectedAsset] = useState("")
   const [amount, setAmount] = useState("")
-  const [position, setPosition] = useState("long")
+  const [position, setPosition] = useState<"long" | "short">("long")
   const [leverage, setLeverage] = useState(1)
-  const [isWalletConnected, setIsWalletConnected] = useState(false)
-  const { prices, loading } = usePriceContext()
+  const { prices, loading: priceLoading } = usePriceContext()
   const [selectedLocation, setSelectedLocation] = useState<string>("Manhattan")
   const [selectedNeighborhood, setSelectedNeighborhood] = useState<string>("")
 
+  const { currentWallet, connectionStatus } = useCurrentWallet()
+  const currentAccount = useCurrentAccount()
+  const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction()
+  const [iotaClient, setIotaClient] = useState<IotaClient | null>(null)
+  const [walletAddress, setWalletAddress] = useState<string | null>(null)
+  const [transferLoading, setTransferLoading] = useState(false)
+  const [transferError, setTransferError] = useState<string | null>(null)
+  const [transferTxResult, setTransferTxResult] = useState<any>(null)
+  // State to hold the details of the "opened" position
+  const [activePosition, setActivePosition] = useState<{
+    asset: string;
+    assetFullName: string;
+    positionType: 'long' | 'short';
+    entryPrice: number;
+    size: number;
+    leverage: number;
+    liquidationPrice: number | null;
+  } | null>(null)
+
+  useEffect(() => {
+    try {
+      const rpcUrl = getFullnodeUrl('testnet')
+      const client = new IotaClient({ url: rpcUrl })
+      setIotaClient(client)
+    } catch (err) {
+      console.error('Failed to initialize IOTA client:', err)
+      setTransferError(err instanceof Error ? err.message : 'Failed to initialize IOTA client')
+    }
+  }, [])
+
+  useEffect(() => {
+    if (currentWallet && connectionStatus === 'connected' && currentAccount) {
+      setWalletAddress(currentAccount.address || null)
+    } else {
+      setWalletAddress(null)
+    }
+  }, [currentWallet, connectionStatus, currentAccount])
+
   const handleTrade = () => {
-    // Trade logic will be implemented here
-    console.log({
+    console.log("Original Trade Action Triggered (Short button?)", {
       asset: selectedAsset,
       amount,
       position,
       leverage
     })
   }
+  
+  const transferTokens = async () => {
+    if (!iotaClient || !walletAddress || connectionStatus !== 'connected') {
+      setTransferError('Client not initialized or wallet not connected')
+      return
+    }
+    
+    if (!amount || parseFloat(amount) <= 0) {
+      setTransferError('Please provide a valid amount')
+      return
+    }
+    
+    setTransferLoading(true)
+    setTransferError(null)
+    setTransferTxResult(null)
+    
+    try {
+      const tx = new Transaction()
+      tx.setGasBudget(30000000)
+      
+      const amountNano = Math.floor(parseFloat(amount) * 10 ** 9)
+      
+      const coin = tx.splitCoins(tx.gas, [amountNano])
+      tx.transferObjects([coin], RECIPIENT_ADDRESS)
+      
+      signAndExecuteTransaction(
+        { transaction: tx },
+        {
+          onSuccess: (result) => {
+            console.log('Tokens transferred successfully:', result)
+            
+            // Capture details for the position card
+            const entryPrice = selectedAssetPrice // Price at time of confirmation
+            const currentLeverage = leverage
+            const positionType = position // 'long' or 'short' from state
+            const size = parseFloat(amount)
+            const assetFullName = getAssetFullName(selectedAsset)
 
-  // Get the price for the selected asset
+            let liquidationPrice: number | null = null
+            if (entryPrice && currentLeverage > 0) {
+              if (positionType === 'long') {
+                liquidationPrice = entryPrice * (1 - 1 / currentLeverage)
+              } else { // short
+                liquidationPrice = entryPrice * (1 + 1 / currentLeverage)
+              }
+            }
+
+            setActivePosition({
+              asset: selectedAsset,
+              assetFullName: assetFullName,
+              positionType: positionType,
+              entryPrice: entryPrice ?? 0, // Use 0 if price is null
+              size: size,
+              leverage: currentLeverage,
+              liquidationPrice: liquidationPrice
+            })
+            setTransferTxResult(result) // Still store tx result if needed elsewhere
+            setTransferLoading(false)
+            setAmount('')
+          },
+          onError: (err) => {
+            console.error('Failed to transfer tokens:', err)
+            setTransferError(err instanceof Error ? err.message : 'Failed to transfer tokens')
+            setTransferLoading(false)
+          }
+        }
+      )
+    } catch (err) {
+      console.error('Transfer setup failed:', err)
+      setTransferError(err instanceof Error ? err.message : 'Transfer setup failed')
+      setTransferLoading(false)
+    }
+  }
+
   const selectedAssetPrice = selectedAsset 
     ? prices.find(p => p.symbol === selectedAsset)?.price 
     : null;
@@ -160,7 +274,7 @@ function TradePageContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {loading ? (
+                    {priceLoading ? (
                       <>
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-500">24h Volume</span>
@@ -219,7 +333,7 @@ function TradePageContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {loading ? (
+                    {priceLoading ? (
                       Array.from({ length: 4 }).map((_, index) => (
                         <div key={index} className="flex justify-between items-center">
                           <div className="flex items-center">
@@ -296,8 +410,10 @@ function TradePageContent() {
 
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <Label htmlFor="amount">Amount (USD)</Label>
-                      <span className="text-sm text-gray-500">Balance: $10,000</span>
+                      <Label htmlFor="amount">Amount (IOTA)</Label>
+                      <span className="text-sm text-gray-500">
+                        {connectionStatus === 'connected' ? `Balance: Fetching...` : `Balance: Connect Wallet`}
+                      </span>
                     </div>
                     <Input
                       id="amount"
@@ -318,7 +434,7 @@ function TradePageContent() {
                         }`}
                         onClick={() => setPosition("long")}
                       >
-                        <ArrowUp className="h-4 w-4" /> Long
+                        <ArrowUp className="h-4 w-4" /> Long 
                       </button>
                       <button
                         className={`flex items-center justify-center gap-1 p-2 rounded-md transition-colors duration-300 ${
@@ -356,51 +472,117 @@ function TradePageContent() {
                   <div className="pt-4 border-t">
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm">Entry Price</span>
+                        <span className="text-sm">{position === 'long' ? 'Entry Price' : 'Transfer Details'}</span>
                         <span className="font-medium">
-                          ${selectedAssetPrice ? formatPrice(selectedAssetPrice) : '—'}
+                          {position === 'long' ? `$${selectedAssetPrice ? formatPrice(selectedAssetPrice) : '—'}` : 'N/A'}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm">Fees</span>
+                        <span className="text-sm">{position === 'long' ? 'Fees' : 'Recipient'}</span>
                         <span className="font-medium">
-                          ${amount ? formatPrice(parseFloat(amount) * 0.0025) : '0.00'} (0.25%)
+                          {position === 'long' 
+                            ? `$${amount ? formatPrice(parseFloat(amount) * 0.0025) : '0.00'} (0.25%)` 
+                            : <span className="text-xs truncate max-w-[120px]" title={RECIPIENT_ADDRESS}>{RECIPIENT_ADDRESS}</span>}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm">Liquidation Price</span>
+                        <span className="text-sm">{position === 'long' ? 'Liquidation Price' : 'Network'}</span>
                         <div className="flex items-center">
                           <span className="font-medium">
-                            {selectedAssetPrice && position === "long" 
-                              ? '$' + formatPrice(selectedAssetPrice * 0.95) 
-                              : selectedAssetPrice && position === "short"
-                              ? '$' + formatPrice(selectedAssetPrice * 1.05)
-                              : '—'}
+                            {position === 'long' 
+                              ? (selectedAssetPrice ? `$${formatPrice(selectedAssetPrice * 0.95)}` : '—')
+                              : 'IOTA Testnet'}
                           </span>
-                          <Info className="h-3.5 w-3.5 ml-1 text-gray-500" />
+                          {position === 'long' && <Info className="h-3.5 w-3.5 ml-1 text-gray-500" />}
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex flex-col gap-4">
-                <Button
-                  className={`w-full transition-all duration-300 ${
-                    position === "long" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"
-                  } hover:shadow-md`}
-                  onClick={handleTrade}
-                  disabled={!isWalletConnected || !selectedAsset || !amount}
-                >
-                  {position === "long" ? "Long" : "Short"} {selectedAsset || "Asset"}
-                </Button>
-
-                {!isWalletConnected && (
-                  <p className="text-sm text-gray-500 text-center">Please connect your wallet to start trading</p>
+              <CardFooter className="flex flex-col gap-4 pt-6">
+                {position === 'long' ? (
+                  <Button
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 hover:shadow-md transition-all duration-300"
+                    onClick={transferTokens}
+                    disabled={transferLoading || !walletAddress || !amount || parseFloat(amount) <= 0}
+                  >
+                    {transferLoading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Transferring...</>
+                    ) : (
+                      `Long`
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    className="w-full bg-red-600 hover:bg-red-700 hover:shadow-md transition-all duration-300"
+                    onClick={transferTokens}
+                    disabled={transferLoading || !walletAddress || !amount || parseFloat(amount) <= 0}
+                  >
+                    {transferLoading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Transferring...</>
+                    ) : (
+                      `Short`
+                    )}
+                  </Button>
                 )}
               </CardFooter>
             </Card>
           </FadeIn>
+          
+          {/* Display Active Position Card instead of just Tx Result */}
+          {activePosition && (
+            <FadeIn delay={100}>
+              <Card className="mt-4 transition-all duration-300 bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base text-gray-800">Position Opened</CardTitle>
+                  <CardDescription>Details of your simulated position</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Asset:</span>
+                      <span className="font-medium">{activePosition.assetFullName} ({activePosition.asset})</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Type:</span>
+                      <span className={`font-medium ${activePosition.positionType === 'long' ? 'text-emerald-600' : 'text-red-600'}`}>
+                        {activePosition.positionType === 'long' ? 'Long' : 'Short'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Entry Price:</span>
+                      <span className="font-medium">${formatPrice(activePosition.entryPrice)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Size (IOTA):</span>
+                      <span className="font-medium">{activePosition.size}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Leverage:</span>
+                      <span className="font-medium">{activePosition.leverage}x</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-2 mt-2">
+                      <span className="text-gray-500">Est. Liq. Price:</span>
+                      <span className="font-medium">
+                        {activePosition.liquidationPrice !== null 
+                          ? `$${formatPrice(activePosition.liquidationPrice)}` 
+                          : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </FadeIn>
+          )}
+          
+          {transferError && (
+            <FadeIn delay={100}>
+              <div className="bg-red-50 text-red-600 p-4 rounded-md mt-4 transition-all duration-300">
+                {transferError}
+              </div>
+            </FadeIn>
+          )}
         </div>
       </div>
     </div>
@@ -435,15 +617,16 @@ function getAssetFullName(symbol: string) {
 }
 
 function formatPrice(price: number | null) {
-  if (!price) return "0.00";
+  if (!price && price !== 0) return "—";
+
+  if (isNaN(price)) return "—"; 
   
-  // Format based on price magnitude
   if (price >= 1000000) {
     return (price / 1000000).toFixed(2) + "M";
   } else if (price >= 1000) {
     return (price / 1000).toFixed(2) + "K";
   } else {
-    return price.toFixed(2);
+    return price.toFixed(2); 
   }
 }
 
