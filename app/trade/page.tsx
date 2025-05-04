@@ -7,27 +7,23 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowDown, ArrowUp, Info } from "lucide-react"
-import PriceChart from "@/components/price-chart"
+import PriceChart from '../../components/price-chart'
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerContainer, StaggerItem } from "@/components/animations/stagger-container"
 import { CountUp } from "@/components/animations/count-up"
+import { PriceProvider, usePriceContext } from "@/contexts/PriceContext"
+import housePricesData from '@/data/housePrices.json'
 
-export default function TradePage() {
+// Wrapper component to provide price context
+function TradePageContent() {
   const [selectedAsset, setSelectedAsset] = useState("")
   const [amount, setAmount] = useState("")
   const [position, setPosition] = useState("long")
   const [leverage, setLeverage] = useState(1)
   const [isWalletConnected, setIsWalletConnected] = useState(false)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // Simulate loading data
-    const timer = setTimeout(() => {
-      setLoading(false)
-    }, 1500)
-    
-    return () => clearTimeout(timer)
-  }, [])
+  const { prices, loading } = usePriceContext()
+  const [selectedLocation, setSelectedLocation] = useState<string>("Manhattan")
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState<string>("")
 
   const handleTrade = () => {
     // Trade logic will be implemented here
@@ -39,44 +35,118 @@ export default function TradePage() {
     })
   }
 
+  // Get the price for the selected asset
+  const selectedAssetPrice = selectedAsset 
+    ? prices.find(p => p.symbol === selectedAsset)?.price 
+    : null;
+
+  // Get top neighborhoods for the selected location with currency conversion
+  const getTopNeighborhoods = () => {
+    if (!housePricesData || !housePricesData.locations) return [];
+    
+    // Find the selected location
+    const location = housePricesData.locations.find(loc => loc.name === selectedLocation);
+    if (!location) return [];
+    
+    // Currency conversion rates to USD (approximate)
+    const conversionRates: Record<string, number> = {
+      'USD': 1,
+      'JPY': 0.0067,
+      'EUR': 1.08,
+      'IDR': 0.000064
+    };
+    
+    const rate = conversionRates[location.currency as keyof typeof conversionRates] || 1;
+    
+    // Get neighborhoods from the selected location only with converted prices
+    return location.neighborhoodData.map(neighborhood => ({
+      ...neighborhood,
+      location: location.name,
+      originalCurrency: location.currency,
+      originalPrice: neighborhood.medianHomePrice,
+      usdPrice: neighborhood.medianHomePrice * rate
+    }))
+    .sort((a, b) => b.medianHomePrice - a.medianHomePrice);
+  };
+  
+  const topNeighborhoods = getTopNeighborhoods();
+  
+  // Format currency for display
+  const formatCurrency = (value: number, currency: string) => {
+    const currencyFormatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      maximumFractionDigits: 0,
+    });
+    
+    return currencyFormatter.format(value);
+  };
+
+  // Create a list of all neighborhood assets
+  const getNeighborhoodAssets = () => {
+    if (!housePricesData || !housePricesData.locations) return [];
+    
+    return housePricesData.locations.flatMap(location => 
+      location.neighborhoodData.map(neighborhood => ({
+        symbol: `${neighborhood.name}-${location.name}`,
+        name: neighborhood.name,
+        location: location.name,
+        price: neighborhood.medianHomePrice,
+        currency: location.currency
+      }))
+    );
+  };
+
+  const neighborhoodAssets = getNeighborhoodAssets();
+
+  // Get the selected asset details
+  const getSelectedAssetDetails = () => {
+    if (!selectedAsset) return null;
+    
+    // Parse the asset symbol to extract neighborhood and location
+    // The format should be "NeighborhoodName-LocationName"
+    const parts = selectedAsset.split('-');
+    if (parts.length !== 2) return null;
+    
+    const neighborhoodName = parts[0];
+    const locationName = parts[1];
+    
+    return { neighborhoodName, locationName };
+  };
+
+  // Update selected location and neighborhood when asset is selected
+  useEffect(() => {
+    const assetDetails = getSelectedAssetDetails();
+    if (assetDetails) {
+      console.log("Selected asset details:", assetDetails); // Debug log
+      setSelectedLocation(assetDetails.locationName);
+      setSelectedNeighborhood(assetDetails.neighborhoodName);
+    }
+  }, [selectedAsset]);
+
   return (
-    <div className="container py-8 px-4 mx-auto max-w-7xl">
-      <FadeIn>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Synthetic Trading</h1>
-            <p className="text-gray-500">Trade synthetic versions of real-world assets (sRWAs)</p>
-          </div>
-        </div>
-      </FadeIn>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Real Estate Market Dashboard</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2">
           <FadeIn delay={200}>
             <Card className="mb-6 overflow-hidden transition-all duration-300 hover:shadow-md">
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
                   <div>
-                    <CardTitle>Price Chart</CardTitle>
-                    <CardDescription>Real-time price data from oracle</CardDescription>
+                    <CardTitle>House Price Chart</CardTitle>
+                    <CardDescription>Historical house price data</CardDescription>
                   </div>
-                  <Select defaultValue="1d">
-                    <SelectTrigger className="w-[80px] bg-white">
-                      <SelectValue placeholder="Timeframe" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white">
-                      <SelectItem value="1h" className="hover:bg-emerald-50 cursor-pointer">1H</SelectItem>
-                      <SelectItem value="4h" className="hover:bg-emerald-50 cursor-pointer">4H</SelectItem>
-                      <SelectItem value="1d" className="hover:bg-emerald-50 cursor-pointer">1D</SelectItem>
-                      <SelectItem value="1w" className="hover:bg-emerald-50 cursor-pointer">1W</SelectItem>
-                      <SelectItem value="1m" className="hover:bg-emerald-50 cursor-pointer">1M</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="h-[400px] w-full">
-                  <PriceChart />
+                  <PriceChart 
+                    selectedLocation={selectedLocation}
+                    setSelectedLocation={setSelectedLocation}
+                    selectedNeighborhood={selectedNeighborhood}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -145,7 +215,7 @@ export default function TradePage() {
             <StaggerItem>
               <Card className="transition-all duration-300 hover:shadow-md">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Top sRWA Assets</CardTitle>
+                  <CardTitle className="text-lg">Top Real Estate Assets</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -164,65 +234,28 @@ export default function TradePage() {
                       ))
                     ) : (
                       <>
-                        <div className="flex justify-between items-center group">
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
-                              MANH-APT
-                            </span>
-                            <span className="text-xs border rounded px-2 py-0.5">
-                              Real Estate
-                            </span>
+                        {topNeighborhoods.map((neighborhood, index) => (
+                          <div key={index} className="flex justify-between items-center group">
+                            <div className="flex items-center">
+                              <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
+                                {neighborhood.name}
+                              </span>
+                              <span className="text-xs border rounded px-2 py-0.5">
+                                {neighborhood.location}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-end">
+                              <span className="font-medium">
+                                {formatCurrency(neighborhood.originalPrice, neighborhood.originalCurrency)}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {neighborhood.originalCurrency !== 'USD' ? 
+                                  `($${Math.round(neighborhood.usdPrice).toLocaleString()} USD)` : 
+                                  'Premium Property'}
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex flex-col items-end">
-                            <span className="font-medium">$2,500,000</span>
-                            <span className="text-xs text-emerald-600">+2.4%</span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-center group">
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
-                              TKY-COM
-                            </span>
-                            <span className="text-xs border rounded px-2 py-0.5">
-                              Real Estate
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className="font-medium">$8,750,000</span>
-                            <span className="text-xs text-red-600">-0.8%</span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-center group">
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
-                              VRD-LUX
-                            </span>
-                            <span className="text-xs border rounded px-2 py-0.5">
-                              Luxury
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className="font-medium">$125,000</span>
-                            <span className="text-xs text-emerald-600">+5.2%</span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-center group">
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2 group-hover:text-emerald-600 transition-colors duration-300">
-                              BDX-VIN
-                            </span>
-                            <span className="text-xs border rounded px-2 py-0.5">
-                              Agricultural
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className="font-medium">$4,200,000</span>
-                            <span className="text-xs text-emerald-600">+1.7%</span>
-                          </div>
-                        </div>
+                        ))}
                       </>
                     )}
                   </div>
@@ -247,12 +280,16 @@ export default function TradePage() {
                       <SelectTrigger className="bg-white">
                         <SelectValue placeholder="Select asset" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="MANH-APT" className="hover:bg-emerald-50 cursor-pointer">MANH-APT (Manhattan Apartment)</SelectItem>
-                        <SelectItem value="TKY-COM" className="hover:bg-emerald-50 cursor-pointer">TKY-COM (Tokyo Commercial Building)</SelectItem>
-                        <SelectItem value="VRD-LUX" className="hover:bg-emerald-50 cursor-pointer">VRD-LUX (Vintage Rolex Daytona)</SelectItem>
-                        <SelectItem value="BDX-VIN" className="hover:bg-emerald-50 cursor-pointer">BDX-VIN (Bordeaux Vineyard)</SelectItem>
-                        <SelectItem value="BER-ART" className="hover:bg-emerald-50 cursor-pointer">BER-ART (Berlin Art Collection)</SelectItem>
+                      <SelectContent className="bg-white max-h-[300px]">
+                        {neighborhoodAssets.map((asset, index) => (
+                          <SelectItem 
+                            key={index} 
+                            value={asset.symbol}
+                            className="hover:bg-emerald-50 cursor-pointer"
+                          >
+                            {asset.name} ({asset.location})
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -303,7 +340,7 @@ export default function TradePage() {
                       type="range"
                       id="leverage"
                       min={1}
-                      max={10}
+                      max={100}
                       step={1}
                       value={leverage}
                       onChange={(e) => setLeverage(Number(e.target.value))}
@@ -311,8 +348,8 @@ export default function TradePage() {
                     />
                     <div className="flex justify-between text-xs text-gray-500">
                       <span>1x</span>
-                      <span>5x</span>
-                      <span>10x</span>
+                      <span>50x</span>
+                      <span>100x</span>
                     </div>
                   </div>
 
@@ -320,16 +357,26 @@ export default function TradePage() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm">Entry Price</span>
-                        <span className="font-medium">$2,500,000</span>
+                        <span className="font-medium">
+                          ${selectedAssetPrice ? formatPrice(selectedAssetPrice) : '—'}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Fees</span>
-                        <span className="font-medium">$25.00 (0.25%)</span>
+                        <span className="font-medium">
+                          ${amount ? formatPrice(parseFloat(amount) * 0.0025) : '0.00'} (0.25%)
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Liquidation Price</span>
                         <div className="flex items-center">
-                          <span className="font-medium">{position === "long" ? "$2,375,000" : "$2,625,000"}</span>
+                          <span className="font-medium">
+                            {selectedAssetPrice && position === "long" 
+                              ? '$' + formatPrice(selectedAssetPrice * 0.95) 
+                              : selectedAssetPrice && position === "short"
+                              ? '$' + formatPrice(selectedAssetPrice * 1.05)
+                              : '—'}
+                          </span>
                           <Info className="h-3.5 w-3.5 ml-1 text-gray-500" />
                         </div>
                       </div>
@@ -343,9 +390,9 @@ export default function TradePage() {
                     position === "long" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"
                   } hover:shadow-md`}
                   onClick={handleTrade}
-                  disabled={!isWalletConnected}
+                  disabled={!isWalletConnected || !selectedAsset || !amount}
                 >
-                  {position === "long" ? "Long" : "Short"} {selectedAsset}
+                  {position === "long" ? "Long" : "Short"} {selectedAsset || "Asset"}
                 </Button>
 
                 {!isWalletConnected && (
@@ -357,5 +404,58 @@ export default function TradePage() {
         </div>
       </div>
     </div>
-  )
+  );
+}
+
+// Helper functions
+function getAssetCategory(symbol: string) {
+  const categories: Record<string, string> = {
+    "MANH-APT": "Real Estate",
+    "TKY-COM": "Real Estate",
+    "VRD-LUX": "Luxury",
+    "BDX-VIN": "Agricultural",
+    "BER-ART": "Art"
+  };
+  
+  return categories[symbol] || "Other";
+}
+
+function getAssetFullName(symbol: string) {
+  const names: Record<string, string> = {
+    "ETH/USD": "Ethereum",
+    "BTC/USD": "Bitcoin",
+    "MANH-APT": "Manhattan Apartment",
+    "TKY-COM": "Tokyo Commercial Building",
+    "VRD-LUX": "Vintage Rolex Daytona",
+    "BDX-VIN": "Bordeaux Vineyard",
+    "BER-ART": "Berlin Art Collection"
+  };
+  
+  return names[symbol] || symbol;
+}
+
+function formatPrice(price: number | null) {
+  if (!price) return "0.00";
+  
+  // Format based on price magnitude
+  if (price >= 1000000) {
+    return (price / 1000000).toFixed(2) + "M";
+  } else if (price >= 1000) {
+    return (price / 1000).toFixed(2) + "K";
+  } else {
+    return price.toFixed(2);
+  }
+}
+
+function getRandomChange(): string {
+  return (Math.random() * 10 - 5).toFixed(2);
+}
+
+// Main component with PriceProvider
+export default function TradePage() {
+  return (
+    <PriceProvider>
+      <TradePageContent />
+    </PriceProvider>
+  );
 }

@@ -1,0 +1,2768 @@
+{
+  "locations": [
+    {
+      "name": "Manhattan",
+      "country": "United States",
+      "currency": "USD",
+      "priceData": [
+        {
+          "date": "2023-01-01",
+          "open": 1180000,
+          "high": 1220000,
+          "low": 1170000,
+          "close": 1200000,
+          "volume": 450,
+          "yearOverYearChange": 3.2
+        },
+        {
+          "date": "2023-02-01",
+          "open": 1200000,
+          "high": 1230000,
+          "low": 1195000,
+          "close": 1215000,
+          "volume": 420,
+          "yearOverYearChange": 3.1
+        },
+        {
+          "date": "2023-03-01",
+          "open": 1220000,
+          "high": 1250000,
+          "low": 1210000,
+          "close": 1230000,
+          "volume": 400,
+          "yearOverYearChange": 3.0
+        },
+        {
+          "date": "2023-04-01",
+          "open": 1240000,
+          "high": 1270000,
+          "low": 1235000,
+          "close": 1250000,
+          "volume": 380,
+          "yearOverYearChange": 2.8
+        },
+        {
+          "date": "2023-05-01",
+          "open": 1260000,
+          "high": 1280000,
+          "low": 1255000,
+          "close": 1255000,
+          "volume": 360,
+          "yearOverYearChange": 2.7
+        },
+        {
+          "date": "2023-06-01",
+          "open": 1280000,
+          "high": 1300000,
+          "low": 1270000,
+          "close": 1265000,
+          "volume": 340,
+          "yearOverYearChange": 2.6
+        },
+        {
+          "date": "2023-07-01",
+          "open": 1300000,
+          "high": 1320000,
+          "low": 1290000,
+          "close": 1275000,
+          "volume": 320,
+          "yearOverYearChange": 2.5
+        },
+        {
+          "date": "2023-08-01",
+          "open": 1320000,
+          "high": 1340000,
+          "low": 1310000,
+          "close": 1280000,
+          "volume": 300,
+          "yearOverYearChange": 2.4
+        },
+        {
+          "date": "2023-09-01",
+          "open": 1340000,
+          "high": 1360000,
+          "low": 1330000,
+          "close": 1285000,
+          "volume": 280,
+          "yearOverYearChange": 2.3
+        },
+        {
+          "date": "2023-10-01",
+          "open": 1360000,
+          "high": 1380000,
+          "low": 1350000,
+          "close": 1290000,
+          "volume": 260,
+          "yearOverYearChange": 2.2
+        },
+        {
+          "date": "2023-11-01",
+          "open": 1380000,
+          "high": 1400000,
+          "low": 1370000,
+          "close": 1295000,
+          "volume": 240,
+          "yearOverYearChange": 2.1
+        },
+        {
+          "date": "2023-12-01",
+          "open": 1400000,
+          "high": 1420000,
+          "low": 1390000,
+          "close": 1300000,
+          "volume": 220,
+          "yearOverYearChange": 2.0
+        },
+        {
+          "date": "2024-01-01",
+          "open": 1420000,
+          "high": 1440000,
+          "low": 1410000,
+          "close": 1310000,
+          "volume": 200,
+          "yearOverYearChange": 1.9
+        },
+        {
+          "date": "2024-02-01",
+          "open": 1440000,
+          "high": 1460000,
+          "low": 1430000,
+          "close": 1320000,
+          "volume": 180,
+          "yearOverYearChange": 1.8
+        },
+        {
+          "date": "2024-03-01",
+          "open": 1460000,
+          "high": 1480000,
+          "low": 1450000,
+          "close": 1330000,
+          "volume": 160,
+          "yearOverYearChange": 1.7
+        },
+        {
+          "date": "2024-04-01",
+          "open": 1480000,
+          "high": 1500000,
+          "low": 1470000,
+          "close": 1340000,
+          "volume": 140,
+          "yearOverYearChange": 1.6
+        },
+        {
+          "date": "2024-05-01",
+          "open": 1500000,
+          "high": 1520000,
+          "low": 1490000,
+          "close": 1350000,
+          "volume": 120,
+          "yearOverYearChange": 1.5
+        }
+      ],
+      "neighborhoodData": [
+        {
+          "name": "Upper East Side",
+          "medianHomePrice": 1450000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 1360000,
+              "high": 1395000,
+              "low": 1350000,
+              "close": 1380000,
+              "volume": 85
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 1380000,
+              "high": 1400000,
+              "low": 1370000,
+              "close": 1390000,
+              "volume": 88
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 1380000,
+              "high": 1410000,
+              "low": 1375000,
+              "close": 1395000,
+              "volume": 92
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 1395000,
+              "high": 1415000,
+              "low": 1385000,
+              "close": 1400000,
+              "volume": 90
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 1400000,
+              "high": 1420000,
+              "low": 1390000,
+              "close": 1405000,
+              "volume": 87
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 1405000,
+              "high": 1425000,
+              "low": 1395000,
+              "close": 1410000,
+              "volume": 85
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 1410000,
+              "high": 1430000,
+              "low": 1400000,
+              "close": 1415000,
+              "volume": 82
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 1415000,
+              "high": 1435000,
+              "low": 1405000,
+              "close": 1420000,
+              "volume": 80
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 1420000,
+              "high": 1440000,
+              "low": 1410000,
+              "close": 1425000,
+              "volume": 78
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 1425000,
+              "high": 1445000,
+              "low": 1415000,
+              "close": 1430000,
+              "volume": 75
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 1430000,
+              "high": 1450000,
+              "low": 1420000,
+              "close": 1435000,
+              "volume": 72
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 1435000,
+              "high": 1455000,
+              "low": 1425000,
+              "close": 1440000,
+              "volume": 70
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 1440000,
+              "high": 1460000,
+              "low": 1430000,
+              "close": 1442000,
+              "volume": 68
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 1442000,
+              "high": 1462000,
+              "low": 1432000,
+              "close": 1444000,
+              "volume": 65
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 1444000,
+              "high": 1464000,
+              "low": 1434000,
+              "close": 1445000,
+              "volume": 62
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 1445000,
+              "high": 1465000,
+              "low": 1435000,
+              "close": 1448000,
+              "volume": 60
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 1448000,
+              "high": 1468000,
+              "low": 1438000,
+              "close": 1450000,
+              "volume": 58
+            }
+          ]
+        },
+        {
+          "name": "Chelsea",
+          "medianHomePrice": 1350000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 1310000,
+              "high": 1330000,
+              "low": 1290000,
+              "close": 1320000,
+              "volume": 78
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 1320000,
+              "high": 1325000,
+              "low": 1295000,
+              "close": 1315000,
+              "volume": 65
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 1315000,
+              "high": 1320000,
+              "low": 1290000,
+              "close": 1310000,
+              "volume": 72
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 1310000,
+              "high": 1315000,
+              "low": 1285000,
+              "close": 1305000,
+              "volume": 68
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 1305000,
+              "high": 1310000,
+              "low": 1290000,
+              "close": 1300000,
+              "volume": 70
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 1300000,
+              "high": 1310000,
+              "low": 1285000,
+              "close": 1300000,
+              "volume": 75
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 1300000,
+              "high": 1315000,
+              "low": 1295000,
+              "close": 1305000,
+              "volume": 80
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 1305000,
+              "high": 1320000,
+              "low": 1300000,
+              "close": 1310000,
+              "volume": 82
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 1310000,
+              "high": 1325000,
+              "low": 1305000,
+              "close": 1315000,
+              "volume": 85
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 1315000,
+              "high": 1330000,
+              "low": 1310000,
+              "close": 1320000,
+              "volume": 88
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 1320000,
+              "high": 1335000,
+              "low": 1315000,
+              "close": 1325000,
+              "volume": 90
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 1325000,
+              "high": 1340000,
+              "low": 1320000,
+              "close": 1330000,
+              "volume": 92
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 1330000,
+              "high": 1345000,
+              "low": 1325000,
+              "close": 1335000,
+              "volume": 95
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 1335000,
+              "high": 1350000,
+              "low": 1330000,
+              "close": 1340000,
+              "volume": 98
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 1340000,
+              "high": 1355000,
+              "low": 1335000,
+              "close": 1345000,
+              "volume": 100
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 1345000,
+              "high": 1360000,
+              "low": 1340000,
+              "close": 1350000,
+              "volume": 105
+            }
+          ]
+        },
+        {
+          "name": "Tribeca",
+          "medianHomePrice": 3200000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 3050000,
+              "high": 3080000,
+              "low": 3030000,
+              "close": 3060000,
+              "volume": 45
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 3060000,
+              "high": 3090000,
+              "low": 3040000,
+              "close": 3070000,
+              "volume": 42
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 3070000,
+              "high": 3100000,
+              "low": 3050000,
+              "close": 3080000,
+              "volume": 48
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 3080000,
+              "high": 3110000,
+              "low": 3060000,
+              "close": 3090000,
+              "volume": 50
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 3090000,
+              "high": 3120000,
+              "low": 3070000,
+              "close": 3100000,
+              "volume": 47
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 3100000,
+              "high": 3130000,
+              "low": 3080000,
+              "close": 3120000,
+              "volume": 52
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 3120000,
+              "high": 3150000,
+              "low": 3100000,
+              "close": 3130000,
+              "volume": 49
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 3130000,
+              "high": 3160000,
+              "low": 3110000,
+              "close": 3140000,
+              "volume": 51
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 3140000,
+              "high": 3170000,
+              "low": 3120000,
+              "close": 3150000,
+              "volume": 53
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 3150000,
+              "high": 3180000,
+              "low": 3130000,
+              "close": 3160000,
+              "volume": 48
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 3160000,
+              "high": 3190000,
+              "low": 3140000,
+              "close": 3170000,
+              "volume": 46
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 3170000,
+              "high": 3200000,
+              "low": 3150000,
+              "close": 3180000,
+              "volume": 44
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 3180000,
+              "high": 3210000,
+              "low": 3160000,
+              "close": 3185000,
+              "volume": 42
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 3185000,
+              "high": 3215000,
+              "low": 3165000,
+              "close": 3190000,
+              "volume": 40
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 3190000,
+              "high": 3220000,
+              "low": 3170000,
+              "close": 3195000,
+              "volume": 38
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 3195000,
+              "high": 3225000,
+              "low": 3175000,
+              "close": 3198000,
+              "volume": 36
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 3198000,
+              "high": 3230000,
+              "low": 3180000,
+              "close": 3200000,
+              "volume": 35
+            }
+          ]
+        },
+        {
+          "name": "Harlem",
+          "medianHomePrice": 850000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 790000,
+              "high": 805000,
+              "low": 785000,
+              "close": 795000,
+              "volume": 120
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 795000,
+              "high": 810000,
+              "low": 790000,
+              "close": 798000,
+              "volume": 115
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 798000,
+              "high": 815000,
+              "low": 792000,
+              "close": 800000,
+              "volume": 118
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 800000,
+              "high": 818000,
+              "low": 795000,
+              "close": 805000,
+              "volume": 122
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 805000,
+              "high": 820000,
+              "low": 800000,
+              "close": 810000,
+              "volume": 125
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 810000,
+              "high": 825000,
+              "low": 805000,
+              "close": 815000,
+              "volume": 128
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 815000,
+              "high": 830000,
+              "low": 810000,
+              "close": 818000,
+              "volume": 130
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 818000,
+              "high": 833000,
+              "low": 813000,
+              "close": 822000,
+              "volume": 127
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 822000,
+              "high": 837000,
+              "low": 817000,
+              "close": 825000,
+              "volume": 125
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 825000,
+              "high": 840000,
+              "low": 820000,
+              "close": 830000,
+              "volume": 122
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 830000,
+              "high": 845000,
+              "low": 825000,
+              "close": 835000,
+              "volume": 120
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 835000,
+              "high": 850000,
+              "low": 830000,
+              "close": 840000,
+              "volume": 118
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 840000,
+              "high": 855000,
+              "low": 835000,
+              "close": 842000,
+              "volume": 115
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 842000,
+              "high": 857000,
+              "low": 837000,
+              "close": 844000,
+              "volume": 112
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 844000,
+              "high": 859000,
+              "low": 839000,
+              "close": 845000,
+              "volume": 110
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 845000,
+              "high": 860000,
+              "low": 840000,
+              "close": 848000,
+              "volume": 108
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 848000,
+              "high": 863000,
+              "low": 843000,
+              "close": 850000,
+              "volume": 105
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tokyo",
+      "country": "Japan",
+      "currency": "JPY",
+      "priceData": [
+        {
+          "date": "2023-01-01",
+          "averagePricePerSqM": 1250000,
+          "medianHomePrice": 75000000,
+          "yearOverYearChange": 1.8
+        },
+        {
+          "date": "2023-02-01",
+          "averagePricePerSqM": 1255000,
+          "medianHomePrice": 75500000,
+          "yearOverYearChange": 1.8
+        },
+        {
+          "date": "2023-03-01",
+          "averagePricePerSqM": 1265000,
+          "medianHomePrice": 76000000,
+          "yearOverYearChange": 1.9
+        },
+        {
+          "date": "2023-04-01",
+          "averagePricePerSqM": 1275000,
+          "medianHomePrice": 76500000,
+          "yearOverYearChange": 1.9
+        },
+        {
+          "date": "2023-05-01",
+          "averagePricePerSqM": 1280000,
+          "medianHomePrice": 77000000,
+          "yearOverYearChange": 2.0
+        },
+        {
+          "date": "2023-06-01",
+          "averagePricePerSqM": 1285000,
+          "medianHomePrice": 77500000,
+          "yearOverYearChange": 2.0
+        },
+        {
+          "date": "2023-07-01",
+          "averagePricePerSqM": 1290000,
+          "medianHomePrice": 77800000,
+          "yearOverYearChange": 2.1
+        },
+        {
+          "date": "2023-08-01",
+          "averagePricePerSqM": 1295000,
+          "medianHomePrice": 78200000,
+          "yearOverYearChange": 2.1
+        },
+        {
+          "date": "2023-09-01",
+          "averagePricePerSqM": 1300000,
+          "medianHomePrice": 78700000,
+          "yearOverYearChange": 2.2
+        },
+        {
+          "date": "2023-10-01",
+          "averagePricePerSqM": 1310000,
+          "medianHomePrice": 79200000,
+          "yearOverYearChange": 2.3
+        },
+        {
+          "date": "2023-11-01",
+          "averagePricePerSqM": 1315000,
+          "medianHomePrice": 79800000,
+          "yearOverYearChange": 2.4
+        },
+        {
+          "date": "2023-12-01",
+          "averagePricePerSqM": 1320000,
+          "medianHomePrice": 80000000,
+          "yearOverYearChange": 2.4
+        },
+        {
+          "date": "2024-01-01",
+          "averagePricePerSqM": 1325000,
+          "medianHomePrice": 80500000,
+          "yearOverYearChange": 2.5
+        },
+        {
+          "date": "2024-02-01",
+          "averagePricePerSqM": 1330000,
+          "medianHomePrice": 81000000,
+          "yearOverYearChange": 2.6
+        },
+        {
+          "date": "2024-03-01",
+          "averagePricePerSqM": 1335000,
+          "medianHomePrice": 81500000,
+          "yearOverYearChange": 2.7
+        },
+        {
+          "date": "2024-04-01",
+          "averagePricePerSqM": 1340000,
+          "medianHomePrice": 82000000,
+          "yearOverYearChange": 2.8
+        },
+        {
+          "date": "2024-05-01",
+          "averagePricePerSqM": 1345000,
+          "medianHomePrice": 82500000,
+          "yearOverYearChange": 2.9
+        }
+      ],
+      "neighborhoodData": [
+        {
+          "name": "Shibuya",
+          "medianHomePrice": 95000000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 88000000,
+              "high": 89500000,
+              "low": 87500000,
+              "close": 89000000,
+              "volume": 65
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 89000000,
+              "high": 90000000,
+              "low": 88500000,
+              "close": 89800000,
+              "volume": 62
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 89800000,
+              "high": 91000000,
+              "low": 89200000,
+              "close": 90500000,
+              "volume": 68
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 90500000,
+              "high": 91500000,
+              "low": 90000000,
+              "close": 91000000,
+              "volume": 70
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 91000000,
+              "high": 92000000,
+              "low": 90500000,
+              "close": 91500000,
+              "volume": 67
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 91500000,
+              "high": 92500000,
+              "low": 91000000,
+              "close": 92000000,
+              "volume": 72
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 92000000,
+              "high": 93000000,
+              "low": 91500000,
+              "close": 92500000,
+              "volume": 69
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 92500000,
+              "high": 93500000,
+              "low": 92000000,
+              "close": 93000000,
+              "volume": 71
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 93000000,
+              "high": 94000000,
+              "low": 92500000,
+              "close": 93500000,
+              "volume": 73
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 93500000,
+              "high": 94500000,
+              "low": 93000000,
+              "close": 94000000,
+              "volume": 68
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 94000000,
+              "high": 95000000,
+              "low": 93500000,
+              "close": 94500000,
+              "volume": 66
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 94500000,
+              "high": 95500000,
+              "low": 94000000,
+              "close": 95000000,
+              "volume": 64
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 95000000,
+              "high": 96000000,
+              "low": 94500000,
+              "close": 95200000,
+              "volume": 62
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 95200000,
+              "high": 96200000,
+              "low": 94800000,
+              "close": 95400000,
+              "volume": 60
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 95400000,
+              "high": 96400000,
+              "low": 95000000,
+              "close": 95600000,
+              "volume": 58
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 95600000,
+              "high": 96600000,
+              "low": 95200000,
+              "close": 95800000,
+              "volume": 56
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 95800000,
+              "high": 96800000,
+              "low": 95400000,
+              "close": 96000000,
+              "volume": 55
+            }
+          ]
+        },
+        {
+          "name": "Shinjuku",
+          "medianHomePrice": 88000000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 82000000,
+              "high": 83000000,
+              "low": 81500000,
+              "close": 82500000,
+              "volume": 58
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 82500000,
+              "high": 83500000,
+              "low": 82000000,
+              "close": 83000000,
+              "volume": 55
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 83000000,
+              "high": 84000000,
+              "low": 82500000,
+              "close": 83500000,
+              "volume": 62
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 83500000,
+              "high": 84500000,
+              "low": 83000000,
+              "close": 84000000,
+              "volume": 60
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 84000000,
+              "high": 85000000,
+              "low": 83500000,
+              "close": 84500000,
+              "volume": 57
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 84500000,
+              "high": 85500000,
+              "low": 84000000,
+              "close": 85000000,
+              "volume": 65
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 85000000,
+              "high": 86000000,
+              "low": 84500000,
+              "close": 85500000,
+              "volume": 59
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 85500000,
+              "high": 86500000,
+              "low": 85000000,
+              "close": 86000000,
+              "volume": 61
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 86000000,
+              "high": 87000000,
+              "low": 85500000,
+              "close": 86500000,
+              "volume": 63
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 86500000,
+              "high": 87500000,
+              "low": 86000000,
+              "close": 87000000,
+              "volume": 58
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 87000000,
+              "high": 88000000,
+              "low": 86500000,
+              "close": 87500000,
+              "volume": 56
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 87500000,
+              "high": 88500000,
+              "low": 87000000,
+              "close": 88000000,
+              "volume": 54
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 88000000,
+              "high": 89000000,
+              "low": 87500000,
+              "close": 88200000,
+              "volume": 52
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 88200000,
+              "high": 89200000,
+              "low": 87800000,
+              "close": 88400000,
+              "volume": 50
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 88400000,
+              "high": 89400000,
+              "low": 88000000,
+              "close": 88600000,
+              "volume": 48
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 88600000,
+              "high": 89600000,
+              "low": 88200000,
+              "close": 88800000,
+              "volume": 46
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 88800000,
+              "high": 89800000,
+              "low": 88400000,
+              "close": 89000000,
+              "volume": 45
+            }
+          ]
+        },
+        {
+          "name": "Minato",
+          "medianHomePrice": 120000000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 112000000,
+              "high": 113500000,
+              "low": 111000000,
+              "close": 112500000,
+              "volume": 35
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 112500000,
+              "high": 114000000,
+              "low": 112000000,
+              "close": 113000000,
+              "volume": 32
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 113000000,
+              "high": 115000000,
+              "low": 112500000,
+              "close": 114000000,
+              "volume": 38
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 114000000,
+              "high": 116000000,
+              "low": 113500000,
+              "close": 115000000,
+              "volume": 40
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 115000000,
+              "high": 117000000,
+              "low": 114500000,
+              "close": 115500000,
+              "volume": 37
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 115500000,
+              "high": 117500000,
+              "low": 115000000,
+              "close": 116000000,
+              "volume": 42
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 116000000,
+              "high": 118000000,
+              "low": 115500000,
+              "close": 116500000,
+              "volume": 39
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 116500000,
+              "high": 118500000,
+              "low": 116000000,
+              "close": 117000000,
+              "volume": 41
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 117000000,
+              "high": 119000000,
+              "low": 116500000,
+              "close": 117500000,
+              "volume": 43
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 117500000,
+              "high": 119500000,
+              "low": 117000000,
+              "close": 118000000,
+              "volume": 38
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 118000000,
+              "high": 120000000,
+              "low": 117500000,
+              "close": 118500000,
+              "volume": 36
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 118500000,
+              "high": 120500000,
+              "low": 118000000,
+              "close": 119000000,
+              "volume": 34
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 119000000,
+              "high": 121000000,
+              "low": 118500000,
+              "close": 119200000,
+              "volume": 32
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 119200000,
+              "high": 121200000,
+              "low": 118800000,
+              "close": 119500000,
+              "volume": 30
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 119500000,
+              "high": 121500000,
+              "low": 119000000,
+              "close": 119800000,
+              "volume": 28
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 119800000,
+              "high": 121800000,
+              "low": 119300000,
+              "close": 120000000,
+              "volume": 26
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 120000000,
+              "high": 122000000,
+              "low": 119500000,
+              "close": 120200000,
+              "volume": 25
+            }
+          ]
+        },
+        {
+          "name": "Setagaya",
+          "medianHomePrice": 70000000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 65000000,
+              "high": 66000000,
+              "low": 64500000,
+              "close": 65500000,
+              "volume": 95
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 65500000,
+              "high": 66500000,
+              "low": 65000000,
+              "close": 66000000,
+              "volume": 92
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 66000000,
+              "high": 67000000,
+              "low": 65500000,
+              "close": 66500000,
+              "volume": 98
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 66500000,
+              "high": 67500000,
+              "low": 66000000,
+              "close": 67000000,
+              "volume": 100
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 67000000,
+              "high": 68000000,
+              "low": 66500000,
+              "close": 67500000,
+              "volume": 97
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 67500000,
+              "high": 68500000,
+              "low": 67000000,
+              "close": 68000000,
+              "volume": 102
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 68000000,
+              "high": 69000000,
+              "low": 67500000,
+              "close": 68200000,
+              "volume": 99
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 68200000,
+              "high": 69200000,
+              "low": 67800000,
+              "close": 68500000,
+              "volume": 101
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 68500000,
+              "high": 69500000,
+              "low": 68000000,
+              "close": 68800000,
+              "volume": 103
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 68800000,
+              "high": 69800000,
+              "low": 68300000,
+              "close": 69000000,
+              "volume": 98
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 69000000,
+              "high": 70000000,
+              "low": 68500000,
+              "close": 69300000,
+              "volume": 96
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 69300000,
+              "high": 70300000,
+              "low": 68800000,
+              "close": 69500000,
+              "volume": 94
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 69500000,
+              "high": 70500000,
+              "low": 69000000,
+              "close": 69800000,
+              "volume": 92
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 69800000,
+              "high": 70800000,
+              "low": 69300000,
+              "close": 70000000,
+              "volume": 90
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 70000000,
+              "high": 71000000,
+              "low": 69500000,
+              "close": 70200000,
+              "volume": 88
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 70200000,
+              "high": 71200000,
+              "low": 69700000,
+              "close": 70500000,
+              "volume": 86
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 70500000,
+              "high": 71500000,
+              "low": 70000000,
+              "close": 70800000,
+              "volume": 85
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bordeaux",
+      "country": "France",
+      "currency": "EUR",
+      "priceData": [
+        {
+          "date": "2023-01-01",
+          "averagePricePerSqM": 4800,
+          "medianHomePrice": 450000,
+          "yearOverYearChange": 2.5
+        },
+        {
+          "date": "2023-02-01",
+          "averagePricePerSqM": 4820,
+          "medianHomePrice": 451500,
+          "yearOverYearChange": 2.4
+        },
+        {
+          "date": "2023-03-01",
+          "averagePricePerSqM": 4835,
+          "medianHomePrice": 453000,
+          "yearOverYearChange": 2.4
+        },
+        {
+          "date": "2023-04-01",
+          "averagePricePerSqM": 4850,
+          "medianHomePrice": 455000,
+          "yearOverYearChange": 2.3
+        },
+        {
+          "date": "2023-05-01",
+          "averagePricePerSqM": 4865,
+          "medianHomePrice": 456500,
+          "yearOverYearChange": 2.3
+        },
+        {
+          "date": "2023-06-01",
+          "averagePricePerSqM": 4880,
+          "medianHomePrice": 458000,
+          "yearOverYearChange": 2.2
+        },
+        {
+          "date": "2023-07-01",
+          "averagePricePerSqM": 4900,
+          "medianHomePrice": 460000,
+          "yearOverYearChange": 2.1
+        },
+        {
+          "date": "2023-08-01",
+          "averagePricePerSqM": 4915,
+          "medianHomePrice": 461500,
+          "yearOverYearChange": 2.0
+        },
+        {
+          "date": "2023-09-01",
+          "averagePricePerSqM": 4930,
+          "medianHomePrice": 463000,
+          "yearOverYearChange": 2.0
+        },
+        {
+          "date": "2023-10-01",
+          "averagePricePerSqM": 4950,
+          "medianHomePrice": 465000,
+          "yearOverYearChange": 1.9
+        },
+        {
+          "date": "2023-11-01",
+          "averagePricePerSqM": 4965,
+          "medianHomePrice": 466500,
+          "yearOverYearChange": 1.8
+        },
+        {
+          "date": "2023-12-01",
+          "averagePricePerSqM": 4980,
+          "medianHomePrice": 468000,
+          "yearOverYearChange": 1.8
+        },
+        {
+          "date": "2024-01-01",
+          "averagePricePerSqM": 5000,
+          "medianHomePrice": 470000,
+          "yearOverYearChange": 1.7
+        },
+        {
+          "date": "2024-02-01",
+          "averagePricePerSqM": 5020,
+          "medianHomePrice": 472000,
+          "yearOverYearChange": 1.7
+        },
+        {
+          "date": "2024-03-01",
+          "averagePricePerSqM": 5040,
+          "medianHomePrice": 474000,
+          "yearOverYearChange": 1.6
+        },
+        {
+          "date": "2024-04-01",
+          "averagePricePerSqM": 5060,
+          "medianHomePrice": 476000,
+          "yearOverYearChange": 1.6
+        },
+        {
+          "date": "2024-05-01",
+          "averagePricePerSqM": 5080,
+          "medianHomePrice": 478000,
+          "yearOverYearChange": 1.5
+        }
+      ],
+      "neighborhoodData": [
+        {
+          "name": "Saint-Pierre",
+          "medianHomePrice": 520000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 495000,
+              "high": 500000,
+              "low": 490000,
+              "close": 498000,
+              "volume": 42
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 498000,
+              "high": 503000,
+              "low": 495000,
+              "close": 500000,
+              "volume": 40
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 500000,
+              "high": 505000,
+              "low": 498000,
+              "close": 502000,
+              "volume": 45
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 502000,
+              "high": 507000,
+              "low": 500000,
+              "close": 504000,
+              "volume": 43
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 504000,
+              "high": 509000,
+              "low": 502000,
+              "close": 505000,
+              "volume": 41
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 505000,
+              "high": 510000,
+              "low": 503000,
+              "close": 507000,
+              "volume": 46
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 507000,
+              "high": 512000,
+              "low": 505000,
+              "close": 508000,
+              "volume": 44
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 508000,
+              "high": 513000,
+              "low": 506000,
+              "close": 509000,
+              "volume": 42
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 509000,
+              "high": 514000,
+              "low": 507000,
+              "close": 510000,
+              "volume": 47
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 510000,
+              "high": 515000,
+              "low": 508000,
+              "close": 512000,
+              "volume": 45
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 512000,
+              "high": 517000,
+              "low": 510000,
+              "close": 514000,
+              "volume": 43
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 514000,
+              "high": 519000,
+              "low": 512000,
+              "close": 515000,
+              "volume": 41
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 515000,
+              "high": 520000,
+              "low": 513000,
+              "close": 516000,
+              "volume": 39
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 516000,
+              "high": 521000,
+              "low": 514000,
+              "close": 517000,
+              "volume": 37
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 517000,
+              "high": 522000,
+              "low": 515000,
+              "close": 518000,
+              "volume": 35
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 518000,
+              "high": 523000,
+              "low": 516000,
+              "close": 519000,
+              "volume": 33
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 519000,
+              "high": 524000,
+              "low": 517000,
+              "close": 520000,
+              "volume": 31
+            }
+          ]
+        },
+        {
+          "name": "Chartrons",
+          "medianHomePrice": 490000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 470000,
+              "high": 475000,
+              "low": 468000,
+              "close": 472000,
+              "volume": 38
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 472000,
+              "high": 477000,
+              "low": 470000,
+              "close": 474000,
+              "volume": 36
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 474000,
+              "high": 479000,
+              "low": 472000,
+              "close": 475000,
+              "volume": 40
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 475000,
+              "high": 480000,
+              "low": 473000,
+              "close": 476000,
+              "volume": 39
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 476000,
+              "high": 481000,
+              "low": 474000,
+              "close": 478000,
+              "volume": 37
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 478000,
+              "high": 483000,
+              "low": 476000,
+              "close": 480000,
+              "volume": 41
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 480000,
+              "high": 485000,
+              "low": 478000,
+              "close": 481000,
+              "volume": 39
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 481000,
+              "high": 486000,
+              "low": 479000,
+              "close": 482000,
+              "volume": 38
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 482000,
+              "high": 487000,
+              "low": 480000,
+              "close": 483000,
+              "volume": 42
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 483000,
+              "high": 488000,
+              "low": 481000,
+              "close": 484000,
+              "volume": 40
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 484000,
+              "high": 489000,
+              "low": 482000,
+              "close": 485000,
+              "volume": 38
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 485000,
+              "high": 490000,
+              "low": 483000,
+              "close": 486000,
+              "volume": 36
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 486000,
+              "high": 491000,
+              "low": 484000,
+              "close": 487000,
+              "volume": 34
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 487000,
+              "high": 492000,
+              "low": 485000,
+              "close": 488000,
+              "volume": 32
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 488000,
+              "high": 493000,
+              "low": 486000,
+              "close": 489000,
+              "volume": 30
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 489000,
+              "high": 494000,
+              "low": 487000,
+              "close": 490000,
+              "volume": 28
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 490000,
+              "high": 495000,
+              "low": 488000,
+              "close": 491000,
+              "volume": 26
+            }
+          ]
+        },
+        {
+          "name": "Saint-Michel",
+          "medianHomePrice": 380000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 365000,
+              "high": 370000,
+              "low": 362000,
+              "close": 367000,
+              "volume": 55
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 367000,
+              "high": 372000,
+              "low": 364000,
+              "close": 368000,
+              "volume": 53
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 368000,
+              "high": 373000,
+              "low": 365000,
+              "close": 369000,
+              "volume": 58
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 369000,
+              "high": 374000,
+              "low": 366000,
+              "close": 370000,
+              "volume": 56
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 370000,
+              "high": 375000,
+              "low": 367000,
+              "close": 371000,
+              "volume": 54
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 371000,
+              "high": 376000,
+              "low": 368000,
+              "close": 372000,
+              "volume": 59
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 372000,
+              "high": 377000,
+              "low": 369000,
+              "close": 373000,
+              "volume": 57
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 373000,
+              "high": 378000,
+              "low": 370000,
+              "close": 374000,
+              "volume": 55
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 374000,
+              "high": 379000,
+              "low": 371000,
+              "close": 375000,
+              "volume": 60
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 375000,
+              "high": 380000,
+              "low": 372000,
+              "close": 376000,
+              "volume": 58
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 376000,
+              "high": 381000,
+              "low": 373000,
+              "close": 377000,
+              "volume": 56
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 377000,
+              "high": 382000,
+              "low": 374000,
+              "close": 378000,
+              "volume": 54
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 378000,
+              "high": 383000,
+              "low": 375000,
+              "close": 379000,
+              "volume": 52
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 379000,
+              "high": 384000,
+              "low": 376000,
+              "close": 380000,
+              "volume": 50
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 380000,
+              "high": 385000,
+              "low": 377000,
+              "close": 381000,
+              "volume": 48
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 381000,
+              "high": 386000,
+              "low": 378000,
+              "close": 382000,
+              "volume": 46
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 382000,
+              "high": 387000,
+              "low": 379000,
+              "close": 383000,
+              "volume": 44
+            }
+          ]
+        },
+        {
+          "name": "Bastide",
+          "medianHomePrice": 420000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 395000,
+              "high": 400000,
+              "low": 392000,
+              "close": 397000,
+              "volume": 48
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 397000,
+              "high": 402000,
+              "low": 394000,
+              "close": 399000,
+              "volume": 46
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 399000,
+              "high": 404000,
+              "low": 396000,
+              "close": 400000,
+              "volume": 50
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 400000,
+              "high": 405000,
+              "low": 397000,
+              "close": 402000,
+              "volume": 49
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 402000,
+              "high": 407000,
+              "low": 399000,
+              "close": 404000,
+              "volume": 47
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 404000,
+              "high": 409000,
+              "low": 401000,
+              "close": 405000,
+              "volume": 51
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 405000,
+              "high": 410000,
+              "low": 402000,
+              "close": 407000,
+              "volume": 49
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 407000,
+              "high": 412000,
+              "low": 404000,
+              "close": 408000,
+              "volume": 48
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 408000,
+              "high": 413000,
+              "low": 405000,
+              "close": 410000,
+              "volume": 52
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 410000,
+              "high": 415000,
+              "low": 407000,
+              "close": 412000,
+              "volume": 50
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 412000,
+              "high": 417000,
+              "low": 409000,
+              "close": 414000,
+              "volume": 48
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 414000,
+              "high": 419000,
+              "low": 411000,
+              "close": 415000,
+              "volume": 46
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 415000,
+              "high": 420000,
+              "low": 412000,
+              "close": 416000,
+              "volume": 44
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 416000,
+              "high": 421000,
+              "low": 413000,
+              "close": 417000,
+              "volume": 42
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 417000,
+              "high": 422000,
+              "low": 414000,
+              "close": 418000,
+              "volume": 40
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 418000,
+              "high": 423000,
+              "low": 415000,
+              "close": 419000,
+              "volume": 38
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 419000,
+              "high": 424000,
+              "low": 416000,
+              "close": 420000,
+              "volume": 36
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bali",
+      "country": "Indonesia",
+      "currency": "IDR",
+      "priceData": [
+        {
+          "date": "2023-01-01",
+          "averagePricePerSqM": 15000000,
+          "medianHomePrice": 3500000000,
+          "yearOverYearChange": 5.2
+        },
+        {
+          "date": "2023-02-01",
+          "averagePricePerSqM": 15100000,
+          "medianHomePrice": 3530000000,
+          "yearOverYearChange": 5.3
+        },
+        {
+          "date": "2023-03-01",
+          "averagePricePerSqM": 15200000,
+          "medianHomePrice": 3560000000,
+          "yearOverYearChange": 5.4
+        },
+        {
+          "date": "2023-04-01",
+          "averagePricePerSqM": 15300000,
+          "medianHomePrice": 3600000000,
+          "yearOverYearChange": 5.5
+        },
+        {
+          "date": "2023-05-01",
+          "averagePricePerSqM": 15400000,
+          "medianHomePrice": 3630000000,
+          "yearOverYearChange": 5.6
+        },
+        {
+          "date": "2023-06-01",
+          "averagePricePerSqM": 15500000,
+          "medianHomePrice": 3660000000,
+          "yearOverYearChange": 5.7
+        },
+        {
+          "date": "2023-07-01",
+          "averagePricePerSqM": 15600000,
+          "medianHomePrice": 3700000000,
+          "yearOverYearChange": 5.8
+        },
+        {
+          "date": "2023-08-01",
+          "averagePricePerSqM": 15700000,
+          "medianHomePrice": 3730000000,
+          "yearOverYearChange": 5.9
+        },
+        {
+          "date": "2023-09-01",
+          "averagePricePerSqM": 15800000,
+          "medianHomePrice": 3760000000,
+          "yearOverYearChange": 5.9
+        },
+        {
+          "date": "2023-10-01",
+          "averagePricePerSqM": 15900000,
+          "medianHomePrice": 3800000000,
+          "yearOverYearChange": 6.0
+        },
+        {
+          "date": "2023-11-01",
+          "averagePricePerSqM": 16000000,
+          "medianHomePrice": 3830000000,
+          "yearOverYearChange": 6.1
+        },
+        {
+          "date": "2023-12-01",
+          "averagePricePerSqM": 16100000,
+          "medianHomePrice": 3860000000,
+          "yearOverYearChange": 6.1
+        },
+        {
+          "date": "2024-01-01",
+          "averagePricePerSqM": 16200000,
+          "medianHomePrice": 3900000000,
+          "yearOverYearChange": 6.2
+        },
+        {
+          "date": "2024-02-01",
+          "averagePricePerSqM": 16300000,
+          "medianHomePrice": 3930000000,
+          "yearOverYearChange": 6.3
+        },
+        {
+          "date": "2024-03-01",
+          "averagePricePerSqM": 16400000,
+          "medianHomePrice": 3960000000,
+          "yearOverYearChange": 6.4
+        },
+        {
+          "date": "2024-04-01",
+          "averagePricePerSqM": 16500000,
+          "medianHomePrice": 4000000000,
+          "yearOverYearChange": 6.5
+        },
+        {
+          "date": "2024-05-01",
+          "averagePricePerSqM": 16600000,
+          "medianHomePrice": 4030000000,
+          "yearOverYearChange": 6.6
+        }
+      ],
+      "neighborhoodData": [
+        {
+          "name": "Seminyak",
+          "medianHomePrice": 4500000000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 4100000000,
+              "high": 4150000000,
+              "low": 4080000000,
+              "close": 4120000000,
+              "volume": 28
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 4120000000,
+              "high": 4170000000,
+              "low": 4100000000,
+              "close": 4140000000,
+              "volume": 26
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 4140000000,
+              "high": 4190000000,
+              "low": 4120000000,
+              "close": 4180000000,
+              "volume": 30
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 4180000000,
+              "high": 4230000000,
+              "low": 4160000000,
+              "close": 4200000000,
+              "volume": 32
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 4200000000,
+              "high": 4250000000,
+              "low": 4180000000,
+              "close": 4220000000,
+              "volume": 29
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 4220000000,
+              "high": 4270000000,
+              "low": 4200000000,
+              "close": 4250000000,
+              "volume": 34
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 4250000000,
+              "high": 4300000000,
+              "low": 4230000000,
+              "close": 4270000000,
+              "volume": 31
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 4270000000,
+              "high": 4320000000,
+              "low": 4250000000,
+              "close": 4290000000,
+              "volume": 33
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 4290000000,
+              "high": 4340000000,
+              "low": 4270000000,
+              "close": 4320000000,
+              "volume": 35
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 4320000000,
+              "high": 4370000000,
+              "low": 4300000000,
+              "close": 4350000000,
+              "volume": 30
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 4350000000,
+              "high": 4400000000,
+              "low": 4330000000,
+              "close": 4380000000,
+              "volume": 28
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 4380000000,
+              "high": 4430000000,
+              "low": 4360000000,
+              "close": 4400000000,
+              "volume": 26
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 4400000000,
+              "high": 4450000000,
+              "low": 4380000000,
+              "close": 4420000000,
+              "volume": 24
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 4420000000,
+              "high": 4470000000,
+              "low": 4400000000,
+              "close": 4440000000,
+              "volume": 22
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 4440000000,
+              "high": 4490000000,
+              "low": 4420000000,
+              "close": 4460000000,
+              "volume": 20
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 4460000000,
+              "high": 4510000000,
+              "low": 4440000000,
+              "close": 4480000000,
+              "volume": 18
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 4480000000,
+              "high": 4530000000,
+              "low": 4460000000,
+              "close": 4500000000,
+              "volume": 16
+            }
+          ]
+        },
+        {
+          "name": "Ubud",
+          "medianHomePrice": 3200000000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 2900000000,
+              "high": 2950000000,
+              "low": 2880000000,
+              "close": 2920000000,
+              "volume": 42
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 2920000000,
+              "high": 2970000000,
+              "low": 2900000000,
+              "close": 2940000000,
+              "volume": 40
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 2940000000,
+              "high": 2990000000,
+              "low": 2920000000,
+              "close": 2960000000,
+              "volume": 45
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 2960000000,
+              "high": 3010000000,
+              "low": 2940000000,
+              "close": 2980000000,
+              "volume": 47
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 2980000000,
+              "high": 3030000000,
+              "low": 2960000000,
+              "close": 3000000000,
+              "volume": 44
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 3000000000,
+              "high": 3050000000,
+              "low": 2980000000,
+              "close": 3020000000,
+              "volume": 49
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 3020000000,
+              "high": 3070000000,
+              "low": 3000000000,
+              "close": 3040000000,
+              "volume": 46
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 3040000000,
+              "high": 3090000000,
+              "low": 3020000000,
+              "close": 3060000000,
+              "volume": 48
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 3060000000,
+              "high": 3110000000,
+              "low": 3040000000,
+              "close": 3080000000,
+              "volume": 50
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 3080000000,
+              "high": 3130000000,
+              "low": 3060000000,
+              "close": 3100000000,
+              "volume": 45
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 3100000000,
+              "high": 3150000000,
+              "low": 3080000000,
+              "close": 3120000000,
+              "volume": 43
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 3120000000,
+              "high": 3170000000,
+              "low": 3100000000,
+              "close": 3140000000,
+              "volume": 41
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 3140000000,
+              "high": 3190000000,
+              "low": 3120000000,
+              "close": 3160000000,
+              "volume": 39
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 3160000000,
+              "high": 3210000000,
+              "low": 3140000000,
+              "close": 3180000000,
+              "volume": 37
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 3180000000,
+              "high": 3230000000,
+              "low": 3160000000,
+              "close": 3190000000,
+              "volume": 35
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 3190000000,
+              "high": 3240000000,
+              "low": 3170000000,
+              "close": 3195000000,
+              "volume": 33
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 3195000000,
+              "high": 3245000000,
+              "low": 3175000000,
+              "close": 3200000000,
+              "volume": 31
+            }
+          ]
+        },
+        {
+          "name": "Canggu",
+          "medianHomePrice": 4000000000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 3600000000,
+              "high": 3650000000,
+              "low": 3580000000,
+              "close": 3620000000,
+              "volume": 35
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 3620000000,
+              "high": 3670000000,
+              "low": 3600000000,
+              "close": 3640000000,
+              "volume": 33
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 3640000000,
+              "high": 3690000000,
+              "low": 3620000000,
+              "close": 3660000000,
+              "volume": 38
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 3660000000,
+              "high": 3710000000,
+              "low": 3640000000,
+              "close": 3680000000,
+              "volume": 40
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 3680000000,
+              "high": 3730000000,
+              "low": 3660000000,
+              "close": 3700000000,
+              "volume": 37
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 3700000000,
+              "high": 3750000000,
+              "low": 3680000000,
+              "close": 3720000000,
+              "volume": 42
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 3720000000,
+              "high": 3770000000,
+              "low": 3700000000,
+              "close": 3740000000,
+              "volume": 39
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 3740000000,
+              "high": 3790000000,
+              "low": 3720000000,
+              "close": 3760000000,
+              "volume": 41
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 3760000000,
+              "high": 3810000000,
+              "low": 3740000000,
+              "close": 3780000000,
+              "volume": 43
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 3780000000,
+              "high": 3830000000,
+              "low": 3760000000,
+              "close": 3800000000,
+              "volume": 38
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 3800000000,
+              "high": 3850000000,
+              "low": 3780000000,
+              "close": 3820000000,
+              "volume": 36
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 3820000000,
+              "high": 3870000000,
+              "low": 3800000000,
+              "close": 3840000000,
+              "volume": 34
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 3840000000,
+              "high": 3890000000,
+              "low": 3820000000,
+              "close": 3860000000,
+              "volume": 32
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 3860000000,
+              "high": 3910000000,
+              "low": 3840000000,
+              "close": 3880000000,
+              "volume": 30
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 3880000000,
+              "high": 3930000000,
+              "low": 3860000000,
+              "close": 3900000000,
+              "volume": 28
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 3900000000,
+              "high": 3950000000,
+              "low": 3880000000,
+              "close": 3920000000,
+              "volume": 26
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 3920000000,
+              "high": 3970000000,
+              "low": 3900000000,
+              "close": 3940000000,
+              "volume": 24
+            }
+          ]
+        },
+        {
+          "name": "Uluwatu",
+          "medianHomePrice": 5200000000,
+          "priceHistory": [
+            { 
+              "date": "2023-01-01", 
+              "open": 4700000000,
+              "high": 4750000000,
+              "low": 4680000000,
+              "close": 4720000000,
+              "volume": 22
+            },
+            { 
+              "date": "2023-02-01", 
+              "open": 4720000000,
+              "high": 4770000000,
+              "low": 4700000000,
+              "close": 4740000000,
+              "volume": 20
+            },
+            { 
+              "date": "2023-03-01", 
+              "open": 4740000000,
+              "high": 4790000000,
+              "low": 4720000000,
+              "close": 4760000000,
+              "volume": 25
+            },
+            { 
+              "date": "2023-04-01", 
+              "open": 4760000000,
+              "high": 4810000000,
+              "low": 4740000000,
+              "close": 4780000000,
+              "volume": 27
+            },
+            { 
+              "date": "2023-05-01", 
+              "open": 4780000000,
+              "high": 4830000000,
+              "low": 4760000000,
+              "close": 4800000000,
+              "volume": 24
+            },
+            { 
+              "date": "2023-06-01", 
+              "open": 4800000000,
+              "high": 4850000000,
+              "low": 4780000000,
+              "close": 4820000000,
+              "volume": 29
+            },
+            { 
+              "date": "2023-07-01", 
+              "open": 4820000000,
+              "high": 4870000000,
+              "low": 4800000000,
+              "close": 4840000000,
+              "volume": 26
+            },
+            { 
+              "date": "2023-08-01", 
+              "open": 4840000000,
+              "high": 4890000000,
+              "low": 4820000000,
+              "close": 4860000000,
+              "volume": 28
+            },
+            { 
+              "date": "2023-09-01", 
+              "open": 4860000000,
+              "high": 4910000000,
+              "low": 4840000000,
+              "close": 4880000000,
+              "volume": 30
+            },
+            { 
+              "date": "2023-10-01", 
+              "open": 4880000000,
+              "high": 4930000000,
+              "low": 4860000000,
+              "close": 4900000000,
+              "volume": 25
+            },
+            { 
+              "date": "2023-11-01", 
+              "open": 4900000000,
+              "high": 4950000000,
+              "low": 4880000000,
+              "close": 4920000000,
+              "volume": 23
+            },
+            { 
+              "date": "2023-12-01", 
+              "open": 4920000000,
+              "high": 4970000000,
+              "low": 4900000000,
+              "close": 4940000000,
+              "volume": 21
+            },
+            { 
+              "date": "2024-01-01", 
+              "open": 4940000000,
+              "high": 4990000000,
+              "low": 4920000000,
+              "close": 4960000000,
+              "volume": 19
+            },
+            { 
+              "date": "2024-02-01", 
+              "open": 4960000000,
+              "high": 5010000000,
+              "low": 4940000000,
+              "close": 4980000000,
+              "volume": 17
+            },
+            { 
+              "date": "2024-03-01", 
+              "open": 4980000000,
+              "high": 5030000000,
+              "low": 4960000000,
+              "close": 5000000000,
+              "volume": 15
+            },
+            { 
+              "date": "2024-04-01", 
+              "open": 5000000000,
+              "high": 5050000000,
+              "low": 4980000000,
+              "close": 5020000000,
+              "volume": 13
+            },
+            { 
+              "date": "2024-05-01", 
+              "open": 5020000000,
+              "high": 5070000000,
+              "low": 5000000000,
+              "close": 5040000000,
+              "volume": 11
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "lastUpdated": "2024-05-01",
+    "dataSource": "Sample Real Estate Market Data",
+    "disclaimer": "This data is for demonstration purposes only and may not reflect actual market conditions."
+  }
+} 
