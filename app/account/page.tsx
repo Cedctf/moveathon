@@ -43,7 +43,7 @@ const defaultUserData = {
 }
 
 // Mock assets data (removed Rolex Daytona)
-const assets = [
+const defaultAssets = [
   {
     id: 1,
     name: "Manhattan Apartment",
@@ -56,7 +56,7 @@ const assets = [
 ]
 
 // Mock transactions data (keeping all transactions for history)
-const transactions = [
+const defaultTransactions = [
   {
     id: 1,
     type: "buy",
@@ -112,9 +112,37 @@ export default function AccountPage() {
   const currentAccount = useCurrentAccount()
   const [walletAddress, setWalletAddress] = useState("")
   const [userData, setUserData] = useState<KYCData | null>(null)
+  const [assets, setAssets] = useState(defaultAssets)
+  const [transactions, setTransactions] = useState(defaultTransactions)
 
   // Get wallet KYC data using our custom hook
   const { needsKYC, kycData, isVerified } = useWalletKYCData(walletAddress)
+
+  // Load assets and transactions from localStorage
+  useEffect(() => {
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      try {
+        // Load assets
+        const storedAssets = localStorage.getItem('userAssets');
+        if (storedAssets) {
+          const parsedAssets = JSON.parse(storedAssets);
+          // Merge with default assets to ensure we have both
+          setAssets([...defaultAssets, ...parsedAssets]);
+        }
+
+        // Load transactions
+        const storedTransactions = localStorage.getItem('userTransactions');
+        if (storedTransactions) {
+          const parsedTransactions = JSON.parse(storedTransactions);
+          // Merge with default transactions
+          setTransactions([...parsedTransactions, ...defaultTransactions]);
+        }
+      } catch (error) {
+        console.error("Error loading data from localStorage:", error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     // Update wallet address when wallet connection changes
@@ -553,7 +581,7 @@ export default function AccountPage() {
                               <Skeleton className="h-8 w-24" />
                             ) : (
                               <div className="font-bold text-2xl">
-                                $<CountUp end={125000} />
+                                $<CountUp end={assets.reduce((sum, asset) => sum + (asset.value * (asset.ownership || 1)), 0)} />
                               </div>
                             )}
                           </div>
@@ -563,7 +591,7 @@ export default function AccountPage() {
                               <Skeleton className="h-8 w-16" />
                             ) : (
                               <div className="font-bold text-2xl">
-                                <CountUp end={1} />
+                                <CountUp end={assets.length} />
                               </div>
                             )}
                           </div>
@@ -590,19 +618,52 @@ export default function AccountPage() {
                             </>
                           ) : (
                             <>
-                              <div className="h-8 w-full rounded-full overflow-hidden bg-gray-100 flex">
-                                <div
-                                  className="h-full bg-emerald-600 transition-all duration-1000"
-                                  style={{ width: "100%" }}
-                                  id="real-estate-bar"
-                                ></div>
-                              </div>
-                              <div className="flex gap-4 mt-3">
-                                <div className="flex items-center">
-                                  <div className="w-3 h-3 bg-emerald-600 rounded-full mr-2"></div>
-                                  <span className="text-sm">Real Estate (100%)</span>
-                                </div>
-                              </div>
+                              {/* Calculate asset allocation percentages */}
+                              {(() => {
+                                const totalValue = assets.reduce((sum, asset) => sum + (asset.value * (asset.ownership || 1)), 0);
+                                const typeGroups = assets.reduce((groups, asset) => {
+                                  const type = asset.type || "Other";
+                                  if (!groups[type]) groups[type] = 0;
+                                  groups[type] += asset.value * (asset.ownership || 1);
+                                  return groups;
+                                }, {} as Record<string, number>);
+                                
+                                // Convert to array for rendering
+                                const allocations = Object.entries(typeGroups).map(([type, value]) => ({
+                                  type,
+                                  value,
+                                  percentage: totalValue > 0 ? (value / totalValue) * 100 : 0
+                                }));
+                                
+                                // Generate colors for each asset type
+                                const colors = {
+                                  "Real Estate": "bg-emerald-600",
+                                  "Collectible": "bg-blue-600",
+                                  "Other": "bg-gray-500"
+                                };
+                                
+                                return (
+                                  <>
+                                    <div className="h-8 w-full rounded-full overflow-hidden bg-gray-100 flex">
+                                      {allocations.map((allocation, index) => (
+                                        <div
+                                          key={index}
+                                          className={`h-full transition-all duration-1000 ${colors[allocation.type as keyof typeof colors] || "bg-gray-500"}`}
+                                          style={{ width: `${allocation.percentage}%` }}
+                                        ></div>
+                                      ))}
+                                    </div>
+                                    <div className="flex flex-wrap gap-4 mt-3">
+                                      {allocations.map((allocation, index) => (
+                                        <div key={index} className="flex items-center">
+                                          <div className={`w-3 h-3 rounded-full mr-2 ${colors[allocation.type as keyof typeof colors] || "bg-gray-500"}`}></div>
+                                          <span className="text-sm">{allocation.type} ({allocation.percentage.toFixed(1)}%)</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </>
+                                );
+                              })()}
                             </>
                           )}
                         </div>
@@ -621,223 +682,237 @@ export default function AccountPage() {
               </TabsContent>
 
               <TabsContent value="transactions" className="mt-6">
-  <Card className="transition-all duration-300 hover:shadow-md">
-    <CardHeader>
-      <CardTitle>Transaction History</CardTitle>
-      <CardDescription>Your recent transactions on the platform</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <div className="space-y-6">
-        {loading ? (
-          Array.from({ length: 5 }).map((_, index) => (
-            <div
-              key={index}
-              className="flex justify-between items-center border-b pb-4 last:border-0 last:pb-0"
-            >
-              <div className="flex items-start gap-4">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <div>
-                  <Skeleton className="h-5 w-32 mb-1" />
-                  <div className="flex items-center gap-2 mt-1">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-16" />
-                  </div>
-                </div>
-              </div>
-              <div className="text-right">
-                <Skeleton className="h-5 w-24 mb-1" />
-                <Skeleton className="h-4 w-20" />
-              </div>
-            </div>
-          ))
-        ) : (
-          <StaggerContainer>
-            {transactions.map((tx) => (
-              <StaggerItem key={tx.id}>
-                <div className="flex justify-between items-center border-b pb-4 last:border-0 last:pb-0 group hover:bg-gray-50 p-2 rounded-md transition-all duration-300">
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${
-                        tx.type === "buy"
-                          ? "bg-emerald-100"
-                          : tx.type === "add_liquidity"
-                            ? "bg-blue-100"
-                            : tx.type === "withdraw_rewards"
-                              ? "bg-purple-100"
-                              : "bg-gray-100"
-                      }`}
+                <Card className="transition-all duration-300 hover:shadow-md">
+                  <CardHeader>
+                    <CardTitle>Transaction History</CardTitle>
+                    <CardDescription>Your recent transactions on the platform</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      {loading ? (
+                        Array.from({ length: 5 }).map((_, index) => (
+                          <div
+                            key={index}
+                            className="flex justify-between items-center border-b pb-4 last:border-0 last:pb-0"
+                          >
+                            <div className="flex items-start gap-4">
+                              <Skeleton className="h-10 w-10 rounded-full" />
+                              <div>
+                                <Skeleton className="h-5 w-32 mb-1" />
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Skeleton className="h-4 w-24" />
+                                  <Skeleton className="h-4 w-16" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Skeleton className="h-5 w-24 mb-1" />
+                              <Skeleton className="h-4 w-20" />
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <StaggerContainer>
+                          {/* Sort transactions by date (newest first) */}
+                          {transactions
+                            .sort((a, b) => {
+                              // Try to parse dates for comparison
+                              const dateA = new Date(a.date);
+                              const dateB = new Date(b.date);
+                              // If both are valid dates, compare them
+                              if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                                return dateB.getTime() - dateA.getTime();
+                              }
+                              // Otherwise, keep original order
+                              return 0;
+                            })
+                            .slice(0, 5) // Show only the latest 5 transactions
+                            .map((tx) => (
+                            <StaggerItem key={tx.id}>
+                              <div className="flex justify-between items-center border-b pb-4 last:border-0 last:pb-0 group hover:bg-gray-50 p-2 rounded-md transition-all duration-300">
+                                <div className="flex items-start gap-4">
+                                  <div
+                                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${
+                                      tx.type === "buy"
+                                        ? "bg-emerald-100"
+                                        : tx.type === "add_liquidity"
+                                          ? "bg-blue-100"
+                                          : tx.type === "withdraw_rewards"
+                                            ? "bg-purple-100"
+                                            : "bg-gray-100"
+                                    }`}
+                                  >
+                                    {tx.type === "buy" && <ArrowUpRight className="h-5 w-5 text-emerald-600" />}
+                                    {tx.type === "add_liquidity" && <Landmark className="h-5 w-5 text-blue-600" />}
+                                    {tx.type === "withdraw_rewards" && <Coins className="h-5 w-5 text-purple-600" />}
+                                    {tx.type === "list_asset" && <FileText className="h-5 w-5 text-gray-600" />}
+                                  </div>
+                                  <div>
+                                    <h4 className="font-medium">
+                                      {tx.type === "buy" && "Purchased Asset"}
+                                      {tx.type === "add_liquidity" && "Added Liquidity"}
+                                      {tx.type === "withdraw_rewards" && "Withdrew Rewards"}
+                                      {tx.type === "list_asset" && "Listed Asset"}
+                                    </h4>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <span className="text-sm text-gray-500">{tx.asset}</span>
+                                      <span className="text-xs text-gray-400">•</span>
+                                      <span className="text-sm text-gray-500">
+                                        {tx.amount} {tx.type === "buy" ? "tokens" : "USDC"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="font-medium">${tx.value.toLocaleString()}</div>
+                                  <div className="flex items-center text-sm text-gray-500">
+                                    <Clock className="h-3.5 w-3.5 mr-1" />
+                                    {tx.date}
+                                  </div>
+                                </div>
+                              </div>
+                            </StaggerItem>
+                          ))}
+                        </StaggerContainer>
+                      )}
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-between">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
                     >
-                      {tx.type === "buy" && <ArrowUpRight className="h-5 w-5 text-emerald-600" />}
-                      {tx.type === "add_liquidity" && <Landmark className="h-5 w-5 text-blue-600" />}
-                      {tx.type === "withdraw_rewards" && <Coins className="h-5 w-5 text-purple-600" />}
-                      {tx.type === "list_asset" && <FileText className="h-5 w-5 text-gray-600" />}
+                      <History className="h-4 w-4 mr-2" /> View All
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                    >
+                      <Download className="h-4 w-4 mr-2" /> Export
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="documents" className="mt-6">
+                <Card className="transition-all duration-300 hover:shadow-md">
+                  <CardHeader>
+                    <CardTitle>Legal Documents</CardTitle>
+                    <CardDescription>Documents related to your assets and transactions</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {loading ? (
+                        Array.from({ length: 5 }).map((_, index) => (
+                          <div key={index} className="border rounded-lg p-4 flex justify-between items-center">
+                            <div className="flex items-center">
+                              <Skeleton className="h-10 w-10 rounded-full mr-4" />
+                              <div>
+                                <Skeleton className="h-5 w-48 mb-1" />
+                                <Skeleton className="h-4 w-32" />
+                              </div>
+                            </div>
+                            <Skeleton className="h-9 w-24" />
+                          </div>
+                        ))
+                      ) : (
+                        <StaggerContainer>
+                          <StaggerItem>
+                            <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
+                              <div className="flex items-center">
+                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
+                                  <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
+                                </div>
+                                <div>
+                                  <h4 className="font-medium">Manhattan Apartment - Title Deed</h4>
+                                  <div className="text-sm text-gray-500">Uploaded on Mar 10, 2023</div>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                              >
+                                <Download className="h-4 w-4 mr-2" /> Download
+                              </Button>
+                            </div>
+                          </StaggerItem>
+
+                          <StaggerItem>
+                            <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
+                              <div className="flex items-center">
+                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
+                                  <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
+                                </div>
+                                <div>
+                                  <h4 className="font-medium">Manhattan Apartment - Appraisal</h4>
+                                  <div className="text-sm text-gray-500">Uploaded on Mar 8, 2023</div>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                              >
+                                <Download className="h-4 w-4 mr-2" /> Download
+                              </Button>
+                            </div>
+                          </StaggerItem>
+
+                          <StaggerItem>
+                            <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
+                              <div className="flex items-center">
+                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
+                                  <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
+                                </div>
+                                <div>
+                                  <h4 className="font-medium">KYC Verification Documents</h4>
+                                  <div className="text-sm text-gray-500">Uploaded on Jan 15, 2023</div>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                              >
+                                <Download className="h-4 w-4 mr-2" /> Download
+                              </Button>
+                            </div>
+                          </StaggerItem>
+
+                          <StaggerItem>
+                            <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
+                              <div className="flex items-center">
+                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
+                                  <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
+                                </div>
+                                <div>
+                                  <h4 className="font-medium">Platform Terms of Service</h4>
+                                  <div className="text-sm text-gray-500">Signed on Jan 15, 2023</div>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
+                              >
+                                <ExternalLink className="h-4 w-4 mr-2" /> View
+                              </Button>
+                            </div>
+                          </StaggerItem>
+                        </StaggerContainer>
+                      )}
                     </div>
-                    <div>
-                      <h4 className="font-medium">
-                        {tx.type === "buy" && "Purchased Asset"}
-                        {tx.type === "add_liquidity" && "Added Liquidity"}
-                        {tx.type === "withdraw_rewards" && "Withdrew Rewards"}
-                        {tx.type === "list_asset" && "Listed Asset"}
-                      </h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-gray-500">{tx.asset}</span>
-                        <span className="text-xs text-gray-400">•</span>
-                        <span className="text-sm text-gray-500">
-                          {tx.amount} {tx.type === "buy" ? "tokens" : "USDC"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-medium">${tx.value.toLocaleString()}</div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Clock className="h-3.5 w-3.5 mr-1" />
-                      {tx.date}
-                    </div>
-                  </div>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        )}
-      </div>
-    </CardContent>
-    <CardFooter className="flex justify-between">
-      <Button
-        variant="outline"
-        size="sm"
-        className="transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
-      >
-        <History className="h-4 w-4 mr-2" /> View All
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        className="transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
-      >
-        <Download className="h-4 w-4 mr-2" /> Export
-      </Button>
-    </CardFooter>
-  </Card>
-</TabsContent>
-
-<TabsContent value="documents" className="mt-6">
-  <Card className="transition-all duration-300 hover:shadow-md">
-    <CardHeader>
-      <CardTitle>Legal Documents</CardTitle>
-      <CardDescription>Documents related to your assets and transactions</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <div className="space-y-4">
-        {loading ? (
-          Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="border rounded-lg p-4 flex justify-between items-center">
-              <div className="flex items-center">
-                <Skeleton className="h-10 w-10 rounded-full mr-4" />
-                <div>
-                  <Skeleton className="h-5 w-48 mb-1" />
-                  <Skeleton className="h-4 w-32" />
-                </div>
-              </div>
-              <Skeleton className="h-9 w-24" />
-            </div>
-          ))
-        ) : (
-          <StaggerContainer>
-            <StaggerItem>
-              <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
-                    <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Manhattan Apartment - Title Deed</h4>
-                    <div className="text-sm text-gray-500">Uploaded on Mar 10, 2023</div>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
-                >
-                  <Download className="h-4 w-4 mr-2" /> Download
-                </Button>
-              </div>
-            </StaggerItem>
-
-            <StaggerItem>
-              <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
-                    <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Manhattan Apartment - Appraisal</h4>
-                    <div className="text-sm text-gray-500">Uploaded on Mar 8, 2023</div>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
-                >
-                  <Download className="h-4 w-4 mr-2" /> Download
-                </Button>
-              </div>
-            </StaggerItem>
-
-            <StaggerItem>
-              <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
-                    <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium">KYC Verification Documents</h4>
-                    <div className="text-sm text-gray-500">Uploaded on Jan 15, 2023</div>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
-                >
-                  <Download className="h-4 w-4 mr-2" /> Download
-                </Button>
-              </div>
-            </StaggerItem>
-
-            <StaggerItem>
-              <div className="border rounded-lg p-4 flex justify-between items-center group hover:border-emerald-600 hover:shadow-sm transition-all duration-300">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 group-hover:bg-emerald-100 transition-all duration-300">
-                    <FileText className="h-5 w-5 text-gray-500 group-hover:text-emerald-600 transition-all duration-300" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Platform Terms of Service</h4>
-                    <div className="text-sm text-gray-500">Signed on Jan 15, 2023</div>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center transition-all duration-300 hover:border-emerald-600 hover:text-emerald-600"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" /> View
-                </Button>
-              </div>
-            </StaggerItem>
-          </StaggerContainer>
-        )}
-      </div>
-    </CardContent>
-    <CardFooter>
-      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 transition-all duration-300 hover:shadow-md">
-        Upload New Document
-      </Button>
-    </CardFooter>
-  </Card>
-</TabsContent>
+                  </CardContent>
+                  <CardFooter>
+                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700 transition-all duration-300 hover:shadow-md">
+                      Upload New Document
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </TabsContent>
             </Tabs>
           </FadeIn>
         </div>

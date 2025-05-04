@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,6 +30,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useRouter } from "next/navigation";
 
 export default function ListAssetPage() {
   const [activeTab, setActiveTab] = useState("kyc");
@@ -43,6 +44,19 @@ export default function ListAssetPage() {
   const [selectedAppraisal, setSelectedAppraisal] = useState<File | null>(null);
   const [selectedAdditionalDocs, setSelectedAdditionalDocs] =
     useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [kycError, setKycError] = useState("");
+  const router = useRouter();
+
+  // Asset details state
+  const [assetDetails, setAssetDetails] = useState({
+    name: "",
+    type: "real-estate-residential",
+    location: "",
+    valuation: "",
+    tokenSymbol: "",
+    description: ""
+  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imagesInputRef = useRef<HTMLInputElement>(null);
@@ -57,8 +71,6 @@ export default function ListAssetPage() {
     address: "",
     idVerificationMethod: "passport",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [kycError, setKycError] = useState("");
 
   const [verificationProgress, setVerificationProgress] = useState(0);
   const [verificationStep, setVerificationStep] = useState("");
@@ -100,6 +112,42 @@ export default function ListAssetPage() {
     setFormData({
       ...formData,
       [id]: value,
+    });
+  };
+
+  const handleAssetInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target;
+    
+    console.log(`Input changed - id: ${id}, value: ${value}`);
+    
+    // Create a copy of the state to update
+    const updatedDetails = { ...assetDetails };
+    
+    // Map the input IDs to the state property names
+    if (id === "asset-name") {
+      updatedDetails.name = value;
+    } else if (id === "token-symbol") {
+      updatedDetails.tokenSymbol = value;
+    } else if (id === "description") {
+      updatedDetails.description = value;
+    } else if (id === "location") {
+      updatedDetails.location = value;
+    } else if (id === "valuation") {
+      updatedDetails.valuation = value;
+    }
+    
+    // Update the state with the new values
+    setAssetDetails(updatedDetails);
+    
+    console.log('Updated assetDetails state:', updatedDetails);
+  };
+
+  const handleAssetTypeChange = (value: string) => {
+    setAssetDetails({
+      ...assetDetails,
+      type: value,
     });
   };
 
@@ -177,21 +225,22 @@ export default function ListAssetPage() {
     // Get form data from the asset details form
     const assetForm = e.target as HTMLFormElement;
 
-    // Create an object to store asset data
-    const assetName =
-      (assetForm.querySelector("#asset-name") as HTMLInputElement)?.value ||
-      "Unnamed Asset";
-    const assetType =
-      document.querySelector("select")?.value || "real-estate-residential";
-    const location =
-      (assetForm.querySelector("#location") as HTMLInputElement)?.value ||
-      "Unknown Location";
-    const valuation =
-      (assetForm.querySelector("#valuation") as HTMLInputElement)?.value ||
-      "10000";
-    const tokenSymbol =
-      (assetForm.querySelector("#token-symbol") as HTMLInputElement)?.value ||
-      "TOKEN";
+    // Update assetDetails with form values
+    const assetName = (assetForm.querySelector("#asset-name") as HTMLInputElement)?.value || "Unnamed Asset";
+    const assetType = document.querySelector("select")?.value || "real-estate-residential";
+    const location = (assetForm.querySelector("#location") as HTMLInputElement)?.value || "Unknown Location";
+    const valuation = (assetForm.querySelector("#valuation") as HTMLInputElement)?.value || "10000";
+    const tokenSymbol = (assetForm.querySelector("#token-symbol") as HTMLInputElement)?.value || "TOKEN";
+    const description = (assetForm.querySelector("#description") as HTMLTextAreaElement)?.value || "";
+
+    setAssetDetails({
+      name: assetName,
+      type: assetType,
+      location: location,
+      valuation: valuation,
+      tokenSymbol: tokenSymbol,
+      description: description
+    });
 
     console.log("Asset data collected:", {
       assetName,
@@ -252,6 +301,90 @@ export default function ListAssetPage() {
       }, 1000);
     } finally {
       console.log("========== SIMULATED ASSET VERIFICATION ENDED ==========");
+    }
+  };
+
+  const handleDocumentsSubmit = async () => {
+    setIsSubmitting(true);
+    console.log("========== SIMULATED DOCUMENTS SUBMISSION STARTED ==========");
+    
+    try {
+      // Reset state
+      setVerificationSuccess(false);
+      setVerificationProgress(0);
+
+      // Simulate verification steps with progress
+      const steps = [
+        "Uploading documents to secure storage...",
+        "Verifying document authenticity...",
+        "Creating document hashes...",
+        "Registering documents on-chain...",
+        "Linking documents to asset DID...",
+        "Finalizing document verification...",
+      ];
+
+      // Simulate each step with a delay
+      for (let i = 0; i < steps.length; i++) {
+        setVerificationStep(steps[i]);
+        setVerificationProgress(Math.floor((i / steps.length) * 100));
+
+        // Show each step for a realistic amount of time
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
+      // Simulation complete
+      setVerificationProgress(100);
+      setVerificationStep("Documents submitted successfully!");
+
+      // Show success indicator
+      setVerificationSuccess(true);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Create the new asset object
+      const newAsset = {
+        id: Date.now(), // Use timestamp as a unique ID
+        name: assetDetails.name || "New Asset",
+        symbol: assetDetails.tokenSymbol || "TOKEN",
+        type: assetDetails.type === "real-estate-residential" || assetDetails.type === "real-estate-commercial" 
+          ? "Real Estate" 
+          : "Collectible",
+        value: parseInt(assetDetails.valuation) || 10000,
+        ownership: 1.0, // Full ownership for newly listed assets
+        status: "pending", // New assets start as pending
+      };
+
+      // Store the new asset in localStorage
+      const existingAssets = localStorage.getItem('userAssets');
+      let assetsArray = existingAssets ? JSON.parse(existingAssets) : [];
+      assetsArray.push(newAsset);
+      localStorage.setItem('userAssets', JSON.stringify(assetsArray));
+
+      // Create a transaction for the listing
+      const newTransaction = {
+        id: Date.now(),
+        type: "list_asset",
+        asset: newAsset.name,
+        amount: "1",
+        value: newAsset.value,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        status: "completed",
+      };
+
+      // Store the new transaction in localStorage
+      const existingTransactions = localStorage.getItem('userTransactions');
+      let transactionsArray = existingTransactions ? JSON.parse(existingTransactions) : [];
+      transactionsArray.push(newTransaction);
+      localStorage.setItem('userTransactions', JSON.stringify(transactionsArray));
+
+      // Redirect to the account page after successful submission
+      await new Promise(resolve => setTimeout(resolve, 500));
+      router.push('/account');
+      
+    } catch (error) {
+      console.error("Simulated document submission error:", error);
+    } finally {
+      setIsSubmitting(false);
+      console.log("========== SIMULATED DOCUMENTS SUBMISSION ENDED ==========");
     }
   };
 
@@ -564,13 +697,19 @@ export default function ListAssetPage() {
                         placeholder="Enter asset name"
                         required
                         className="bg-white text-black border-gray-200"
+                        value={assetDetails.name}
+                        onChange={handleAssetInputChange}
                       />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="grid gap-3">
                         <Label htmlFor="asset-type">Asset Type</Label>
-                        <Select required>
+                        <Select 
+                          required
+                          value={assetDetails.type}
+                          onValueChange={handleAssetTypeChange}
+                        >
                           <SelectTrigger className="bg-white text-black border-gray-200">
                             <SelectValue placeholder="Select asset type" />
                           </SelectTrigger>
@@ -598,6 +737,8 @@ export default function ListAssetPage() {
                           placeholder="Enter asset location"
                           required
                           className="bg-white text-black border-gray-200"
+                          value={assetDetails.location}
+                          onChange={handleAssetInputChange}
                         />
                       </div>
                     </div>
@@ -611,6 +752,8 @@ export default function ListAssetPage() {
                           placeholder="Enter asset valuation"
                           required
                           className="bg-white text-black border-gray-200"
+                          value={assetDetails.valuation}
+                          onChange={handleAssetInputChange}
                         />
                       </div>
 
@@ -621,6 +764,8 @@ export default function ListAssetPage() {
                           placeholder="e.g., NYC-APT"
                           required
                           className="bg-white text-black border-gray-200"
+                          value={assetDetails.tokenSymbol}
+                          onChange={handleAssetInputChange}
                         />
                       </div>
                     </div>
@@ -633,6 +778,8 @@ export default function ListAssetPage() {
                         rows={4}
                         required
                         className="bg-white text-black border-gray-200"
+                        value={assetDetails.description}
+                        onChange={handleAssetInputChange}
                       />
                     </div>
 
@@ -998,8 +1145,19 @@ export default function ListAssetPage() {
                   >
                     Back
                   </Button>
-                  <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                    Submit Application
+                  <Button 
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    onClick={handleDocumentsSubmit}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Submitting...</span>
+                      </div>
+                    ) : (
+                      "Submit Application"
+                    )}
                   </Button>
                 </div>
               </CardContent>
