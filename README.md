@@ -64,7 +64,7 @@ These gaps make RWA integration into DeFi risky.
 
 Below is the high-level architecture of the Asseta platform:
 
-![Asseta System Architecture](/Architecture.png)
+![Asseta System Architecture](/public/Architecture.png)
 
 The architecture illustrates how all components of our platform work together - from KYC verification to asset tokenization and liquidity pool mechanics, all built on IOTA's secure foundation.
 
