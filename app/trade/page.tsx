@@ -107,15 +107,20 @@ function TradePageContent() {
           onSuccess: (result) => {
             console.log('Tokens transferred successfully:', result)
             
-            // Capture details for the position card
-            const entryPrice = selectedAssetPrice // Price at time of confirmation
+            // Find the selected asset details from the JSON data
+            const assetDetail = neighborhoodAssets.find(a => a.symbol === selectedAsset);
+
+            // Use price and details from the found assetDetail
+            const entryPrice = assetDetail?.price ?? 0; // Use price from JSON data
             const currentLeverage = leverage
             const positionType = position // 'long' or 'short' from state
             const size = parseFloat(amount)
-            const assetFullName = getAssetFullName(selectedAsset)
+            // Construct full name from JSON data fields
+            const assetFullName = assetDetail ? `${assetDetail.name} (${assetDetail.location})` : selectedAsset;
 
             let liquidationPrice: number | null = null
-            if (entryPrice && currentLeverage > 0) {
+            // Use the entryPrice derived from JSON
+            if (entryPrice > 0 && currentLeverage > 0) { 
               if (positionType === 'long') {
                 liquidationPrice = entryPrice * (1 - 1 / currentLeverage)
               } else { // short
@@ -127,7 +132,7 @@ function TradePageContent() {
               asset: selectedAsset,
               assetFullName: assetFullName,
               positionType: positionType,
-              entryPrice: entryPrice ?? 0, // Use 0 if price is null
+              entryPrice: entryPrice,
               size: size,
               leverage: currentLeverage,
               liquidationPrice: liquidationPrice
@@ -546,13 +551,13 @@ function TradePageContent() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Type:</span>
-                      <span className={`font-medium ${activePosition.positionType === 'long' ? 'text-emerald-600' : 'text-red-600'}`}>
-                        {activePosition.positionType === 'long' ? 'Long' : 'Short'}
-                      </span>
+                      <span className="font-medium">{activePosition.assetFullName}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Entry Price:</span>
-                      <span className="font-medium">${formatPrice(activePosition.entryPrice)}</span>
+                      <span className="font-medium">
+                        {formatCurrency(activePosition.entryPrice, neighborhoodAssets.find(a => a.symbol === activePosition.asset)?.currency || 'USD')}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Size (IOTA):</span>
@@ -566,7 +571,7 @@ function TradePageContent() {
                       <span className="text-gray-500">Est. Liq. Price:</span>
                       <span className="font-medium">
                         {activePosition.liquidationPrice !== null 
-                          ? `$${formatPrice(activePosition.liquidationPrice)}` 
+                          ? formatCurrency(activePosition.liquidationPrice, neighborhoodAssets.find(a => a.symbol === activePosition.asset)?.currency || 'USD')
                           : 'N/A'}
                       </span>
                     </div>
