@@ -77,24 +77,27 @@ These gaps make RWA integration into DeFi risky.
 ## Team 👥
 
 - **Cedric Chung**  
-  *Role:* Team Leader, Frontend Developer and Smart Contract Developer
-  [LinkedIn](https://www.linkedin.com/in/cedric-chung-2756b4310/) 
+  - *Role:* Team Leader, Frontend Developer and Smart Contract Developer  
+  - [LinkedIn](https://www.linkedin.com/in/cedric-chung-2756b4310/)
 
 - **Phen Jing Yuan**  
-  *Role:* Backend Developer
-  [LinkedIn](https://www.linkedin.com/in/jing-yuan-phen-b42266295/) | [Twitter](https://x.com/ilovedahmo)
+  - *Role:* Backend Developer  
+  - [LinkedIn](https://www.linkedin.com/in/jing-yuan-phen-b42266295/)  
+  - [Twitter](https://x.com/ilovedahmo)
 
 - **Liew Qi Jian**  
-  *Role:* Defi Integrator
-  [LinkedIn](https://www.linkedin.com/in/derek2403/) | [Twitter](https://x.com/derek2403)
+  - *Role:* Defi Integrator  
+  - [LinkedIn](https://www.linkedin.com/in/derek2403/)  
+  - [Twitter](https://x.com/derek2403)
 
 - **Tan Zhi Wei**  
-  *Role:* Backend Developer & Oracle Specialist  
-  [LinkedIn](https://www.linkedin.com/in/tanzhiwei0328/)
+  - *Role:* Backend Developer & Oracle Specialist  
+  - [LinkedIn](https://www.linkedin.com/in/tanzhiwei0328/)
 
 - **Edwina Hon**  
-  *Role:* Backend Developer & Smart Contract Developer  
-  [LinkedIn](https://www.linkedin.com/in/edwina-hon-548189340/)
+  - *Role:* Backend Developer & Smart Contract Developer  
+  - [LinkedIn](https://www.linkedin.com/in/edwina-hon-548189340/)
+
 
 
 
