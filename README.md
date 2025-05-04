@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Trade Me Baby 🏡
 
-## Getting Started
+**Reimagining assets by enabling real-world items to live, trade, and evolve on-chain through verifiable identity, one-time proof, and decentralized finance mechanics**
 
-First, run the development server:
+Trade Me Baby is a next-generation RWA infrastructure that brings physical assets into the digital world with trust and liquidity. Users begin by verifying their identity, anchoring it securely on-chain. Assets are then introduced with a unique, one-time proof mechanism—ensuring authenticity and preventing duplication.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Each asset becomes a living digital entity through NFT minting, and is instantly linked to a dynamic token economy that allows market exposure, and full tradability. Investors can engage in open liquidity pools, hedge their positions, or speculate via long/short strategies, all while retaining confidence in the origin and integrity of the underlying asset.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# How We Came Up With This Idea 💡
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The inspiration behind Trade Me Baby came from a simple question: *"Why can't I trade a real-world asset the same way I trade a token?"*
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+While crypto markets offer instant liquidity, leveraged positions, and seamless swaps, real-world assets remain locked in legal frameworks, paper documents, and third-party approvals. Even when tokenized, they’re often untradeable.
 
-## Learn More
+One of our friends wanted to short the real estate market not through a synthetic index, but by betting against a specific property backed token but the infrastructure wasn’t there. There was no way to prove the asset was real, unique, or legally tied to a digital token—let alone to open a long/short position on it.
 
-To learn more about Next.js, take a look at the following resources:
+So we thought: *What if we could verify a real-world asset just once, mint it as an NFT, link it to a fungible token, and open a trading market around it?* A place where:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Traders can long or short tokenized houses.
+- Each asset is guaranteed to be unique using IOTA’s One-Time Witness.
+- Every participant is verified through on-chain KYC.
+- Liquidity pools provide real-time pricing and capital efficiency.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+# The Problem ⚠️
 
-## Deploy on Vercel
+Real-world assets remain largely absent from decentralized finance not due to lack of demand, but because the infrastructure to bring them on-chain **tradably** does not exist.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Most attempts at asset tokenization fall short due to a combination of deep-rooted issues:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- **No verifiable uniqueness**: Anyone can mint a token claiming ownership of a physical item. Without a trustless proof of asset origin, duplication and fraud are inevitable.
+- **No link between identity and asset ownership**: Anonymous wallets may hold asset tokens, but there’s no on-chain tie to real-world individuals who own or control the underlying asset.
+- **Lack of financial utility**: Even when tokenized, assets are static and users can’t long/short, or dynamically interact with their value.
+- **Over reliance on centralized validation**: Most platforms still depend on third parties to verify ownership, introducing trust assumptions.
+- **Fragmented workflows**: KYC, verification, minting, trading, and liquidity provisioning are often spread across multiple systems with no unified flow.
+
+These gaps make RWA integration into DeFi risky.
