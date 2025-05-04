@@ -18,7 +18,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <IotaClientProvider networks={networkConfig} defaultNetwork="testnet">
-        <WalletProvider>
+        <WalletProvider persistConnection={true}>
           {children}
         </WalletProvider>
       </IotaClientProvider>
